@@ -1,0 +1,47 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle files
+.gradle/
+build/
+**/build/
+
+# Local configuration (contains SDK path, not for VCS)
+local.properties
+
+# IntelliJ / Android Studio
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# Kotlin incremental compilation
+.kotlinc/
+
+# macOS
+.DS_Store
+
+# proguard
+proguard/
+
+# Keystore
+*.jks
+*.keystore
+
+# Google Services
+google-services.json

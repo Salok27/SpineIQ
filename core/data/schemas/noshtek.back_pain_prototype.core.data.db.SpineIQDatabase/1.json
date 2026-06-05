@@ -1,0 +1,775 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "30161c04783602e589d3735e031cf2e2",
+    "entities": [
+      {
+        "tableName": "patient_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `full_name` TEXT NOT NULL, `date_of_birth` INTEGER NOT NULL, `gender` TEXT NOT NULL, `height_cm` REAL NOT NULL, `weight_kg` REAL NOT NULL, `phone_number` TEXT, `patient_id_external` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "full_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "date_of_birth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heightCm",
+            "columnName": "height_cm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weightKg",
+            "columnName": "weight_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phoneNumber",
+            "columnName": "phone_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientIdExternal",
+            "columnName": "patient_id_external",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "assessment_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `patient_id` TEXT NOT NULL, `assessment_date` INTEGER NOT NULL, `status` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `completed_at` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`patient_id`) REFERENCES `patient_profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assessmentDate",
+            "columnName": "assessment_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completed_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_assessment_records_patient_id",
+            "unique": false,
+            "columnNames": [
+              "patient_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_assessment_records_patient_id` ON `${TABLE_NAME}` (`patient_id`)"
+          },
+          {
+            "name": "index_assessment_records_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_assessment_records_status` ON `${TABLE_NAME}` (`status`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "patient_profiles",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "patient_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "occupation_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `occupation_type` TEXT NOT NULL, `sitting_hours_per_day` REAL NOT NULL, `standing_hours_per_day` REAL NOT NULL, `driving_hours_per_day` REAL NOT NULL, `lifting_level` TEXT NOT NULL, `work_pattern_notes` TEXT, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occupationType",
+            "columnName": "occupation_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sittingHoursPerDay",
+            "columnName": "sitting_hours_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "standingHoursPerDay",
+            "columnName": "standing_hours_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "drivingHoursPerDay",
+            "columnName": "driving_hours_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "liftingLevel",
+            "columnName": "lifting_level",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workPatternNotes",
+            "columnName": "work_pattern_notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "lifestyle_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `sitting_hours_per_day` REAL NOT NULL, `walking_minutes_per_day` REAL NOT NULL, `exercise_days_per_week` INTEGER NOT NULL, `exercise_types` TEXT NOT NULL, `sleep_quality` TEXT NOT NULL, `exercise_type_modifier_applied` INTEGER NOT NULL, `sleep_hours_per_night` REAL NOT NULL, `data_source_sleep_hours` TEXT NOT NULL, `daily_steps` INTEGER, `data_source_steps` TEXT NOT NULL, `active_minutes_per_day` INTEGER, `data_source_active_minutes` TEXT NOT NULL, `sedentary_time_minutes_per_day` INTEGER, `data_source_sedentary_time` TEXT NOT NULL, `resting_heart_rate` INTEGER, `data_source_resting_heart_rate` TEXT NOT NULL, `average_heart_rate` INTEGER, `data_source_average_heart_rate` TEXT NOT NULL, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sittingHoursPerDay",
+            "columnName": "sitting_hours_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walkingMinutesPerDay",
+            "columnName": "walking_minutes_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseDaysPerWeek",
+            "columnName": "exercise_days_per_week",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseTypes",
+            "columnName": "exercise_types",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sleepQuality",
+            "columnName": "sleep_quality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseTypeModifierApplied",
+            "columnName": "exercise_type_modifier_applied",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sleepHoursPerNight",
+            "columnName": "sleep_hours_per_night",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataSourceSleepHours",
+            "columnName": "data_source_sleep_hours",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dailySteps",
+            "columnName": "daily_steps",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataSourceSteps",
+            "columnName": "data_source_steps",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeMinutesPerDay",
+            "columnName": "active_minutes_per_day",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataSourceActiveMinutes",
+            "columnName": "data_source_active_minutes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sedentaryTimeMinutesPerDay",
+            "columnName": "sedentary_time_minutes_per_day",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataSourceSedentaryTime",
+            "columnName": "data_source_sedentary_time",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "restingHeartRate",
+            "columnName": "resting_heart_rate",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataSourceRestingHeartRate",
+            "columnName": "data_source_resting_heart_rate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "averageHeartRate",
+            "columnName": "average_heart_rate",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataSourceAverageHeartRate",
+            "columnName": "data_source_average_heart_rate",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pain_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `pain_locations` TEXT NOT NULL, `vas_score` INTEGER NOT NULL, `pain_duration` TEXT NOT NULL, `pain_pattern` TEXT NOT NULL, `pain_triggers` TEXT NOT NULL, `radiculopathy_severity` TEXT NOT NULL, `radiation_location` TEXT, `functional_limitations_text` TEXT, `functional_limitation_severity` TEXT, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "painLocations",
+            "columnName": "pain_locations",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vasScore",
+            "columnName": "vas_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "painDuration",
+            "columnName": "pain_duration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "painPattern",
+            "columnName": "pain_pattern",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "painTriggers",
+            "columnName": "pain_triggers",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiculopathySeverity",
+            "columnName": "radiculopathy_severity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiationLocation",
+            "columnName": "radiation_location",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "functionalLimitationsText",
+            "columnName": "functional_limitations_text",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "functionalLimitationSeverity",
+            "columnName": "functional_limitation_severity",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "functional_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `walking` TEXT NOT NULL, `sitting` TEXT NOT NULL, `standing` TEXT NOT NULL, `sleep` TEXT NOT NULL, `daily_activities` TEXT NOT NULL, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walking",
+            "columnName": "walking",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sitting",
+            "columnName": "sitting",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "standing",
+            "columnName": "standing",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sleep",
+            "columnName": "sleep",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dailyActivities",
+            "columnName": "daily_activities",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "red_flag_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `history_cancer` INTEGER NOT NULL, `unexplained_weight_loss` INTEGER NOT NULL, `fever_or_infection` INTEGER NOT NULL, `recent_major_trauma` INTEGER NOT NULL, `bowel_bladder_dysfunction` INTEGER NOT NULL, `saddle_anaesthesia` INTEGER NOT NULL, `progressive_neurological_deficit` INTEGER NOT NULL, `other_serious_pathology_suspicion` INTEGER NOT NULL, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyCancer",
+            "columnName": "history_cancer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unexplainedWeightLoss",
+            "columnName": "unexplained_weight_loss",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "feverOrInfection",
+            "columnName": "fever_or_infection",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recentMajorTrauma",
+            "columnName": "recent_major_trauma",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bowelBladderDysfunction",
+            "columnName": "bowel_bladder_dysfunction",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saddleAnaesthesia",
+            "columnName": "saddle_anaesthesia",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progressiveNeurologicalDeficit",
+            "columnName": "progressive_neurological_deficit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "otherSeriousPathologySuspicion",
+            "columnName": "other_serious_pathology_suspicion",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "scores_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assessment_id` TEXT NOT NULL, `vas_score` INTEGER NOT NULL, `vas_points` INTEGER NOT NULL, `radiculopathy_score` INTEGER NOT NULL, `odi_score` INTEGER NOT NULL, `odi_points` INTEGER NOT NULL, `bmi_score` REAL NOT NULL, `bmi_category` TEXT NOT NULL, `bmi_points` INTEGER NOT NULL, `chronicity_points` INTEGER NOT NULL, `red_flag_score` INTEGER NOT NULL, `raw_sss_score` INTEGER NOT NULL, `total_sss_score` INTEGER NOT NULL, `sss_severity_tier` TEXT NOT NULL, `age_group` TEXT NOT NULL, `sitting_risk` TEXT NOT NULL, `walking_risk` TEXT NOT NULL, `exercise_risk` TEXT NOT NULL, `sleep_risk` TEXT NOT NULL, `sleep_quality_modifier` TEXT NOT NULL, `exercise_type_modifier` INTEGER NOT NULL, `lifestyle_risk_tier` TEXT NOT NULL, `back_pain_risk_classification` TEXT NOT NULL, `computed_at` INTEGER NOT NULL, PRIMARY KEY(`assessment_id`), FOREIGN KEY(`assessment_id`) REFERENCES `assessment_records`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "assessmentId",
+            "columnName": "assessment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vasScore",
+            "columnName": "vas_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vasPoints",
+            "columnName": "vas_points",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiculopathyScore",
+            "columnName": "radiculopathy_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odiScore",
+            "columnName": "odi_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odiPoints",
+            "columnName": "odi_points",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bmiScore",
+            "columnName": "bmi_score",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bmiCategory",
+            "columnName": "bmi_category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bmiPoints",
+            "columnName": "bmi_points",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chronicityPoints",
+            "columnName": "chronicity_points",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "redFlagScore",
+            "columnName": "red_flag_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawSSSScore",
+            "columnName": "raw_sss_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalSSSScore",
+            "columnName": "total_sss_score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sssSeverityTier",
+            "columnName": "sss_severity_tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ageGroup",
+            "columnName": "age_group",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sittingRisk",
+            "columnName": "sitting_risk",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walkingRisk",
+            "columnName": "walking_risk",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseRisk",
+            "columnName": "exercise_risk",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sleepRisk",
+            "columnName": "sleep_risk",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sleepQualityModifier",
+            "columnName": "sleep_quality_modifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseTypeModifier",
+            "columnName": "exercise_type_modifier",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lifestyleRiskTier",
+            "columnName": "lifestyle_risk_tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backPainRiskClassification",
+            "columnName": "back_pain_risk_classification",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "computedAt",
+            "columnName": "computed_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assessment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "assessment_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "assessment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '30161c04783602e589d3735e031cf2e2')"
+    ]
+  }
+}
