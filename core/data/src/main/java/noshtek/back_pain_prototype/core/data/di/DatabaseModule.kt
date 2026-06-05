@@ -25,6 +25,11 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         keyProvider: DatabaseKeyProvider
     ): SpineIQDatabase {
+        // net.zetetic:sqlcipher-android does NOT auto-load its native library (unlike the
+        // legacy net.sqlcipher artifact). Without this, the first DB open throws
+        // UnsatisfiedLinkError on SQLiteConnection.nativeOpen, crashing the app on launch.
+        System.loadLibrary("sqlcipher")
+
         val passphrase = keyProvider.getOrCreatePassphrase()
         val factory = SupportOpenHelperFactory(passphrase)
         return Room.databaseBuilder(
