@@ -29,7 +29,7 @@ the public Google Play Store. The authoritative spec is **`PROJECT_PLAN.md`**
 
 | Path | Responsibility |
 |---|---|
-| `app/src/main/.../ui/` | Compose screens + ViewModels, grouped by feature (`home`, `patient`, `assessment`, `results`, `settings`) |
+| `app/src/main/.../ui/` | Compose screens + ViewModels, grouped by feature (`home`, `assessment`, `results`, `settings`) |
 | `app/src/main/.../navigation/` | `Screen.kt` (routes) + `NavGraph.kt` (nav host, wizard nested graph) |
 | `app/src/main/.../ui/common/` | Shared composables (`SpineIQComponents.kt`) and assessment draft state |
 | `core/scoring/` | **Pure** scoring engine — SSS, lifestyle, composite risk. No Android deps. |
@@ -86,7 +86,7 @@ Detail in `.claude/docs/architectural_patterns.md`.
 
 ## Additional Documentation
 
-- `PROJECT_PLAN.md` — authoritative product/clinical specification (repo root)
+- `PROJECT_PLAN.md` — authoritative product specification (repo root)
 - `.claude/docs/architectural_patterns.md` — patterns, dependency flow, data access
 - `.claude/docs/development_workflows.md` — build/test, common tasks, debugging
-- `.claude/docs/domain_knowledge.md` — clinical scoring rules, glossary, scope
+- `.claude/docs/domain_knowledge.md` — scoring rules, glossary, scope
