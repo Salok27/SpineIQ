@@ -83,6 +83,19 @@ Implementing the API 28+ import flow and API 26–27 graceful-disable is open wo
 
 ## Distribution
 
-Phase 1 is internal-only (NFR-11 / OQ-14): `release` build type has
-`isMinifyEnabled = false` and **no production keystore**. Do not add a public
-Play Store / signing config without confirming it is in scope.
+Phase 1 targets the **public Google Play Store** (see `PROJECT_PLAN.md` §1).
+
+Pre-release checklist:
+- **Production keystore**: a signing config must be created and stored securely
+  before a Play Store submission. Do not commit the keystore or its credentials
+  to version control.
+- **`isMinifyEnabled`**: currently `false` in the `release` build type. Enable and
+  configure ProGuard/R8 rules before the production release build.
+- **Play Store listing**: app description, screenshots, privacy policy URL, and
+  content rating questionnaire are required by Google Play before publishing.
+- **Privacy policy**: mandatory for any health-data app on the Play Store. Must
+  clearly state that all data is stored locally on-device and is never transmitted
+  to any server in Phase 1.
+
+For development and internal testing, use `assembleDebug` / `installDebug` or
+distribute via an internal Play testing track.

@@ -3,6 +3,27 @@
 Recurring patterns in SpineIQ. Each is cited with representative files. One-off
 implementations are intentionally excluded.
 
+## Single-user local-first architecture
+
+SpineIQ is a **D2C personal health app** — one installation, one user. There is no
+patient management, no multi-tenant data model, no role-based access control, and
+no clinic or enterprise network layer.
+
+Key constraints:
+- **Single `UserProfile` record per install.** The profile is set up once on first
+  launch and edited from Settings. There is no "patient list", no patient selection
+  screen, and no concept of a "logged-in" role beyond the local device owner.
+- **Offline-first, on-device only.** All scoring, classification, and report
+  generation runs entirely on-device. There are no API calls, no telemetry, and no
+  cloud sync in Phase 1. The app must be fully functional without network access.
+- **Encrypted at rest.** The Room DB is encrypted via SQLCipher with a
+  Keystore-backed passphrase (`DatabaseKeyProvider`). The user's health data never
+  leaves the device in Phase 1.
+- **Optional cloud backup is out of scope for Phase 1.** If added later, it must be
+  user-initiated and user-controlled (not automatic).
+- **No RBAC.** There are no user roles, no admin screens, and no permission tiers.
+  The installed app is the user's personal tool.
+
 ## Module dependency flow
 
 Strict one-directional graph (`settings.gradle.kts`):
@@ -48,8 +69,8 @@ Every screen follows the same shape:
 - State mutation uses `_state.update { it.copy(...) }`; side effects run in
   `viewModelScope.launch { … }`.
 
-Representative: `ui/home/HomeViewModel.kt`, `ui/patient/PatientListViewModel.kt`,
-`ui/results/ResultsViewModel.kt`.
+Representative: `ui/home/HomeViewModel.kt`, `ui/results/ResultsViewModel.kt`,
+`ui/settings/SettingsViewModel.kt`.
 
 ## Shared-ViewModel assessment wizard
 
@@ -80,10 +101,10 @@ In-progress assessment input lives in immutable draft data classes
 
 ## Repository + DAO data access
 
-- Repositories (`AssessmentRepository`, `PatientRepository`) are `@Singleton`,
+- Repositories (`AssessmentRepository`, `UserProfileRepository`) are `@Singleton`,
   constructor-injected with DAOs, and expose `suspend` writes + `Flow` reads.
 - One Room DB, `SpineIQDatabase` (`core/data/.../db/SpineIQDatabase.kt`), three
-  DAOs (`PatientDao`, `AssessmentDao`, `ScoresDao`) provided by
+  DAOs (`UserProfileDao`, `AssessmentDao`, `ScoresDao`) provided by
   `di/DatabaseModule.kt`.
 - Assessment sections are separate tables keyed by `assessment_id`, written with
   `@Insert(onConflict = REPLACE)` upserts. `AssessmentDao.getFullAssessment()`
