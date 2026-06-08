@@ -11,8 +11,8 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import noshtek.back_pain_prototype.core.data.db.DatabaseKeyProvider
 import noshtek.back_pain_prototype.core.data.db.SpineIQDatabase
 import noshtek.back_pain_prototype.core.data.db.dao.AssessmentDao
-import noshtek.back_pain_prototype.core.data.db.dao.PatientDao
 import noshtek.back_pain_prototype.core.data.db.dao.ScoresDao
+import noshtek.back_pain_prototype.core.data.db.dao.UserProfileDao
 import javax.inject.Singleton
 
 @Module
@@ -25,11 +25,7 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         keyProvider: DatabaseKeyProvider
     ): SpineIQDatabase {
-        // net.zetetic:sqlcipher-android does NOT auto-load its native library (unlike the
-        // legacy net.sqlcipher artifact). Without this, the first DB open throws
-        // UnsatisfiedLinkError on SQLiteConnection.nativeOpen, crashing the app on launch.
         System.loadLibrary("sqlcipher")
-
         val passphrase = keyProvider.getOrCreatePassphrase()
         val factory = SupportOpenHelperFactory(passphrase)
         return Room.databaseBuilder(
@@ -38,12 +34,12 @@ object DatabaseModule {
             SpineIQDatabase.DATABASE_NAME
         )
             .openHelperFactory(factory)
-            .fallbackToDestructiveMigration()   // safe for Phase 1 prototype; replace with Migrations before production
+            .fallbackToDestructiveMigration()
             .build()
     }
 
     @Provides
-    fun providePatientDao(db: SpineIQDatabase): PatientDao = db.patientDao()
+    fun provideUserProfileDao(db: SpineIQDatabase): UserProfileDao = db.userProfileDao()
 
     @Provides
     fun provideAssessmentDao(db: SpineIQDatabase): AssessmentDao = db.assessmentDao()

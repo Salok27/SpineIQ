@@ -1,6 +1,6 @@
 package noshtek.back_pain_prototype.core.data.model
 
-/** Patient gender — stored in PatientProfile. */
+/** User gender — stored in UserProfile. */
 enum class Gender { MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY }
 
 /** Assessment lifecycle state (Section 15.5). */

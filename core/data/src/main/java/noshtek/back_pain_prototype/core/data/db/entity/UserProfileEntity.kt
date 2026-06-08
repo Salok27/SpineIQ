@@ -6,17 +6,15 @@ import androidx.room.PrimaryKey
 import noshtek.back_pain_prototype.core.data.model.Gender
 
 /**
- * Persisted patient profile (Section 15.2).
- *
- * Dates are stored as epoch-day Longs; timestamps as epoch-milli Longs.
- * BMI is NOT stored here — it is computed at assessment time and stored in ScoresRecordEntity.
+ * Single user profile for this installation (FR-01, Section 15.2).
+ * One record per install — no patient list, no multi-user support (FR-14, OQ-02).
  */
-@Entity(tableName = "patient_profiles")
-data class PatientProfileEntity(
+@Entity(tableName = "user_profiles")
+data class UserProfileEntity(
 
     @PrimaryKey
     @ColumnInfo(name = "id")
-    val id: String,                         // UUID string
+    val id: String,
 
     @ColumnInfo(name = "full_name")
     val fullName: String,
@@ -33,13 +31,6 @@ data class PatientProfileEntity(
 
     @ColumnInfo(name = "weight_kg")
     val weightKg: Float,
-
-    @ColumnInfo(name = "phone_number")
-    val phoneNumber: String? = null,
-
-    /** Free-form OPD/patient ID — no external system validation (OQ-10). */
-    @ColumnInfo(name = "patient_id_external")
-    val patientIdExternal: String? = null,
 
     /** Epoch millis. */
     @ColumnInfo(name = "created_at")

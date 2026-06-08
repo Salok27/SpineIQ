@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
-import noshtek.back_pain_prototype.core.data.repository.PatientRepository
+import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
 import noshtek.back_pain_prototype.core.pdf.PdfExporter
 import noshtek.back_pain_prototype.core.pdf.PdfReportInput
 import java.time.LocalDate
@@ -32,7 +32,7 @@ data class PdfExportState(
 class PdfExportViewModel @Inject constructor(
     application: Application,
     private val assessmentRepository: AssessmentRepository,
-    private val patientRepository: PatientRepository,
+    private val userProfileRepository: UserProfileRepository,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
@@ -53,18 +53,17 @@ class PdfExportViewModel @Inject constructor(
                 val scores = assessmentRepository.getScores(assessmentId).firstOrNull()
                     ?: throw IllegalStateException("Scores not found")
 
-                val patient = patientRepository.getPatient(fullData.record.patientId).firstOrNull()
-                    ?: throw IllegalStateException("Patient not found")
+                val profile = userProfileRepository.getUserProfile().firstOrNull()
+                    ?: throw IllegalStateException("Profile not found")
 
                 val age = try {
-                    Period.between(LocalDate.ofEpochDay(patient.dateOfBirth), LocalDate.now()).years
+                    Period.between(LocalDate.ofEpochDay(profile.dateOfBirth), LocalDate.now()).years
                 } catch (e: Exception) { 0 }
 
                 val input = PdfReportInput(
-                    patientName = patient.fullName,
-                    patientAge = age,
-                    patientGender = patient.gender,
-                    externalPatientId = patient.patientIdExternal,
+                    userName = profile.fullName,
+                    userAge = age,
+                    userGender = profile.gender,
                     fullData = fullData,
                     scores = scores
                 )
@@ -85,6 +84,7 @@ class PdfExportViewModel @Inject constructor(
     fun buildShareIntent(uri: Uri): Intent = Intent(Intent.ACTION_SEND).apply {
         type = "application/pdf"
         putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "My SpineIQ Back Pain Assessment")
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 

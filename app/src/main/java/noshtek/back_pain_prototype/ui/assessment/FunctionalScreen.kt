@@ -40,7 +40,7 @@ fun FunctionalScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Rate the patient's ability to perform each activity.",
+                "Rate your ability to perform each activity.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

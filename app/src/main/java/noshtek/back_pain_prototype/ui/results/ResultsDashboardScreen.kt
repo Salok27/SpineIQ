@@ -142,13 +142,13 @@ fun ResultsDashboardScreen(
 
                     OutlinedButton(
                         onClick = {
-                            navController.navigate(Screen.PatientList.route) {
-                                popUpTo(Screen.Home.route)
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Back to Patients")
+                        Text("Back to Home")
                     }
 
                     Spacer(Modifier.height(8.dp))

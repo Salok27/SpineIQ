@@ -1,26 +1,20 @@
 package noshtek.back_pain_prototype.navigation
 
 sealed class Screen(val route: String) {
+    object Onboarding      : Screen("onboarding")
+    object Profile         : Screen("profile")
     object Home            : Screen("home")
-    object PatientList     : Screen("patients")
-    object PatientInfo     : Screen("patient_info?patientId={patientId}") {
-        fun route(patientId: String) = "patient_info?patientId=$patientId"
-        const val NEW = "patient_info"
-    }
-    object PatientHistory  : Screen("patient_history/{patientId}") {
-        fun route(patientId: String) = "patient_history/$patientId"
-    }
-    // Nested assessment graph — all assessment screens share one AssessmentSessionViewModel scoped to this
+    object Progress        : Screen("progress")
+
+    // Nested assessment graph — all 6 wizard screens share one AssessmentSessionViewModel
     object AssessmentGraph : Screen("assessment_graph")
-    // patientId carried in Occupation so the shared ViewModel can call initSession on first load
-    object Occupation      : Screen("occupation/{patientId}") {
-        fun route(patientId: String) = "occupation/$patientId"
-    }
+    object Occupation      : Screen("occupation")
     object Lifestyle       : Screen("lifestyle")
     object Pain            : Screen("pain")
     object Functional      : Screen("functional")
     object RedFlag         : Screen("red_flag")
     object Review          : Screen("review")
+
     object Results         : Screen("results/{assessmentId}") {
         fun route(assessmentId: String) = "results/$assessmentId"
     }

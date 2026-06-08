@@ -19,15 +19,15 @@ interface AssessmentDao {
     @Query("SELECT * FROM assessment_records WHERE id = :assessmentId")
     suspend fun getAssessmentRecordOnce(assessmentId: String): AssessmentRecordEntity?
 
-    @Query("SELECT * FROM assessment_records WHERE patient_id = :patientId ORDER BY assessment_date DESC")
-    fun getAssessmentsForPatient(patientId: String): Flow<List<AssessmentRecordEntity>>
+    @Query("SELECT * FROM assessment_records WHERE user_id = :userId ORDER BY assessment_date DESC")
+    fun getAssessmentsForUser(userId: String): Flow<List<AssessmentRecordEntity>>
 
-    /** Returns any single in-progress assessment across all patients (Section 15.5). */
+    /** Returns any single in-progress assessment (Section 15.5). */
     @Query("SELECT * FROM assessment_records WHERE status = 'IN_PROGRESS' ORDER BY created_at DESC LIMIT 1")
     fun getInProgressAssessment(): Flow<AssessmentRecordEntity?>
 
-    @Query("SELECT COUNT(*) FROM assessment_records WHERE patient_id = :patientId AND status = 'COMPLETED'")
-    fun getCompletedAssessmentCount(patientId: String): Flow<Int>
+    @Query("SELECT COUNT(*) FROM assessment_records WHERE user_id = :userId AND status = 'COMPLETED'")
+    fun getCompletedAssessmentCount(userId: String): Flow<Int>
 
     // ── OccupationData ────────────────────────────────────────────────────────
 
@@ -71,19 +71,15 @@ interface AssessmentDao {
 
     // ── Heart rate trend (Section 9.7, FR-16) ─────────────────────────────────
 
-    /**
-     * Returns lifestyle rows for a patient that have heart rate data,
-     * ordered chronologically for trend visualisation.
-     */
     @Query("""
         SELECT l.* FROM lifestyle_data l
         INNER JOIN assessment_records r ON l.assessment_id = r.id
-        WHERE r.patient_id = :patientId
+        WHERE r.user_id = :userId
           AND r.status = 'COMPLETED'
           AND (l.resting_heart_rate IS NOT NULL OR l.average_heart_rate IS NOT NULL)
         ORDER BY r.assessment_date ASC
     """)
-    fun getHeartRateHistory(patientId: String): Flow<List<LifestyleDataEntity>>
+    fun getHeartRateHistory(userId: String): Flow<List<LifestyleDataEntity>>
 
     // ── Full assessment load ──────────────────────────────────────────────────
 

@@ -11,7 +11,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import noshtek.back_pain_prototype.ui.assessment.*
 import noshtek.back_pain_prototype.ui.home.HomeScreen
-import noshtek.back_pain_prototype.ui.patient.*
+import noshtek.back_pain_prototype.ui.onboarding.OnboardingScreen
+import noshtek.back_pain_prototype.ui.profile.ProfileScreen
+import noshtek.back_pain_prototype.ui.progress.ProgressScreen
 import noshtek.back_pain_prototype.ui.results.FullReportScreen
 import noshtek.back_pain_prototype.ui.results.ResultsDashboardScreen
 import noshtek.back_pain_prototype.ui.settings.SettingsScreen
@@ -20,38 +22,23 @@ import noshtek.back_pain_prototype.ui.settings.SettingsScreen
 fun SpineIQNavGraph() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
+    // Onboarding checks for an existing profile and routes to Home automatically if one exists.
+    NavHost(navController = navController, startDestination = Screen.Onboarding.route) {
+
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(navController = navController)
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(navController = navController)
+        }
 
         composable(Screen.Home.route) {
             HomeScreen(navController = navController)
         }
 
-        composable(Screen.PatientList.route) {
-            PatientListScreen(navController = navController)
-        }
-
-        composable(
-            route = Screen.PatientInfo.route,
-            arguments = listOf(navArgument("patientId") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
-        ) { entry ->
-            PatientInformationScreen(
-                navController = navController,
-                patientId = entry.arguments?.getString("patientId")
-            )
-        }
-
-        composable(
-            route = Screen.PatientHistory.route,
-            arguments = listOf(navArgument("patientId") { type = NavType.StringType })
-        ) { entry ->
-            PatientHistoryScreen(
-                navController = navController,
-                patientId = checkNotNull(entry.arguments?.getString("patientId"))
-            )
+        composable(Screen.Progress.route) {
+            ProgressScreen(navController = navController)
         }
 
         // Assessment wizard — all 6 screens share one ViewModel scoped to this graph entry
@@ -59,18 +46,13 @@ fun SpineIQNavGraph() {
             startDestination = Screen.Occupation.route,
             route = Screen.AssessmentGraph.route
         ) {
-            composable(
-                route = Screen.Occupation.route,
-                arguments = listOf(navArgument("patientId") { type = NavType.StringType })
-            ) { entry ->
+            composable(Screen.Occupation.route) { entry ->
                 val parentEntry = remember(entry) {
                     navController.getBackStackEntry(Screen.AssessmentGraph.route)
                 }
-                val vm: AssessmentSessionViewModel = hiltViewModel(parentEntry)
                 OccupationScreen(
                     navController = navController,
-                    viewModel = vm,
-                    patientId = checkNotNull(entry.arguments?.getString("patientId"))
+                    viewModel = hiltViewModel(parentEntry)
                 )
             }
             composable(Screen.Lifestyle.route) { entry ->

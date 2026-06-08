@@ -18,10 +18,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 data class PdfReportInput(
-    val patientName: String,
-    val patientAge: Int,
-    val patientGender: Gender,
-    val externalPatientId: String?,
+    val userName: String,
+    val userAge: Int,
+    val userGender: Gender,
     val fullData: FullAssessmentData,
     val scores: ScoresRecordEntity
 )
@@ -37,8 +36,7 @@ class PdfExporter(private val context: Context) {
             LocalDate.ofEpochDay(input.fullData.record.assessmentDate)
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         } catch (e: Exception) { "unknown" }
-        val safeName = input.patientName.replace(Regex("[^A-Za-z0-9]"), "_")
-        val file = File(dir, "SpineIQ_${safeName}_${dateStr}.pdf")
+        val file = File(dir, "SpineIQ_Assessment_${dateStr}.pdf")
 
         FileOutputStream(file).use { pdf.writeTo(it) }
         pdf.close()
@@ -50,8 +48,8 @@ class PdfExporter(private val context: Context) {
         // A4 at 72 pt/inch
         private val PW = 595
         private val PH = 842
-        private val M = 43f             // margin
-        private val CW = PW - 2 * M    // content width
+        private val M = 43f
+        private val CW = PW - 2 * M
         private val FOOTER_H = 28f
         private val MAX_Y get() = PH - M - FOOTER_H
 
@@ -65,7 +63,6 @@ class PdfExporter(private val context: Context) {
                 .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
         } catch (e: Exception) { "—" }
 
-        // Paints
         private val pBody = body(9f)
         private val pBold = bold(9f)
         private val pSmall = body(8f).also { it.color = Color.parseColor("#666666") }
@@ -87,8 +84,6 @@ class PdfExporter(private val context: Context) {
             finishCurrentPage()
         }
 
-        // ── Page management ───────────────────────────────────────────────────
-
         private fun newPage() {
             pageNum++
             val info = PdfDocument.PageInfo.Builder(PW, PH, pageNum).create()
@@ -104,7 +99,7 @@ class PdfExporter(private val context: Context) {
             small("Assessment Date: $dateLabel", M, fy + 10f)
             val pg = "Page $pageNum"
             small(pg, PW - M - pSmall.measureText(pg), fy + 10f)
-            small("This report is a clinical decision support tool and is not a substitute for clinical judgment.", M, fy + 20f)
+            small("This report is a self-assessment screening tool and does not constitute medical advice.", M, fy + 20f)
             page?.let { doc.finishPage(it) }
             page = null; cv = null
         }
@@ -118,22 +113,19 @@ class PdfExporter(private val context: Context) {
             }
         }
 
-        // ── Page headers ──────────────────────────────────────────────────────
-
         private fun drawPageOneHeader() {
             val c = cv!!
             c.drawRect(M, y, PW - M, y + 28f, pNavyBg)
             c.drawText("SpineIQ", M + 8f, y + 19f, pWhiteTxt)
-            c.drawText("Spine Severity System — Clinical Decision Support", M + 76f, y + 19f, pSubHeader)
+            c.drawText("Spine Severity System — Personal Self-Assessment", M + 76f, y + 19f, pSubHeader)
             y += 34f
 
-            c.drawText("Back Pain Risk Assessment Report", M, y, pTitle)
+            c.drawText("Your Back Pain Risk Assessment Report", M, y, pTitle)
             y += 22f
 
             val info = buildString {
-                append("Patient: ${inp.patientName}   |   Age: ${inp.patientAge} yrs   |   ")
-                append("Gender: ${inp.patientGender.name.lowercase().replaceFirstChar { it.uppercase() }}")
-                if (!inp.externalPatientId.isNullOrBlank()) append("   |   ID: ${inp.externalPatientId}")
+                append("Name: ${inp.userName}   |   Age: ${inp.userAge} yrs   |   ")
+                append("Gender: ${inp.userGender.name.lowercase().replaceFirstChar { it.uppercase() }}")
             }
             text(info, M, y, pBody)
             y += 13f
@@ -147,17 +139,15 @@ class PdfExporter(private val context: Context) {
             val c = cv!!
             c.drawRect(M, y, PW - M, y + 16f, pBlueBg)
             val hp = bold(8f).also { it.color = Color.parseColor("#0D47A1") }
-            c.drawText("SpineIQ Report — ${inp.patientName} — $dateLabel", M + 4f, y + 11f, hp)
+            c.drawText("SpineIQ Report — ${inp.userName} — $dateLabel", M + 4f, y + 11f, hp)
             y += 22f
         }
 
-        // ── Section renderers ─────────────────────────────────────────────────
-
         private fun drawSection1() {
-            sHead("Section 1 — Patient Summary")
-            tRow("Full Name", inp.patientName)
-            tRow("Age", "${inp.patientAge} years")
-            tRow("Gender", inp.patientGender.name.lowercase().replaceFirstChar { it.uppercase() })
+            sHead("Section 1 — Your Summary")
+            tRow("Full Name", inp.userName)
+            tRow("Age", "${inp.userAge} years")
+            tRow("Gender", inp.userGender.name.lowercase().replaceFirstChar { it.uppercase() })
             tRow("BMI", "${"%.1f".format(inp.scores.bmiScore)} (${inp.scores.bmiCategory.name.lowercase().replaceFirstChar { it.uppercase() }})")
             inp.fullData.occupation?.let { o ->
                 tRow("Occupation", o.occupationType.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
@@ -172,20 +162,20 @@ class PdfExporter(private val context: Context) {
             tRow("BMI Value", "${"%.1f".format(inp.scores.bmiScore)}")
             tRow("Category", inp.scores.bmiCategory.name.lowercase().replaceFirstChar { it.uppercase() })
             val interp = when (inp.scores.bmiCategory) {
-                BmiCategory.UNDERWEIGHT -> "Low body weight may indicate reduced muscle mass contributing to spinal instability."
-                BmiCategory.NORMAL -> "BMI within healthy range. No mechanical overload from body weight detected."
-                BmiCategory.OVERWEIGHT -> "Overweight BMI contributes moderate additional mechanical load on spinal structures and intervertebral discs."
-                BmiCategory.OBESE -> "Obese BMI creates significant mechanical overload contributing to disc degeneration and lumbar joint stress."
+                BmiCategory.UNDERWEIGHT -> "Your weight may indicate reduced muscle mass, which can contribute to spinal instability."
+                BmiCategory.NORMAL -> "Your weight is not adding extra load to your spine."
+                BmiCategory.OVERWEIGHT -> "Your weight is adding moderate additional mechanical load to your spinal structures and discs."
+                BmiCategory.OBESE -> "Your weight is creating significant mechanical overload on your discs and lumbar joints."
             }
-            wRow("Interpretation", interp)
+            wRow("What this means", interp)
             gap(6f)
         }
 
         private fun drawSection3() {
             sHead("Section 3 — Lifestyle Assessment")
-            tRow("Lifestyle Risk Tier", inp.scores.lifestyleRiskTier.name.lowercase().replaceFirstChar { it.uppercase() })
+            tRow("Your Lifestyle Risk", inp.scores.lifestyleRiskTier.name.lowercase().replaceFirstChar { it.uppercase() })
             gap(3f)
-            tHead("Habit", "Value", "Risk Tier")
+            tHead("Habit", "Your Value", "Risk")
             inp.fullData.lifestyle?.let { ls ->
                 tData("Sitting", "${"%.0f".format(ls.sittingHoursPerDay)} hrs/day", inp.scores.sittingRisk.name)
                 tData("Walking", "${"%.0f".format(ls.walkingMinutesPerDay)} min/day", inp.scores.walkingRisk.name)
@@ -197,7 +187,7 @@ class PdfExporter(private val context: Context) {
                 AgeGroup.YOUNG_ADULT -> "20–30"; AgeGroup.MID_ADULT -> "31–45"
                 AgeGroup.PRE_SENIOR -> "46–60"; AgeGroup.SENIOR -> "61+"
             }
-            wRow("Age Context", "Age group ${inp.scores.ageGroup.name.replace('_', ' ').lowercase()} ($ageBand yrs). Age-specific thresholds applied for sitting, walking, and sleep risk scoring.")
+            wRow("Age Context", "For your age group ($ageBand yrs), age-specific thresholds were applied for sitting, walking, and sleep risk.")
             gap(6f)
         }
 
@@ -213,14 +203,14 @@ class PdfExporter(private val context: Context) {
                 ls.restingHeartRate?.let { tRow("Resting Heart Rate", "$it bpm") }
                 ls.averageHeartRate?.let { tRow("Average Heart Rate", "$it bpm") }
             }
-            tRow("Exercise Risk Tier", inp.scores.exerciseRisk.name.lowercase().replaceFirstChar { it.uppercase() })
+            tRow("Exercise Risk", inp.scores.exerciseRisk.name.lowercase().replaceFirstChar { it.uppercase() })
             gap(6f)
         }
 
         private fun drawSection5() {
-            sHead("Section 5 — Occupational Risk Assessment")
+            sHead("Section 5 — Occupational Risk")
             inp.fullData.occupation?.let { o ->
-                tRow("Occupation Type", o.occupationType.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
+                tRow("Occupation", o.occupationType.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 tRow("Sitting", "${"%.0f".format(o.sittingHoursPerDay)} hrs/day")
                 tRow("Standing", "${"%.0f".format(o.standingHoursPerDay)} hrs/day")
                 tRow("Driving", "${"%.0f".format(o.drivingHoursPerDay)} hrs/day")
@@ -241,9 +231,9 @@ class PdfExporter(private val context: Context) {
                 tRow("Radiculopathy Severity", p.radiculopathySeverity.name.lowercase().replaceFirstChar { it.uppercase() })
                 p.radiationLocation?.let { tRow("Radiation Side", it.name.replace('_', ' ').lowercase().replaceFirstChar { c -> c.uppercase() }) }
                 tRow("Functional Limitation Severity", p.functionalLimitationSeverity?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "—")
-                p.functionalLimitationsText?.let { n -> if (n.isNotBlank()) wRow("Functional Notes", n) }
+                p.functionalLimitationsText?.let { n -> if (n.isNotBlank()) wRow("Your notes", n) }
             }
-            tRow("Chronicity SSS Points", "${inp.scores.chronicityPoints}")
+            tRow("Chronicity Points", "${inp.scores.chronicityPoints}")
             gap(6f)
         }
 
@@ -268,7 +258,7 @@ class PdfExporter(private val context: Context) {
             if (rf == null || !rf.hasAnyRedFlag) {
                 tRow("Status", "No red flags confirmed")
             } else {
-                tRow("Status", "RED FLAG CONFIRMED — Urgent referral indicated")
+                tRow("Status", "RED FLAG CONFIRMED — Urgent medical attention required")
                 listOf(
                     "History of cancer" to rf.historyCancer,
                     "Unexplained weight loss" to rf.unexplainedWeightLoss,
@@ -277,10 +267,10 @@ class PdfExporter(private val context: Context) {
                     "Bowel / bladder dysfunction" to rf.bowelBladderDysfunction,
                     "Saddle anaesthesia" to rf.saddleAnaesthesia,
                     "Progressive neurological deficit" to rf.progressiveNeurologicalDeficit,
-                    "Other serious pathology" to rf.otherSeriousPathologySuspicion
+                    "Other serious symptoms" to rf.otherSeriousPathologySuspicion
                 ).filter { (_, v) -> v }.forEach { (lbl, _) -> tRow("  •", lbl) }
                 gap(3f)
-                wRow("Action Required", "URGENT: Refer patient to spine specialist immediately. Do not manage independently.")
+                wRow("Action Required", "Please seek immediate medical attention from a doctor or emergency department. Do not delay.")
             }
             gap(6f)
         }
@@ -299,29 +289,29 @@ class PdfExporter(private val context: Context) {
         private fun buildRiskFactors(): List<Pair<String, String>> {
             val s = inp.scores
             return buildList {
-                if (s.redFlagScore > 0) add("Red Flag" to "Confirmed clinical red flag requiring urgent evaluation.")
-                if (s.bmiPoints >= 2) add("Obesity" to "BMI ${"%.1f".format(s.bmiScore)} — significant mechanical overload on spinal structures.")
-                else if (s.bmiPoints == 1) add("Overweight" to "BMI ${"%.1f".format(s.bmiScore)} — moderate additional spinal load.")
-                if (s.radiculopathyScore >= 2) add("Radiculopathy" to "Significant nerve root irritation or compression identified.")
-                else if (s.radiculopathyScore == 1) add("Mild Radiculopathy" to "Mild leg pain or referred symptoms noted.")
-                if (s.sittingRisk == RiskTier.HIGH) add("Sedentary Lifestyle" to "Prolonged sitting beyond age-appropriate threshold, increasing disc pressure and core weakness.")
-                if (s.walkingRisk == RiskTier.HIGH) add("Low Walking Activity" to "Insufficient walking reduces spinal mobility and postural endurance.")
-                if (s.exerciseRisk == RiskTier.HIGH) add("Exercise Risk" to "High-impact or insufficient exercise contributing to spinal deconditioning.")
-                if (s.sleepRisk == RiskTier.HIGH) add("Poor Sleep" to "Impaired recovery, elevated inflammation markers, worsened pain perception.")
-                if (s.chronicityPoints >= 1) add("Chronic Pain" to "Duration >6 weeks suggests established tissue changes or central sensitisation.")
-                if (s.odiPoints >= 2) add("Severe Functional Limitation" to "Significant disability impacting multiple daily activities.")
+                if (s.redFlagScore > 0) add("Red Flag" to "A confirmed red flag symptom requiring urgent medical attention.")
+                if (s.bmiPoints >= 2) add("Obesity" to "Your BMI (${"%.1f".format(s.bmiScore)}) is creating significant mechanical overload on your spinal structures.")
+                else if (s.bmiPoints == 1) add("Overweight" to "Your BMI (${"%.1f".format(s.bmiScore)}) is adding moderate additional load to your spine.")
+                if (s.radiculopathyScore >= 2) add("Radiculopathy" to "Significant nerve root irritation or compression identified in your assessment.")
+                else if (s.radiculopathyScore == 1) add("Mild Radiculopathy" to "Mild leg pain or referred symptoms noted in your assessment.")
+                if (s.sittingRisk == RiskTier.HIGH) add("Prolonged Sitting" to "Your daily sitting exceeds the age-appropriate threshold, increasing disc pressure and weakening core muscles.")
+                if (s.walkingRisk == RiskTier.HIGH) add("Low Walking Activity" to "Insufficient walking reduces your spinal mobility and postural endurance.")
+                if (s.exerciseRisk == RiskTier.HIGH) add("Exercise Risk" to "Your exercise pattern is contributing to spinal deconditioning.")
+                if (s.sleepRisk == RiskTier.HIGH) add("Poor Sleep" to "Your sleep is impairing musculoskeletal recovery and may be amplifying your pain perception.")
+                if (s.chronicityPoints >= 1) add("Chronic Pain" to "Pain duration >6 weeks suggests established tissue changes or central sensitisation.")
+                if (s.odiPoints >= 2) add("Severe Functional Limitation" to "Significant difficulty with multiple daily activities was identified.")
             }
         }
 
         private fun drawSection10() {
-            sHead("Section 10 — Back Pain Risk Score (Results)")
+            sHead("Section 10 — Your Back Pain Risk Score")
             val s = inp.scores
-            tRow("Total SSS Score", "${s.totalSSSScore} / 11")
-            tRow("SSS Severity Tier", s.sssSeverityTier.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
-            tRow("Lifestyle Risk Tier", s.lifestyleRiskTier.name.lowercase().replaceFirstChar { it.uppercase() })
+            tRow("Your SSS Score", "${s.totalSSSScore} / 11")
+            tRow("Severity Tier", s.sssSeverityTier.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
+            tRow("Lifestyle Risk", s.lifestyleRiskTier.name.lowercase().replaceFirstChar { it.uppercase() })
             tRow("Composite Classification", s.backPainRiskClassification.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
             gap(4f)
-            tHead("SSS Component", "Value", "Points")
+            tHead("SSS Component", "Your Value", "Points")
             tData("VAS — Pain Intensity", "${s.vasScore}/10", "${s.vasPoints}")
             tData("Radiculopathy / Leg Pain", "${s.radiculopathyScore}", "${s.radiculopathyScore}")
             tData("ODI — Functional", "${s.odiScore}/10", "${s.odiPoints}")
@@ -338,7 +328,7 @@ class PdfExporter(private val context: Context) {
         }
 
         private fun drawSection11() {
-            sHead("Section 11 — Probable Contributors to Back Pain")
+            sHead("Section 11 — Probable Contributors to Your Back Pain")
             wrapped(buildNarrative())
             gap(6f)
         }
@@ -347,25 +337,25 @@ class PdfExporter(private val context: Context) {
             val s = inp.scores
             val parts = mutableListOf<String>()
             if (s.redFlagScore > 0)
-                parts += "A confirmed clinical red flag has been identified, indicating a need for urgent specialist evaluation to rule out serious spinal pathology."
+                parts += "A confirmed red flag symptom has been identified. Please seek immediate medical attention from a doctor or emergency department — do not delay."
             if (s.bmiPoints >= 2)
-                parts += "Elevated BMI (${"%.1f".format(s.bmiScore)}) creates significant mechanical overload on the intervertebral discs and lumbar joints, increasing tissue stress and the risk of degenerative change."
+                parts += "Your BMI (${"%.1f".format(s.bmiScore)}) is creating significant mechanical overload on your intervertebral discs and lumbar joints, increasing tissue stress and the risk of degenerative change."
             else if (s.bmiPoints == 1)
-                parts += "Overweight BMI (${"%.1f".format(s.bmiScore)}) contributes moderate additional mechanical load to spinal structures."
+                parts += "Your BMI (${"%.1f".format(s.bmiScore)}) is contributing moderate additional mechanical load to your spinal structures."
             if (s.radiculopathyScore >= 2)
                 parts += "Significant radiculopathy or leg pain symptoms suggest nerve root irritation or compression, most commonly associated with disc herniation or foraminal stenosis."
             else if (s.radiculopathyScore == 1)
                 parts += "Mild radiculopathy or referred leg symptoms indicate some degree of nerve root involvement warranting monitoring."
             if (s.sittingRisk == RiskTier.HIGH)
-                parts += "Prolonged daily sitting exceeds age-appropriate thresholds, significantly increasing intradiscal pressure while promoting core muscle weakening and postural collapse."
+                parts += "Your prolonged daily sitting exceeds age-appropriate thresholds, significantly increasing intradiscal pressure while promoting core muscle weakening."
             if (s.sleepRisk == RiskTier.HIGH)
-                parts += "Poor or insufficient sleep impairs musculoskeletal recovery and elevates systemic inflammatory markers, amplifying the patient's pain perception."
+                parts += "Poor or insufficient sleep is impairing your musculoskeletal recovery and elevating inflammatory markers, amplifying your pain perception."
             if (s.chronicityPoints >= 1)
-                parts += "The chronic duration of symptoms (>6 weeks) suggests established tissue changes or central sensitisation, which typically requires structured rehabilitation."
+                parts += "The chronic duration of your symptoms (>6 weeks) suggests established tissue changes or central sensitisation, which typically benefits from structured rehabilitation."
             if (s.odiPoints >= 2)
-                parts += "Severe functional limitation across multiple daily activities indicates substantial disability and significant impact on quality of life."
+                parts += "Severe functional limitation across multiple daily activities was identified, indicating substantial disability and impact on your quality of life."
             return if (parts.isEmpty())
-                "No dominant risk contributors were identified. The overall risk profile appears low. Continued healthy lifestyle habits and periodic reassessment are recommended."
+                "No dominant risk contributors were identified. Your overall risk profile appears low. Continuing healthy lifestyle habits and periodic reassessment is recommended."
             else parts.take(3).joinToString(" ")
         }
 
@@ -373,26 +363,23 @@ class PdfExporter(private val context: Context) {
             sHead("Section 12 — Recommended Next Steps")
             val steps = when (inp.scores.backPainRiskClassification) {
                 BackPainRiskClassification.LOW, BackPainRiskClassification.LOW_MODERATE ->
-                    "Continue healthy habits. Monitor symptoms regularly. Consider a postural assessment to optimise ergonomics. Reassess if symptoms worsen or new symptoms develop."
+                    "Maintain healthy habits. Self-monitor your symptoms. Consider a postural assessment to optimise your ergonomics. Reassess if symptoms worsen."
                 BackPainRiskClassification.MILD_MODERATE, BackPainRiskClassification.MODERATE ->
-                    "Consult a physiotherapist for a guided exercise and postural correction programme. Begin lifestyle corrections as identified in this report. Reassess in 4–6 weeks."
+                    "Consider talking to a physiotherapist. Focus on the lifestyle improvements identified in this report. Reassess in 4–6 weeks."
                 BackPainRiskClassification.MODERATE_HIGH, BackPainRiskClassification.HIGH ->
-                    "Seek a spine specialist consultation. Structured rehabilitation is recommended. Avoid unsupervised self-management of symptoms. Review all lifestyle risk factors identified above."
+                    "We recommend speaking with a doctor or spine specialist about your results. Review all lifestyle risk factors identified above."
                 BackPainRiskClassification.SEVERE_URGENT ->
-                    "Seek urgent spine specialist evaluation immediately. Do not delay clinical assessment and investigation. Immediate referral is indicated based on current assessment findings."
+                    "Please seek urgent medical attention. Share this report with a doctor immediately. Do not delay."
             }
             wrapped(steps)
             gap(8f)
             divider()
             gap(4f)
             wrapped(
-                "DISCLAIMER: This report is generated by a clinical decision support screening tool and is not a substitute for clinical judgment. It must be reviewed by a qualified healthcare professional. " +
-                        "SSS v1.0 — SpineIQ Phase 1 Prototype. Disclaimer text is provisional; formal medical-legal sign-off is required prior to any production release.",
+                "DISCLAIMER: This report is generated by a self-assessment screening tool and does not constitute medical advice. It is not a substitute for consultation with a qualified healthcare professional. If you are concerned about your symptoms, please consult a doctor. SSS v1.0 — SpineIQ.",
                 pSmall
             )
         }
-
-        // ── Primitive drawing helpers ─────────────────────────────────────────
 
         private fun sHead(title: String) {
             checkBreak(22f)
@@ -406,14 +393,14 @@ class PdfExporter(private val context: Context) {
             checkBreak(13f)
             val c = cv!!
             val col = M + 135f
-            c.drawText(label, M, y, pBold)
             val vw = CW - 135f
+            c.drawText(label, M, y, pBold)
             if (pBody.measureText(value) <= vw) {
                 c.drawText(value, col, y, pBody)
                 y += pBody.textSize * 1.4f + 1f
             } else {
                 y += pBody.textSize * 1.4f
-                wrapped(value, pBody, col, CW - 135f)
+                wrapped(value, pBody, col, vw)
                 y += 1f
             }
         }
@@ -459,31 +446,18 @@ class PdfExporter(private val context: Context) {
                 if (paint.measureText(candidate) <= maxW) {
                     sb.clear(); sb.append(candidate)
                 } else {
-                    if (sb.isNotEmpty()) {
-                        checkBreak(lineH)
-                        cv!!.drawText(sb.toString(), x, y, paint)
-                        y += lineH
-                    }
+                    if (sb.isNotEmpty()) { checkBreak(lineH); cv!!.drawText(sb.toString(), x, y, paint); y += lineH }
                     sb.clear(); sb.append(word)
                 }
             }
-            if (sb.isNotEmpty()) {
-                checkBreak(lineH)
-                cv!!.drawText(sb.toString(), x, y, paint)
-                y += lineH
-            }
+            if (sb.isNotEmpty()) { checkBreak(lineH); cv!!.drawText(sb.toString(), x, y, paint); y += lineH }
         }
 
-        private fun divider() {
-            cv!!.drawLine(M, y, PW - M, y, pDivider)
-            y += 4f
-        }
-
+        private fun divider() { cv!!.drawLine(M, y, PW - M, y, pDivider); y += 4f }
         private fun gap(pts: Float) { y += pts }
         private fun text(t: String, x: Float, ty: Float, p: Paint) { cv!!.drawText(t, x, ty, p) }
         private fun small(t: String, x: Float, ty: Float) { cv!!.drawText(t, x, ty, pSmall) }
 
-        // ── Paint factories ───────────────────────────────────────────────────
         private fun body(size: Float) = Paint().apply { isAntiAlias = true; color = Color.BLACK; textSize = size }
         private fun bold(size: Float) = Paint().apply { isAntiAlias = true; color = Color.BLACK; textSize = size; typeface = Typeface.DEFAULT_BOLD }
         private fun fill(c: Int) = Paint().apply { color = c; style = Paint.Style.FILL }

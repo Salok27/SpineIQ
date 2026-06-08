@@ -21,16 +21,16 @@ class AssessmentRepository @Inject constructor(
     // ── Start / lifecycle ─────────────────────────────────────────────────────
 
     /**
-     * Creates a new IN_PROGRESS assessment record and returns its ID.
-     * The section data rows are written separately as the user progresses through screens.
+     * Creates a new IN_PROGRESS assessment record linked to the user and returns its ID.
+     * Section data rows are written separately as the user progresses through screens.
      */
-    suspend fun startAssessment(patientId: String): String {
+    suspend fun startAssessment(userId: String): String {
         val id = UUID.randomUUID().toString()
         val now = Instant.now().toEpochMilli()
         assessmentDao.insertAssessmentRecord(
             AssessmentRecordEntity(
                 id             = id,
-                patientId      = patientId,
+                userId         = userId,
                 assessmentDate = LocalDate.now().toEpochDay(),
                 status         = AssessmentStatus.IN_PROGRESS,
                 createdAt      = now
@@ -40,7 +40,7 @@ class AssessmentRepository @Inject constructor(
     }
 
     /**
-     * Marks the assessment as COMPLETED, stores the computed scores, and records completedAt.
+     * Marks the assessment COMPLETED, stores computed scores, records completedAt.
      * Must be called after all section data has been saved.
      */
     suspend fun completeAssessment(assessmentId: String, scoringResult: ScoringResult) {
@@ -52,17 +52,6 @@ class AssessmentRepository @Inject constructor(
         scoresDao.insertScores(
             ScoresRecordEntity.fromScoringResult(assessmentId, scoringResult, now)
         )
-    }
-
-    /** Deletes an in-progress assessment and all its section data (user chose to discard). */
-    suspend fun discardAssessment(assessmentId: String) {
-        val record = assessmentDao.getAssessmentRecordOnce(assessmentId) ?: return
-        assessmentDao.updateAssessmentRecord(record.copy(status = AssessmentStatus.IN_PROGRESS))
-        // Cascade delete via patientId → delete record directly
-        // Room cascades section deletes when the record row is removed.
-        // We delete by updating status first then deleting — use a raw delete if DAO exposes one.
-        // For now, use the same pattern: mark discarded then rely on UI to ignore IN_PROGRESS on discard.
-        // A cleaner option is added below for future use.
     }
 
     // ── Section persistence ───────────────────────────────────────────────────
@@ -84,11 +73,11 @@ class AssessmentRepository @Inject constructor(
 
     // ── Reads ─────────────────────────────────────────────────────────────────
 
-    fun getAssessmentsForPatient(patientId: String): Flow<List<AssessmentRecordEntity>> =
-        assessmentDao.getAssessmentsForPatient(patientId)
+    fun getAssessmentsForUser(userId: String): Flow<List<AssessmentRecordEntity>> =
+        assessmentDao.getAssessmentsForUser(userId)
 
-    fun getCompletedAssessmentCount(patientId: String): Flow<Int> =
-        assessmentDao.getCompletedAssessmentCount(patientId)
+    fun getCompletedAssessmentCount(userId: String): Flow<Int> =
+        assessmentDao.getCompletedAssessmentCount(userId)
 
     /** Emits any in-progress assessment on app launch so the UI can offer resume/discard (Section 15.5). */
     fun getInProgressAssessment(): Flow<AssessmentRecordEntity?> =
@@ -100,9 +89,9 @@ class AssessmentRepository @Inject constructor(
     fun getScores(assessmentId: String): Flow<ScoresRecordEntity?> =
         scoresDao.getScores(assessmentId)
 
-    fun getScoresHistory(patientId: String): Flow<List<ScoresRecordEntity>> =
-        scoresDao.getScoresHistoryForPatient(patientId)
+    fun getScoresHistory(userId: String): Flow<List<ScoresRecordEntity>> =
+        scoresDao.getScoresHistoryForUser(userId)
 
-    fun getHeartRateHistory(patientId: String): Flow<List<LifestyleDataEntity>> =
-        assessmentDao.getHeartRateHistory(patientId)
+    fun getHeartRateHistory(userId: String): Flow<List<LifestyleDataEntity>> =
+        assessmentDao.getHeartRateHistory(userId)
 }

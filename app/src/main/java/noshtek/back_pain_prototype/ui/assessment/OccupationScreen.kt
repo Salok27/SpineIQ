@@ -17,14 +17,13 @@ import noshtek.back_pain_prototype.ui.common.*
 @Composable
 fun OccupationScreen(
     navController: NavController,
-    viewModel: AssessmentSessionViewModel,
-    patientId: String
+    viewModel: AssessmentSessionViewModel
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     var showError by remember { mutableStateOf(false) }
 
-    LaunchedEffect(patientId) {
-        viewModel.initSession(patientId)
+    LaunchedEffect(Unit) {
+        viewModel.initSession()
     }
 
     Column(
@@ -50,7 +49,11 @@ fun OccupationScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Patient: ${session.patientName}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "Hi ${session.userName}, let's start with your work pattern.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             SectionCard(title = "Occupation Type") {
                 OccupationType.entries.chunked(2).forEach { row ->

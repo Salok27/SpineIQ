@@ -44,11 +44,11 @@ fun ReviewScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Patient
-            SectionCard(title = "Patient") {
-                ReviewRow("Name", session.patientName)
-                ReviewRow("Age", "${session.patientAgeYears} yrs")
-                ReviewRow("Weight / Height", "${"%.1f".format(session.patientWeightKg)} kg · ${"%.0f".format(session.patientHeightCm)} cm")
+            // Personal
+            SectionCard(title = "Personal") {
+                ReviewRow("Name", session.userName)
+                ReviewRow("Age", "${session.userAgeYears} yrs")
+                ReviewRow("Weight / Height", "${"%.1f".format(session.userWeightKg)} kg · ${"%.0f".format(session.userHeightCm)} cm")
             }
 
             // Occupation

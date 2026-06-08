@@ -6,55 +6,52 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.db.entity.*
 import noshtek.back_pain_prototype.core.data.model.AssessmentStatus
 import noshtek.back_pain_prototype.core.data.model.DataSource
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
-import noshtek.back_pain_prototype.core.data.repository.PatientRepository
+import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
 import noshtek.back_pain_prototype.core.scoring.ScoringEngine
 import noshtek.back_pain_prototype.core.scoring.model.*
 import noshtek.back_pain_prototype.ui.common.*
-import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.time.Period
 import javax.inject.Inject
 
 @HiltViewModel
 class AssessmentSessionViewModel @Inject constructor(
     private val assessmentRepository: AssessmentRepository,
-    private val patientRepository: PatientRepository
+    private val userProfileRepository: UserProfileRepository
 ) : ViewModel() {
 
     private val _session = MutableStateFlow(AssessmentSession())
     val session: StateFlow<AssessmentSession> = _session.asStateFlow()
 
-    fun initSession(patientId: String) {
-        if (_session.value.patientId == patientId && _session.value.assessmentId.isNotEmpty()) return
+    /** Called once when entering the wizard. Reads the single user profile and starts a new assessment. */
+    fun initSession() {
+        if (_session.value.assessmentId.isNotEmpty()) return
         viewModelScope.launch {
             _session.update { it.copy(isLoading = true) }
-            patientRepository.getPatient(patientId).collect { patient ->
-                if (patient == null) { _session.update { it.copy(isLoading = false) }; return@collect }
-                val age = run {
-                    val dob = LocalDate.ofEpochDay(patient.dateOfBirth)
-                    java.time.Period.between(dob, LocalDate.now()).years
-                }
-                if (_session.value.assessmentId.isEmpty()) {
-                    val aId = assessmentRepository.startAssessment(patientId)
-                    _session.update { it.copy(
-                        isLoading = false,
-                        patientId = patientId,
-                        patientName = patient.fullName,
-                        patientAgeYears = age,
-                        patientWeightKg = patient.weightKg,
-                        patientHeightCm = patient.heightCm,
-                        assessmentId = aId
-                    )}
-                } else {
-                    _session.update { it.copy(isLoading = false, patientName = patient.fullName, patientAgeYears = age, patientWeightKg = patient.weightKg, patientHeightCm = patient.heightCm) }
-                }
-                return@collect // only need first emission to init
+            val profile = userProfileRepository.getUserProfile().firstOrNull()
+            if (profile == null) {
+                _session.update { it.copy(isLoading = false, error = "Profile not found. Please complete your profile first.") }
+                return@launch
+            }
+            val age = Period.between(LocalDate.ofEpochDay(profile.dateOfBirth), LocalDate.now()).years
+            val aId = assessmentRepository.startAssessment(profile.id)
+            _session.update {
+                it.copy(
+                    isLoading = false,
+                    userId = profile.id,
+                    userName = profile.fullName,
+                    userAgeYears = age,
+                    userWeightKg = profile.weightKg,
+                    userHeightCm = profile.heightCm,
+                    assessmentId = aId
+                )
             }
         }
     }
@@ -170,7 +167,7 @@ class AssessmentSessionViewModel @Inject constructor(
         _session.update { it.copy(isScoring = true) }
         viewModelScope.launch {
             val input = AssessmentInput(
-                demographic = DemographicInput(s.patientAgeYears, s.patientWeightKg, s.patientHeightCm),
+                demographic = DemographicInput(s.userAgeYears, s.userWeightKg, s.userHeightCm),
                 lifestyle = LifestyleInput(
                     sittingHoursPerDay = s.occupation.sittingHoursPerDay,
                     walkingMinutesPerDay = s.lifestyle.walkingMinutesPerDay,

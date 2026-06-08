@@ -16,12 +16,12 @@ interface ScoresDao {
     @Query("SELECT * FROM scores_records WHERE assessment_id = :assessmentId")
     suspend fun getScoresOnce(assessmentId: String): ScoresRecordEntity?
 
-    /** All scores for a patient's completed assessments, newest first — for longitudinal reporting. */
+    /** All scores for the user's completed assessments, newest first — for longitudinal reporting (FR-19). */
     @Query("""
         SELECT s.* FROM scores_records s
         INNER JOIN assessment_records r ON s.assessment_id = r.id
-        WHERE r.patient_id = :patientId
+        WHERE r.user_id = :userId
         ORDER BY r.assessment_date DESC
     """)
-    fun getScoresHistoryForPatient(patientId: String): Flow<List<ScoresRecordEntity>>
+    fun getScoresHistoryForUser(userId: String): Flow<List<ScoresRecordEntity>>
 }
