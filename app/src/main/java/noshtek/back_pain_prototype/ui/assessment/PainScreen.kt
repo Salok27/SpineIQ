@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -55,7 +56,13 @@ fun PainScreen(
                                         copy(painLocations = if (selected) painLocations - loc else painLocations + loc)
                                     }
                                 },
-                                label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
+                                label = {
+                                    Text(
+                                        loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -90,11 +97,15 @@ fun PainScreen(
                             selected = pain.painDuration == dur,
                             onClick = { viewModel.updatePain { copy(painDuration = dur) } },
                             label = {
-                                Text(when(dur) {
-                                    PainDuration.ACUTE -> "Acute (<3 wks)"
-                                    PainDuration.SUBACUTE -> "Subacute (3–6 wks)"
-                                    PainDuration.CHRONIC -> "Chronic (>6 wks)"
-                                })
+                                Text(
+                                    when (dur) {
+                                        PainDuration.ACUTE    -> "Acute\n(<3 wks)"
+                                        PainDuration.SUBACUTE -> "Subacute\n(3–6 wks)"
+                                        PainDuration.CHRONIC  -> "Chronic\n(>6 wks)"
+                                    },
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             },
                             modifier = Modifier.weight(1f)
                         )
@@ -108,7 +119,13 @@ fun PainScreen(
                         FilterChip(
                             selected = pain.painPattern == pattern,
                             onClick = { viewModel.updatePain { copy(painPattern = pattern) } },
-                            label = { Text(pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
+                            label = {
+                                Text(
+                                    pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -130,7 +147,13 @@ fun PainScreen(
                                         copy(painTriggers = if (selected) painTriggers - trigger else painTriggers + trigger)
                                     }
                                 },
-                                label = { Text(trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
+                                label = {
+                                    Text(
+                                        trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -147,7 +170,13 @@ fun PainScreen(
                         FilterChip(
                             selected = pain.radiculopathySeverity == sev,
                             onClick = { viewModel.updatePain { copy(radiculopathySeverity = sev, radiationLocation = if (sev == RadiculopathySeverity.NONE) null else radiationLocation) } },
-                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            label = {
+                                Text(
+                                    sev.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -162,7 +191,13 @@ fun PainScreen(
                             FilterChip(
                                 selected = pain.radiationLocation == loc,
                                 onClick = { viewModel.updatePain { copy(radiationLocation = loc) } },
-                                label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
+                                label = {
+                                    Text(
+                                        loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -177,7 +212,13 @@ fun PainScreen(
                         FilterChip(
                             selected = pain.functionalLimitationSeverity == sev,
                             onClick = { viewModel.updatePain { copy(functionalLimitationSeverity = sev) } },
-                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            label = {
+                                Text(
+                                    sev.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }

@@ -10,7 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.scoring.model.BackPainRiskClassification
 import noshtek.back_pain_prototype.core.scoring.model.RiskTier
@@ -91,16 +94,26 @@ fun SliderWithLabel(
     unit: String = "",
     modifier: Modifier = Modifier
 ) {
+    val valueText = if (unit.isNotEmpty()) "%.1f %s".format(value, unit) else "%.0f".format(value)
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(label, style = MaterialTheme.typography.bodyMedium)
             Text(
-                if (unit.isNotEmpty()) "%.1f %s".format(value, unit) else "%.0f".format(value),
+                label,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                valueText,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
         }
         Slider(
@@ -108,7 +121,9 @@ fun SliderWithLabel(
             onValueChange = onValueChange,
             valueRange = valueRange,
             steps = steps,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = "$label: $valueText" }
         )
     }
 }
@@ -143,6 +158,66 @@ fun NextButton(
 fun RequiredFieldError(show: Boolean, message: String = "This field is required") {
     if (show) {
         Text(message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+/**
+ * Horizontal score bar with a numeric label pinned to the end of the filled
+ * portion (or against the track edge when progress is near 0 or 1).
+ * Uses a [Box] overlay — no Canvas required.
+ */
+@Composable
+fun LabelledScoreBar(
+    label: String,
+    score: Int,
+    maxScore: Int,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    require(maxScore > 0) { "maxScore must be > 0" }
+    val progress = (score.coerceIn(0, maxScore).toFloat() / maxScore)
+    val scoreText = "$score / $maxScore"
+
+    Column(modifier = modifier.semantics(mergeDescendants = true) {
+        contentDescription = "$label: $scoreText"
+    }) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                scoreText,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = color,
+                maxLines = 1
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        // 12 dp bar height keeps it above the 48 dp touch-target floor because
+        // the Column as a whole is the interactive unit, not the bar itself.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(12.dp)
+        ) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxSize(),
+                color = color,
+                trackColor = color.copy(alpha = 0.15f),
+                gapSize = 0.dp,
+                drawStopIndicator = {}
+            )
+        }
     }
 }
 
