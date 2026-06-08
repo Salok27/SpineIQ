@@ -398,7 +398,7 @@ Scrollable, section-by-section personalised report. See Section 12 for content r
 | BMI Category | Enum | Auto | < 25 Normal / 25–29.9 Overweight / ≥ 30 Obese |
 | Assessment Date | Date | Auto | |
 
-> Note: Phone number and OPD/Patient ID fields are removed. This is a personal self-assessment app with a single user profile.
+> Note: Phone number and OPD/Patient ID fields are not collected. This is a personal self-assessment app with a single user profile.
 
 ### 8.2 Occupation & Work Pattern
 
@@ -911,7 +911,7 @@ UserProfile {
 }
 ```
 
-> One `UserProfile` record exists per installation. There is no list of profiles and no multi-user support. `patientIdExternal` (OPD number) field has been removed.
+> One `UserProfile` record exists per installation. There is no list of profiles and no multi-user support. No external patient or OPD ID field is defined.
 
 #### Assessment Record
 ```
