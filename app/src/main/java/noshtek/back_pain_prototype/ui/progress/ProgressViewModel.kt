@@ -46,10 +46,15 @@ class ProgressViewModel @Inject constructor(
                     ) { records, scoresList ->
                         val completedRecords = records.filter { it.completedAt != null }
                         // Match each completed record with its scores
+                        // Chronological oldest→newest. assessment_date is epoch *days*, so
+                        // multiple assessments on the same day tie on a date-only sort; a stable
+                        // sort would then leak the DAO's created_at DESC order through, rendering
+                        // the trend charts (and habit/delta readouts) newest-first. Tie-break on
+                        // created_at to match the SQL ordering and guarantee true chronology.
                         val summaries = completedRecords.mapNotNull { record ->
                             val scores = scoresList.find { it.assessmentId == record.id }
                             scores?.let { AssessmentSummary(record, it) }
-                        }.sortedBy { it.record.assessmentDate }
+                        }.sortedWith(compareBy({ it.record.assessmentDate }, { it.record.createdAt }))
 
                         val hasEnough = summaries.size >= 2
                         val delta = if (hasEnough) {
