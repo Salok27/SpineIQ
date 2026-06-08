@@ -49,5 +49,3 @@ google-services.json
 # Claude Code files
 .claude/projects/
 .claude/settings.local.json
-CLAUDE.md
-.claude/docs/
