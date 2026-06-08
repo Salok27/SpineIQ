@@ -1,16 +1,18 @@
 
 ## Project Overview
 
-SpineIQ — a native Android app for **clinician-led** back pain screening. A
-physiotherapist/doctor runs a structured multi-domain assessment on behalf of a
-patient during an OPD consultation, and the app computes a Spine Severity Score
-(SSS, 0–11), a three-tier Lifestyle Risk score, and a composite Back Pain Risk
-classification, then produces an in-app report and exportable PDF. It is a
-screening / decision-support tool — it never recommends specific treatments.
+SpineIQ — a **direct-to-consumer** Android app for personal back pain
+self-assessment and spine health tracking. The user assesses themselves (there
+is no clinician, patient roster, or clinic operator). The app computes a Spine
+Severity Score (SSS, 0–11), a three-tier Lifestyle Risk score, and a composite
+Back Pain Risk classification, then produces a personalised in-app report and
+exportable PDF. It is a screening / decision-support tool — it never recommends
+specific treatments.
 
-Multi-patient, single-operator ("Clinic Mode"). Phase 1 prototype, internal
-distribution only. The authoritative spec is **`PROJECT_PLAN.md`** (repo root);
-code comments cite its section numbers (e.g. "Section 10.3", "OQ-06").
+Single-user, single-profile ("Personal Health App"). Phase 1 prototype targeting
+the public Google Play Store. The authoritative spec is **`PROJECT_PLAN.md`**
+(repo root); code comments cite its section numbers (e.g. "Section 10.3",
+"OQ-06").
 
 ## Tech Stack
 
@@ -76,8 +78,11 @@ Detail in `.claude/docs/architectural_patterns.md`.
 - **DB migrations**: currently `fallbackToDestructiveMigration()` — schema changes
   wipe local data. Acceptable for Phase 1 only.
 - **Health Connect** is unimplemented; all activity/lifestyle data is manual entry.
-- **Phase 1 scope**: no patient self-assessment, body diagrams, LLM narrative,
-  clinic branding, cloud sync, or public Play Store config. Confirm before adding.
+- **Single user only**: the data model has one `UserProfile` record per install.
+  There is no patient management, patient list, or multi-user support.
+- **Phase 1 scope**: no body diagrams, LLM narrative, cloud sync. Onboarding,
+  push notification reminders, and progress/trend tracking ARE in Phase 1 scope.
+  Confirm before adding anything else.
 
 ## Additional Documentation
 
