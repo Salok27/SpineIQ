@@ -46,6 +46,8 @@ proguard/
 # Google Services
 google-services.json
 
-# Claude Code — ignore personal memory, keep docs
+# Claude Code files
 .claude/projects/
 .claude/settings.local.json
+CLAUDE.md
+.claude/docs/
