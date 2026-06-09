@@ -118,7 +118,7 @@ class PdfExporter(private val context: Context) {
             c.drawRect(M, y, PW - M, y + 28f, pNavyBg)
             c.drawText("SpineIQ", M + 8f, y + 19f, pWhiteTxt)
             c.drawText("Spine Severity System — Personal Self-Assessment", M + 76f, y + 19f, pSubHeader)
-            y += 34f
+            y += 44f
 
             c.drawText("Your Back Pain Risk Assessment Report", M, y, pTitle)
             y += 22f
@@ -240,6 +240,7 @@ class PdfExporter(private val context: Context) {
         private fun drawSection7() {
             sHead("Section 7 — Functional Assessment (Modified ODI)")
             inp.fullData.functional?.let { f ->
+                gap(4f)
                 tHead("Activity", "Level", "Points")
                 tData("Walking", f.walking.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }, "${f.walking.points}")
                 tData("Sitting", f.sitting.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }, "${f.sitting.points}")
@@ -386,71 +387,118 @@ class PdfExporter(private val context: Context) {
             val c = cv!!
             c.drawRect(M, y, PW - M, y + 16f, pBlueBg)
             c.drawText(title, M + 4f, y + 11f, pSection)
-            y += 20f
+            y += 24f
+        }
+
+        // ----- Table layout primitives -----
+        // A cell occupies a fixed horizontal band [left, right]. Text wraps inside that
+        // band and can never bleed into the neighbouring column; row height is driven by
+        // the tallest cell so wrapped content is never clipped. Numeric / tier columns
+        // are right-aligned so they read as a true column in viewers and PDF parsers.
+        private val CELL_PAD = 5f
+
+        private inner class Col(val left: Float, val right: Float, val rightAlign: Boolean = false) {
+            val innerW: Float get() = right - left - 2 * CELL_PAD
+        }
+
+        // Two-column key/value layout.
+        private val kvCols: List<Col> get() = listOf(
+            Col(M, M + 135f),
+            Col(M + 135f, PW - M)
+        )
+
+        // Three-column layout: label | value | points/tier (right-aligned).
+        private val triCols: List<Col> get() = listOf(
+            Col(M, M + CW * 0.50f),
+            Col(M + CW * 0.50f, M + CW * 0.78f),
+            Col(M + CW * 0.78f, PW - M, rightAlign = true)
+        )
+
+        /** Greedy word-wrap that respects the cell width, hard-breaking any single token
+         *  (long enum names, URLs) that is itself wider than the column. */
+        private fun wrapLines(text: String, paint: Paint, maxW: Float): List<String> {
+            if (text.isEmpty()) return listOf("")
+            val out = mutableListOf<String>()
+            val sb = StringBuilder()
+            fun flush() { if (sb.isNotEmpty()) { out.add(sb.toString()); sb.clear() } }
+            for (word in text.split(" ")) {
+                val candidate = if (sb.isEmpty()) word else "$sb $word"
+                if (paint.measureText(candidate) <= maxW) {
+                    sb.clear(); sb.append(candidate)
+                } else {
+                    flush()
+                    if (paint.measureText(word) <= maxW) {
+                        sb.append(word)
+                    } else {
+                        var chunk = StringBuilder()
+                        for (ch in word) {
+                            if (chunk.isNotEmpty() && paint.measureText("$chunk$ch") > maxW) {
+                                out.add(chunk.toString()); chunk = StringBuilder()
+                            }
+                            chunk.append(ch)
+                        }
+                        sb.append(chunk)
+                    }
+                }
+            }
+            flush()
+            return if (out.isEmpty()) listOf("") else out
+        }
+
+        /** Draws one bounded, wrapping row of cells. `y` enters as the baseline of the
+         *  first text line and exits below the tallest cell in the row. */
+        private fun drawCells(
+            cells: List<Pair<String, Paint>>,
+            cols: List<Col>,
+            bg: Paint? = null,
+            separator: Boolean = false
+        ) {
+            val lineH = cells.maxOf { it.second.textSize } * 1.4f
+            val wrapped = cells.mapIndexed { i, (t, p) -> wrapLines(t, p, cols[i].innerW) }
+            val rowH = wrapped.maxOf { it.size } * lineH
+            checkBreak(rowH + 3f)
+            val c = cv!!
+            val top = y - cells.maxOf { it.second.textSize }
+            bg?.let { c.drawRect(M, top - 1f, PW - M, top + rowH + 2f, it) }
+            wrapped.forEachIndexed { i, lines ->
+                val col = cols[i]
+                val paint = cells[i].second
+                lines.forEachIndexed { li, line ->
+                    val ly = y + li * lineH
+                    val tx = if (col.rightAlign) col.right - CELL_PAD - paint.measureText(line)
+                             else col.left + CELL_PAD
+                    c.drawText(line, tx, ly, paint)
+                }
+            }
+            y += rowH + 3f
+            if (separator) c.drawLine(M, y - 2f, PW - M, y - 2f, pDivider)
         }
 
         private fun tRow(label: String, value: String) {
-            checkBreak(13f)
-            val c = cv!!
-            val col = M + 135f
-            val vw = CW - 135f
-            c.drawText(label, M, y, pBold)
-            if (pBody.measureText(value) <= vw) {
-                c.drawText(value, col, y, pBody)
-                y += pBody.textSize * 1.4f + 1f
-            } else {
-                y += pBody.textSize * 1.4f
-                wrapped(value, pBody, col, vw)
-                y += 1f
-            }
+            drawCells(listOf(label to pBold, value to pBody), kvCols)
         }
 
         private fun wRow(label: String, value: String) {
             checkBreak(13f)
-            val c = cv!!
-            c.drawText(label, M, y, pBold)
+            cv!!.drawText(label, M, y, pBold)
             y += pBold.textSize * 1.4f
             wrapped(value, pBody, M + 8f, CW - 8f)
             y += 2f
         }
 
         private fun tHead(c1: String, c2: String, c3: String) {
-            checkBreak(14f)
-            val c = cv!!
-            val col2 = M + CW * 0.5f
-            val col3 = M + CW * 0.8f
-            c.drawRect(M, y - 9f, PW - M, y + 4f, pBlueBg)
-            c.drawText(c1, M + 2f, y, pSection)
-            c.drawText(c2, col2, y, pSection)
-            if (c3.isNotEmpty()) c.drawText(c3, col3, y, pSection)
-            y += 14f
+            drawCells(listOf(c1 to pSection, c2 to pSection, c3 to pSection), triCols, bg = pBlueBg)
         }
 
         private fun tData(c1: String, c2: String, c3: String) {
-            checkBreak(12f)
-            val c = cv!!
-            val col2 = M + CW * 0.5f
-            val col3 = M + CW * 0.8f
-            c.drawText(c1, M + 2f, y, pBody)
-            c.drawText(c2, col2, y, pBody)
-            if (c3.isNotEmpty()) c.drawText(c3, col3, y, pBody)
-            y += 13f
+            drawCells(listOf(c1 to pBody, c2 to pBody, c3 to pBody), triCols, separator = true)
         }
 
         private fun wrapped(text: String, paint: Paint = pBody, x: Float = M, maxW: Float = CW) {
             val lineH = paint.textSize * 1.4f
-            val words = text.split(" ")
-            val sb = StringBuilder()
-            for (word in words) {
-                val candidate = if (sb.isEmpty()) word else "$sb $word"
-                if (paint.measureText(candidate) <= maxW) {
-                    sb.clear(); sb.append(candidate)
-                } else {
-                    if (sb.isNotEmpty()) { checkBreak(lineH); cv!!.drawText(sb.toString(), x, y, paint); y += lineH }
-                    sb.clear(); sb.append(word)
-                }
+            for (line in wrapLines(text, paint, maxW)) {
+                checkBreak(lineH); cv!!.drawText(line, x, y, paint); y += lineH
             }
-            if (sb.isNotEmpty()) { checkBreak(lineH); cv!!.drawText(sb.toString(), x, y, paint); y += lineH }
         }
 
         private fun divider() { cv!!.drawLine(M, y, PW - M, y, pDivider); y += 4f }
