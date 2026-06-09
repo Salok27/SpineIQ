@@ -35,6 +35,7 @@ fun OccupationScreen(
             title = "Occupation  (1 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 1, totalSteps = 6)
 
         if (session.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {

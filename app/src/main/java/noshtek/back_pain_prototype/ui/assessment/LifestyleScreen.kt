@@ -32,6 +32,7 @@ fun LifestyleScreen(
             title = "Lifestyle  (2 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 2, totalSteps = 6)
 
         Column(
             modifier = Modifier

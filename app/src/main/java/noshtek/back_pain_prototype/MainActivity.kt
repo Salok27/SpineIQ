@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import noshtek.back_pain_prototype.navigation.SpineIQNavGraph
-import noshtek.back_pain_prototype.ui.theme.Back_pain_prototypeTheme
+import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Back_pain_prototypeTheme {
+            SpineIQTheme {
                 SpineIQNavGraph()
             }
         }

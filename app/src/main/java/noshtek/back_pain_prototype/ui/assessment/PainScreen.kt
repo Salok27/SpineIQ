@@ -33,6 +33,7 @@ fun PainScreen(
             title = "Pain Assessment  (3 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 3, totalSteps = 6)
 
         Column(
             modifier = Modifier

@@ -44,14 +44,24 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isEditMode) "Edit Profile" else "Set Up Your Profile") },
+                title = {
+                    Text(
+                        if (state.isEditMode) "Edit Profile" else "Set Up Your Profile",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
                 navigationIcon = {
                     if (state.isEditMode) {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
         }
     ) { padding ->
@@ -147,10 +157,17 @@ fun ProfileScreen(
             Button(
                 onClick = viewModel::saveProfile,
                 enabled = !state.isSaving,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
             ) {
                 if (state.isSaving) CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text(if (state.isEditMode) "Save Changes" else "Save and Continue")
+                else Text(
+                    if (state.isEditMode) "Save Changes" else "Save and Continue",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
             }
 
             Spacer(Modifier.height(16.dp))

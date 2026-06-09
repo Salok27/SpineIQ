@@ -32,6 +32,7 @@ fun FunctionalScreen(
             title = "Functional  (4 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 4, totalSteps = 6)
 
         Column(
             modifier = Modifier
