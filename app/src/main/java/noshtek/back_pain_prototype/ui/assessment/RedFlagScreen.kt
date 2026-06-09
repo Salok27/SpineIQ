@@ -64,6 +64,11 @@ fun RedFlagScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            AssessmentVideoPlaceholder(
+                title = "Red Flags Screening Overview",
+                description = "This video will explain important warning signs that may require medical attention.",
+            )
+
             Text(
                 "Check any red flag signs or symptoms present. A confirmed red flag overrides the SSS score to Severe / Urgent.",
                 style = MaterialTheme.typography.bodyMedium,
