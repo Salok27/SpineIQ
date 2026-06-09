@@ -14,8 +14,9 @@ val SpineIQShapes = Shapes(
 )
 
 // Shared shapes referenced directly by custom components.
-val CardShape   = RoundedCornerShape(20.dp)
-val ButtonShape = RoundedCornerShape(18.dp)
-val HeroShape   = RoundedCornerShape(28.dp)
-val ChipShape   = RoundedCornerShape(14.dp)
-val PillShape   = RoundedCornerShape(50)
+val CardShape      = RoundedCornerShape(20.dp)
+val ButtonShape    = RoundedCornerShape(16.dp)   // spec: 16dp button corners
+val HeroShape      = RoundedCornerShape(28.dp)
+val ChipShape      = RoundedCornerShape(14.dp)
+val TextFieldShape = RoundedCornerShape(14.dp)   // centralised text-field radius
+val PillShape      = RoundedCornerShape(50)

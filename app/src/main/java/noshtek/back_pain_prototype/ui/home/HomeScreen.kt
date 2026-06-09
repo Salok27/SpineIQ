@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -49,7 +48,9 @@ import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.ShimmerBox
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.theme.ButtonShape
 import noshtek.back_pain_prototype.ui.theme.CardShape
+import noshtek.back_pain_prototype.ui.theme.HeroShape
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -258,7 +259,7 @@ private fun HomeLoading(modifier: Modifier = Modifier) {
             Modifier
                 .fillMaxWidth()
                 .height(132.dp),
-            shape = RoundedCornerShape(28.dp),
+            shape = HeroShape,
         )
         ShimmerBox(
             Modifier
@@ -270,7 +271,7 @@ private fun HomeLoading(modifier: Modifier = Modifier) {
             Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = RoundedCornerShape(18.dp),
+            shape = ButtonShape,
         )
     }
 }

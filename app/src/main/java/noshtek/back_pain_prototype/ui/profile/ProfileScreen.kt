@@ -2,7 +2,6 @@ package noshtek.back_pain_prototype.ui.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,6 +23,7 @@ import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -107,7 +107,7 @@ fun ProfileScreen(
                     onValueChange = viewModel::onNameChange,
                     label = { Text("Full Name *") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = TextFieldShape,
                     singleLine = true
                 )
                 Spacer(Modifier.height(12.dp))
@@ -143,7 +143,7 @@ fun ProfileScreen(
                         label = { Text("Height (cm) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = TextFieldShape,
                         singleLine = true
                     )
                     OutlinedTextField(
@@ -152,7 +152,7 @@ fun ProfileScreen(
                         label = { Text("Weight (kg) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = TextFieldShape,
                         singleLine = true
                     )
                 }
@@ -199,7 +199,7 @@ private fun DobField(dob: LocalDate, onDobChange: (LocalDate) -> Unit) {
     OutlinedButton(
         onClick = { showPicker = true },
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = TextFieldShape,
     ) {
         Icon(Icons.Filled.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))

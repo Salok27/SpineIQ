@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Brush
 
-/** Diagonal blue → indigo → violet brand gradient (top-start → bottom-end). */
+/** Diagonal blue → sky → teal brand gradient (top-start → bottom-end). */
 @Composable
 @ReadOnlyComposable
 fun brandGradient(): Brush = Brush.linearGradient(SpineIQTheme.colors.brandStops)
