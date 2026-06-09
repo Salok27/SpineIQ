@@ -44,6 +44,7 @@ fun RedFlagScreen(
             title = "Red Flags  (5 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 5, totalSteps = 6)
 
         Column(
             modifier = Modifier

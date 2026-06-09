@@ -31,6 +31,7 @@ fun ReviewScreen(
             title = "Review  (6 / 6)",
             onBack = { navController.popBackStack() }
         )
+        WizardProgressBar(currentStep = 6, totalSteps = 6)
 
         Column(
             modifier = Modifier
@@ -124,9 +125,16 @@ fun ReviewScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                 ) {
-                    Text("Compute Score & Complete")
+                    Text(
+                        "Compute Score & Complete",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
             }
 

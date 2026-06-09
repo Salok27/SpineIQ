@@ -36,12 +36,19 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = {
+                    Text("Settings", style = MaterialTheme.typography.titleLarge)
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
         }
     ) { padding ->
@@ -54,9 +61,10 @@ fun SettingsScreen(
         ) {
             // Profile
             SectionCard(title = "Profile") {
-                TextButton(
+                OutlinedButton(
                     onClick = { navController.navigate(Screen.Profile.route) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                 ) { Text("Edit Personal Information") }
             }
 
