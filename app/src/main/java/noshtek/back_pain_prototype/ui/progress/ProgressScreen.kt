@@ -225,7 +225,7 @@ fun ProgressScreen(
                 ChartCard(
                     title = "Lifestyle Risk Over Time",
                     icon = Icons.AutoMirrored.Filled.DirectionsWalk,
-                    accent = MaterialTheme.colorScheme.tertiary,
+                    accent = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.entrance(2),
                 ) {
                     val tiers = state.assessments.map { summary ->
@@ -236,7 +236,7 @@ fun ProgressScreen(
                         }
                     }
                     val dates = state.assessments.map { LocalDate.ofEpochDay(it.record.assessmentDate).format(fmt) }
-                    SimpleLineChart(values = tiers, labels = dates, maxY = 3f, color = MaterialTheme.colorScheme.tertiary)
+                    SimpleLineChart(values = tiers, labels = dates, maxY = 3f, color = MaterialTheme.colorScheme.secondary)
                     Spacer(Modifier.height(4.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         listOf("1=Low", "2=Moderate", "3=High").forEach {

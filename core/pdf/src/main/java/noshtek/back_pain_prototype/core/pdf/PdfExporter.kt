@@ -25,6 +25,20 @@ data class PdfReportInput(
     val scores: ScoresRecordEntity
 )
 
+/**
+ * Single source of truth for PDF colours, mirroring the app's Design System
+ * palette (Blue primary + Slate neutrals). Kept here because :core:pdf cannot
+ * depend on the :app theme; update alongside `ui/theme/Color.kt`.
+ */
+private object PdfPalette {
+    const val INK        = "#0F172A"   // body text (primary)
+    const val PRIMARY    = "#2563EB"   // section headers (Blue600)
+    const val NAVY       = "#1E3A8A"   // page title + navy banner bg (Blue900)
+    const val LIGHT_BLUE = "#DBEAFE"   // light banner bg + on-navy subheader (Blue50)
+    const val MUTED      = "#64748B"   // small / secondary text (Slate muted)
+    const val DIVIDER    = "#CBD5E1"   // hairline rules (Slate300 outline)
+}
+
 class PdfExporter(private val context: Context) {
 
     suspend fun generatePdf(input: PdfReportInput): File = withContext(Dispatchers.IO) {
@@ -65,14 +79,14 @@ class PdfExporter(private val context: Context) {
 
         private val pBody = body(9f)
         private val pBold = bold(9f)
-        private val pSmall = body(8f).also { it.color = Color.parseColor("#666666") }
-        private val pSection = bold(10f).also { it.color = Color.parseColor("#1565C0") }
-        private val pTitle = bold(16f).also { it.color = Color.parseColor("#0D47A1") }
-        private val pDivider = Paint().also { it.color = Color.parseColor("#BDBDBD"); it.strokeWidth = 0.5f }
-        private val pBlueBg = fill(Color.parseColor("#E3F2FD"))
-        private val pNavyBg = fill(Color.parseColor("#0D47A1"))
+        private val pSmall = body(8f).also { it.color = Color.parseColor(PdfPalette.MUTED) }
+        private val pSection = bold(10f).also { it.color = Color.parseColor(PdfPalette.PRIMARY) }
+        private val pTitle = bold(16f).also { it.color = Color.parseColor(PdfPalette.NAVY) }
+        private val pDivider = Paint().also { it.color = Color.parseColor(PdfPalette.DIVIDER); it.strokeWidth = 0.5f }
+        private val pBlueBg = fill(Color.parseColor(PdfPalette.LIGHT_BLUE))
+        private val pNavyBg = fill(Color.parseColor(PdfPalette.NAVY))
         private val pWhiteTxt = bold(14f).also { it.color = Color.WHITE }
-        private val pSubHeader = body(9f).also { it.color = Color.parseColor("#BBDEFB") }
+        private val pSubHeader = body(9f).also { it.color = Color.parseColor(PdfPalette.LIGHT_BLUE) }
 
         fun render() {
             newPage()
@@ -138,7 +152,7 @@ class PdfExporter(private val context: Context) {
         private fun runningHeader() {
             val c = cv!!
             c.drawRect(M, y, PW - M, y + 16f, pBlueBg)
-            val hp = bold(8f).also { it.color = Color.parseColor("#0D47A1") }
+            val hp = bold(8f).also { it.color = Color.parseColor(PdfPalette.NAVY) }
             c.drawText("SpineIQ Report — ${inp.userName} — $dateLabel", M + 4f, y + 11f, hp)
             y += 22f
         }
@@ -506,8 +520,8 @@ class PdfExporter(private val context: Context) {
         private fun text(t: String, x: Float, ty: Float, p: Paint) { cv!!.drawText(t, x, ty, p) }
         private fun small(t: String, x: Float, ty: Float) { cv!!.drawText(t, x, ty, pSmall) }
 
-        private fun body(size: Float) = Paint().apply { isAntiAlias = true; color = Color.BLACK; textSize = size }
-        private fun bold(size: Float) = Paint().apply { isAntiAlias = true; color = Color.BLACK; textSize = size; typeface = Typeface.DEFAULT_BOLD }
+        private fun body(size: Float) = Paint().apply { isAntiAlias = true; color = Color.parseColor(PdfPalette.INK); textSize = size }
+        private fun bold(size: Float) = Paint().apply { isAntiAlias = true; color = Color.parseColor(PdfPalette.INK); textSize = size; typeface = Typeface.DEFAULT_BOLD }
         private fun fill(c: Int) = Paint().apply { color = c; style = Paint.Style.FILL }
     }
 }

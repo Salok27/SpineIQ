@@ -20,24 +20,24 @@ private val LightColorScheme = lightColorScheme(
     onPrimary              = Color.White,
     primaryContainer       = Blue50,
     onPrimaryContainer     = Blue900,
-    secondary              = Teal600,
+    secondary              = Teal600,          // teal accent
     onSecondary            = Color.White,
     secondaryContainer     = Teal50,
     onSecondaryContainer   = Teal900,
-    tertiary               = Violet600,
+    tertiary               = Sky500,           // cyan — second data accent (charts)
     onTertiary             = Color.White,
-    tertiaryContainer      = Violet50,
-    onTertiaryContainer    = Violet900,
-    error                  = RiskHigh,
+    tertiaryContainer      = Sky100,
+    onTertiaryContainer    = Sky900,
+    error                  = Error,
     onError                = Color.White,
-    errorContainer         = RiskHighContainer,
+    errorContainer         = ErrorContainer,
     onErrorContainer       = RiskSevereUrgent,
     background             = Slate50,
-    onBackground           = Slate900,
+    onBackground           = Ink,
     surface                = Color.White,
-    onSurface              = Slate900,
+    onSurface              = Ink,
     surfaceVariant         = Slate100,
-    onSurfaceVariant       = Slate500,
+    onSurfaceVariant       = SlateText,
     outline                = Slate300,
     outlineVariant         = Slate200,
     surfaceContainerLowest = Color.White,
@@ -53,12 +53,12 @@ private val DarkColorScheme = darkColorScheme(
     onPrimaryContainer     = Blue50,
     secondary              = Teal300,
     onSecondary            = Teal900,
-    secondaryContainer     = Teal700,
+    secondaryContainer     = Teal800,
     onSecondaryContainer   = Teal50,
-    tertiary               = Violet300,
-    onTertiary             = Violet900,
-    tertiaryContainer      = Violet700,
-    onTertiaryContainer    = Violet50,
+    tertiary               = Sky400,
+    onTertiary             = Sky900,
+    tertiaryContainer      = Color(0xFF075985),
+    onTertiaryContainer    = Sky100,
     error                  = RiskHighContainer,
     onError                = RiskSevereUrgent,
     errorContainer         = RiskSevereUrgent,
@@ -67,7 +67,7 @@ private val DarkColorScheme = darkColorScheme(
     onBackground           = Slate200,
     surface                = SlateD100,
     onSurface              = Slate200,
-    surfaceVariant         = SlateD300,
+    surfaceVariant         = SlateD200,
     onSurfaceVariant       = SlateD600,
     outline                = SlateD500,
     outlineVariant         = SlateD700,
@@ -77,7 +77,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHigh   = SlateD200,
 )
 
-// ── Extended colors (the "violet identity" + gradients M3 has no slot for) ────
+// ── Extended colors (the teal "accent identity" + gradients M3 has no slot for) ─
 
 @Immutable
 data class SpineIQColors(
@@ -85,12 +85,18 @@ data class SpineIQColors(
     val onAccent: Color,
     val accentContainer: Color,
     val onAccentContainer: Color,
+    /** AA-safe accent for teal text/icons on white surfaces (accent fails AA for small text). */
+    val accentText: Color,
     val success: Color,
     val onSuccess: Color,
     val successContainer: Color,
+    /** Bright spec success — large fills / indicators only. */
+    val successFill: Color,
     val warning: Color,
     val warningContainer: Color,
-    /** Signature brand gradient: blue → indigo → violet. Hero surfaces + primary CTAs. */
+    /** Bright spec warning — large fills only. */
+    val warningFill: Color,
+    /** Signature brand gradient: blue → sky → teal. Hero surfaces + primary CTAs. */
     val brandStops: List<Color>,
     /** Soft tinted colour for elevation glows. */
     val shadowTint: Color,
@@ -98,38 +104,44 @@ data class SpineIQColors(
 )
 
 private val LightSpineIQColors = SpineIQColors(
-    accent            = Indigo600,
+    accent            = Teal600,
     onAccent          = Color.White,
-    accentContainer   = Indigo50,
-    onAccentContainer = Indigo900,
+    accentContainer   = Teal50,
+    onAccentContainer = Teal900,
+    accentText        = Teal700,
     success           = Success,
     onSuccess         = Color.White,
     successContainer  = SuccessContainer,
+    successFill       = SuccessFill,
     warning           = Warning,
     warningContainer  = WarningContainer,
-    brandStops        = listOf(Blue600, Indigo600, Violet600),
-    shadowTint        = Indigo600,
+    warningFill       = WarningFill,
+    brandStops        = listOf(Blue600, Sky500, Teal600),
+    shadowTint        = Blue600,
     isDark            = false,
 )
 
 private val DarkSpineIQColors = SpineIQColors(
-    accent            = Violet300,
-    onAccent          = Violet900,
-    accentContainer   = Indigo700,
-    onAccentContainer = Indigo50,
-    success           = Green300,
-    onSuccess         = Green900,
-    successContainer  = Green700,
-    warning           = Color(0xFFFBBF24),
-    warningContainer  = Color(0xFF78350F),
-    brandStops        = listOf(Blue500, Indigo500, Violet500),
-    shadowTint        = Violet500,
+    accent            = Teal300,
+    onAccent          = Teal900,
+    accentContainer   = Teal800,
+    onAccentContainer = Teal50,
+    accentText        = Teal300,
+    success           = Color(0xFF34D399),     // Emerald-400
+    onSuccess         = Color(0xFF052E16),
+    successContainer  = Color(0xFF065F46),     // Emerald-800
+    successFill       = Color(0xFF34D399),
+    warning           = Color(0xFFFBBF24),     // Amber-300
+    warningContainer  = Color(0xFF78350F),     // Amber-900
+    warningFill       = Color(0xFFFBBF24),
+    brandStops        = listOf(Blue500, Sky400, Teal300),
+    shadowTint        = Blue500,
     isDark            = true,
 )
 
 private val LocalSpineIQColors = staticCompositionLocalOf { LightSpineIQColors }
 
-/** Accessor for Design-System-2.0 tokens, e.g. `SpineIQTheme.colors.accent`. */
+/** Accessor for Design-System tokens, e.g. `SpineIQTheme.colors.accent`. */
 object SpineIQTheme {
     val colors: SpineIQColors
         @Composable @ReadOnlyComposable get() = LocalSpineIQColors.current

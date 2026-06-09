@@ -18,6 +18,7 @@ import noshtek.back_pain_prototype.core.data.model.LiftingLevel
 import noshtek.back_pain_prototype.core.data.model.OccupationType
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 
 @Composable
 fun OccupationScreen(
@@ -127,6 +128,7 @@ fun OccupationScreen(
                     onValueChange = { viewModel.updateOccupation { copy(workPatternNotes = it) } },
                     placeholder = { Text("Work pattern notes…") },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = TextFieldShape,
                     maxLines = 3
                 )
             }

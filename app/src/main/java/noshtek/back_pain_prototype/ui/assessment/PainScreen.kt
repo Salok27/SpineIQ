@@ -21,6 +21,7 @@ import noshtek.back_pain_prototype.core.scoring.model.PainDuration
 import noshtek.back_pain_prototype.core.scoring.model.RadiculopathySeverity
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 
 @Composable
 fun PainScreen(
@@ -208,6 +209,7 @@ fun PainScreen(
                     onValueChange = { viewModel.updatePain { copy(functionalLimitationsText = it) } },
                     placeholder = { Text("Describe limitations (optional)…") },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = TextFieldShape,
                     maxLines = 3
                 )
             }
