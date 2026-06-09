@@ -77,6 +77,7 @@ class ProgressViewModel @Inject constructor(
                         )
                     }
                 }
+                .catch { _state.update { it.copy(isLoading = false) } }
                 .collect { _state.value = it }
         }
     }

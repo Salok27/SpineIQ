@@ -1,6 +1,8 @@
 package noshtek.back_pain_prototype.core.data.repository
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
+import noshtek.back_pain_prototype.core.data.db.SpineIQDatabase
 import noshtek.back_pain_prototype.core.data.db.dao.AssessmentDao
 import noshtek.back_pain_prototype.core.data.db.dao.FullAssessmentData
 import noshtek.back_pain_prototype.core.data.db.dao.ScoresDao
@@ -15,6 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AssessmentRepository @Inject constructor(
+    private val db: SpineIQDatabase,
     private val assessmentDao: AssessmentDao,
     private val scoresDao: ScoresDao
 ) {
@@ -25,6 +28,10 @@ class AssessmentRepository @Inject constructor(
      * Section data rows are written separately as the user progresses through screens.
      */
     suspend fun startAssessment(userId: String): String {
+        // Discard any abandoned in-progress draft before starting a new one. The FK cascade
+        // removes its section rows, preventing unbounded orphan accumulation (there is no
+        // resume UI yet — Section 15.5). Completed assessments are untouched.
+        assessmentDao.deleteInProgressAssessments()
         val id = UUID.randomUUID().toString()
         val now = Instant.now().toEpochMilli()
         assessmentDao.insertAssessmentRecord(
@@ -45,13 +52,19 @@ class AssessmentRepository @Inject constructor(
      */
     suspend fun completeAssessment(assessmentId: String, scoringResult: ScoringResult) {
         val now = Instant.now().toEpochMilli()
-        val record = assessmentDao.getAssessmentRecordOnce(assessmentId) ?: return
-        assessmentDao.updateAssessmentRecord(
-            record.copy(status = AssessmentStatus.COMPLETED, completedAt = now)
-        )
-        scoresDao.insertScores(
-            ScoresRecordEntity.fromScoringResult(assessmentId, scoringResult, now)
-        )
+        // Atomic: the scores insert and the status flip commit together or roll back together,
+        // so a failure can never leave a COMPLETED record with no scores row (which the history
+        // INNER JOIN would silently drop, and Results would render as "not available").
+        // Scores first, status last, so even a non-transactional failure stays resumable.
+        db.withTransaction {
+            val record = assessmentDao.getAssessmentRecordOnce(assessmentId) ?: return@withTransaction
+            scoresDao.insertScores(
+                ScoresRecordEntity.fromScoringResult(assessmentId, scoringResult, now)
+            )
+            assessmentDao.updateAssessmentRecord(
+                record.copy(status = AssessmentStatus.COMPLETED, completedAt = now)
+            )
+        }
     }
 
     // ── Section persistence ───────────────────────────────────────────────────

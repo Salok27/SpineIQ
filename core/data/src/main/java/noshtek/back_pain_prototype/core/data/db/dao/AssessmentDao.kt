@@ -19,7 +19,10 @@ interface AssessmentDao {
     @Query("SELECT * FROM assessment_records WHERE id = :assessmentId")
     suspend fun getAssessmentRecordOnce(assessmentId: String): AssessmentRecordEntity?
 
-    @Query("SELECT * FROM assessment_records WHERE user_id = :userId ORDER BY assessment_date DESC")
+    // Tiebreak on created_at (epoch millis): assessment_date is epoch *days*, so multiple
+    // assessments on the same day would otherwise resolve by rowid (oldest-first) and hide
+    // the newest one from the dashboard.
+    @Query("SELECT * FROM assessment_records WHERE user_id = :userId ORDER BY assessment_date DESC, created_at DESC")
     fun getAssessmentsForUser(userId: String): Flow<List<AssessmentRecordEntity>>
 
     /** Returns any single in-progress assessment (Section 15.5). */
@@ -28,6 +31,14 @@ interface AssessmentDao {
 
     @Query("SELECT COUNT(*) FROM assessment_records WHERE user_id = :userId AND status = 'COMPLETED'")
     fun getCompletedAssessmentCount(userId: String): Flow<Int>
+
+    /**
+     * Deletes all in-progress (draft) assessments; the CASCADE foreign key on each section
+     * table removes their rows too. Called when starting a new assessment to discard an
+     * abandoned draft so orphaned IN_PROGRESS rows never accumulate (Section 15.5).
+     */
+    @Query("DELETE FROM assessment_records WHERE status = 'IN_PROGRESS'")
+    suspend fun deleteInProgressAssessments()
 
     // ── OccupationData ────────────────────────────────────────────────────────
 
