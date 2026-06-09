@@ -6,7 +6,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,26 +74,36 @@ fun FunctionalScreen(
                 onSelect = { viewModel.updateFunctional { copy(dailyActivities = it) } }
             )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-            ) {
+            // Live ODI total on a brand-gradient card — the number animates as choices change.
+            GradientHeroCard(contentPadding = PaddingValues(20.dp)) {
                 Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
-                        Text("Modified ODI Total", style = MaterialTheme.typography.labelLarge)
-                        Text("0 = full function  ·  10 = severe disability", style = MaterialTheme.typography.bodySmall)
+                        Text("Modified ODI Total", style = MaterialTheme.typography.titleSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            "0 = full function · 10 = severe disability",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.8f),
+                        )
                     }
-                    Text(
-                        "${functional.odiTotal} / 10",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        AnimatedCountText(
+                            target = functional.odiTotal,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold,
+                            durationMillis = MotionTokens.DurationFast,
+                        )
+                        Text(
+                            " / 10",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                    }
                 }
             }
 

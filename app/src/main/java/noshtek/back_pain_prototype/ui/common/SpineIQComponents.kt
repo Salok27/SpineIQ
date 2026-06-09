@@ -1,5 +1,14 @@
 package noshtek.back_pain_prototype.ui.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,19 +16,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -29,13 +37,19 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -44,17 +58,16 @@ import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.scoring.model.BackPainRiskClassification
 import noshtek.back_pain_prototype.core.scoring.model.RiskTier
 import noshtek.back_pain_prototype.core.scoring.model.SssSeverityTier
-import noshtek.back_pain_prototype.ui.theme.Blue600
-import noshtek.back_pain_prototype.ui.theme.Blue900
+import noshtek.back_pain_prototype.ui.theme.CardShape
+import noshtek.back_pain_prototype.ui.theme.HeroShape
+import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.RiskHigh
 import noshtek.back_pain_prototype.ui.theme.RiskLow
 import noshtek.back_pain_prototype.ui.theme.RiskModerate
 import noshtek.back_pain_prototype.ui.theme.RiskModerateSevere
 import noshtek.back_pain_prototype.ui.theme.RiskSevereUrgent
-
-private val PillShape = RoundedCornerShape(50)
-private val CardShape = RoundedCornerShape(12.dp)
-private val ButtonShape = RoundedCornerShape(16.dp)
+import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
+import noshtek.back_pain_prototype.ui.theme.brandGradient
 
 // ── Top Bar ───────────────────────────────────────────────────────────────────
 
@@ -62,15 +75,16 @@ private val ButtonShape = RoundedCornerShape(16.dp)
 @Composable
 fun SpineIQTopBar(
     title: String,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
 ) {
     TopAppBar(
         title = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         },
         navigationIcon = {
@@ -81,7 +95,7 @@ fun SpineIQTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
@@ -131,7 +145,7 @@ fun RiskBadge(label: String, color: Color, modifier: Modifier = Modifier) {
         modifier = modifier
             .background(color.copy(alpha = 0.12f), PillShape)
             .border(BorderStroke(1.dp, color.copy(alpha = 0.35f)), PillShape)
-            .padding(horizontal = 12.dp, vertical = 5.dp)
+            .padding(horizontal = 12.dp, vertical = 5.dp),
     ) {
         Text(
             text = label,
@@ -152,36 +166,36 @@ fun SliderWithLabel(
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int = 0,
     unit: String = "",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val valueText = if (unit.isNotEmpty()) "%.1f %s".format(value, unit) else "%.0f".format(value)
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.width(8.dp))
             Box(
                 modifier = Modifier
                     .background(
                         color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(10.dp),
                     )
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = 12.dp, vertical = 5.dp),
             ) {
                 Text(
                     text = valueText,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                 )
             }
@@ -209,25 +223,28 @@ fun SliderWithLabel(
 fun SectionCard(
     title: String,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+    icon: ImageVector? = null,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+    AppCard(modifier = modifier, shape = CardShape, shadowElevation = 10.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(accent.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(20.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+            }
             Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(14.dp))
-            content()
         }
+        Spacer(Modifier.height(14.dp))
+        content()
     }
 }
 
@@ -238,31 +255,38 @@ fun NextButton(
     onClick: () -> Unit,
     enabled: Boolean = true,
     label: String = "Next",
+    loading: Boolean = false,
 ) {
-    Button(
+    PrimaryButton(
         onClick = onClick,
+        label = label,
         enabled = enabled,
-        shape = ButtonShape,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-        )
-    }
+        loading = loading,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
 fun RequiredFieldError(show: Boolean, message: String = "This field is required") {
-    if (show) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-        )
+    AnimatedVisibility(
+        visible = show,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Filled.ErrorOutline,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }
 
@@ -274,11 +298,19 @@ fun LabelledScoreBar(
     score: Int,
     maxScore: Int,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     require(maxScore > 0) { "maxScore must be > 0" }
-    val progress = score.coerceIn(0, maxScore).toFloat() / maxScore
+    val target = score.coerceIn(0, maxScore).toFloat() / maxScore
     val scoreText = "$score / $maxScore"
+
+    var started by remember { mutableStateOf(false) }
+    LaunchedEffect(target) { started = true }
+    val progress by animateFloatAsState(
+        targetValue = if (started) target else 0f,
+        animationSpec = tween(MotionTokens.DurationScore, easing = MotionTokens.Emphasized),
+        label = "score-bar",
+    )
 
     Column(modifier = modifier.semantics(mergeDescendants = true) {
         contentDescription = "$label: $scoreText"
@@ -286,7 +318,7 @@ fun LabelledScoreBar(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = label,
@@ -308,7 +340,7 @@ fun LabelledScoreBar(
             progress = { progress },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(8.dp)
+                .height(10.dp)
                 .clip(PillShape),
             color = color,
             trackColor = color.copy(alpha = 0.15f),
@@ -340,7 +372,7 @@ fun RiskTileSmall(label: String, tier: RiskTier) {
             modifier = Modifier
                 .background(color.copy(alpha = 0.12f), PillShape)
                 .border(BorderStroke(1.dp, color.copy(alpha = 0.35f)), PillShape)
-                .padding(horizontal = 10.dp, vertical = 3.dp)
+                .padding(horizontal = 10.dp, vertical = 3.dp),
         ) {
             Text(
                 text = tierLabel,
@@ -352,7 +384,7 @@ fun RiskTileSmall(label: String, tier: RiskTier) {
     }
 }
 
-// ── New: Wizard Progress Bar ──────────────────────────────────────────────────
+// ── Wizard Progress Bar ───────────────────────────────────────────────────────
 
 @Composable
 fun WizardProgressBar(
@@ -360,7 +392,12 @@ fun WizardProgressBar(
     totalSteps: Int,
     modifier: Modifier = Modifier,
 ) {
-    val progressFraction = currentStep.toFloat() / totalSteps
+    val target = currentStep.toFloat() / totalSteps
+    val progress by animateFloatAsState(
+        targetValue = target,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
+        label = "wizard-progress",
+    )
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -373,22 +410,22 @@ fun WizardProgressBar(
         ) {
             Text(
                 text = "Step $currentStep of $totalSteps",
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "${(progressFraction * 100).toInt()}%",
-                style = MaterialTheme.typography.labelSmall,
+                text = "${(target * 100).toInt()}%",
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
             )
         }
         Spacer(Modifier.height(6.dp))
         LinearProgressIndicator(
-            progress = { progressFraction },
+            progress = { progress },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp)
+                .height(8.dp)
                 .clip(PillShape),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -399,40 +436,76 @@ fun WizardProgressBar(
     }
 }
 
-// ── New: Score Hero Card ──────────────────────────────────────────────────────
+// ── Score Hero Card (animated gauge) ───────────────────────────────────────────
 
 @Composable
 fun ScoreHeroCard(
     scoreLabel: String,
-    scoreValue: String,
+    score: Int,
+    maxScore: Int,
     classification: BackPainRiskClassification,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Brush.horizontalGradient(listOf(Blue600, Blue900)))
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-        contentAlignment = Alignment.Center,
+    val fraction = if (maxScore > 0) score.coerceIn(0, maxScore).toFloat() / maxScore else 0f
+    AppCard(
+        modifier = modifier,
+        shape = HeroShape,
+        border = false,
+        shadowElevation = 20.dp,
+        contentPadding = PaddingValues(24.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = scoreLabel,
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White.copy(alpha = 0.75f),
-            )
-            Text(
-                text = scoreValue,
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(4.dp))
-            CompositeBadge(classification = classification)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                ScoreGauge(
+                    progress = fraction,
+                    diameter = 132.dp,
+                    strokeWidth = 14.dp,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                    brush = brandGradient(),
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        AnimatedCountText(
+                            target = score,
+                            style = MaterialTheme.typography.displayMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.ExtraBold,
+                        )
+                        Text(
+                            "of $maxScore",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    scoreLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    "OVERALL RISK",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                )
+                CompositeBadge(classification = classification)
+                Text(
+                    "Based on your spine severity, lifestyle and functional scores.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

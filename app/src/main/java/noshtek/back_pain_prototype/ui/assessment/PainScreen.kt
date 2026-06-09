@@ -3,6 +3,13 @@ package noshtek.back_pain_prototype.ui.assessment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -42,7 +49,7 @@ fun PainScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Pain locations
-            SectionCard(title = "Pain Locations") {
+            SectionCard(title = "Pain Locations", icon = Icons.Filled.Place) {
                 Text("Select all that apply", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
                 // FlowRow: chips size to their labels and wrap, so "Lower back
@@ -69,7 +76,7 @@ fun PainScreen(
             }
 
             // VAS
-            SectionCard(title = "Pain Intensity (VAS)") {
+            SectionCard(title = "Pain Intensity (VAS)", icon = Icons.Filled.Bolt, accent = MaterialTheme.colorScheme.tertiary) {
                 SliderWithLabel(
                     label = "0 = No pain  ·  10 = Worst pain",
                     value = pain.vasScore.toFloat(),
@@ -85,7 +92,7 @@ fun PainScreen(
             }
 
             // Duration & pattern
-            SectionCard(title = "Pain Duration") {
+            SectionCard(title = "Pain Duration", icon = Icons.Filled.Schedule, accent = MaterialTheme.colorScheme.secondary) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -108,7 +115,7 @@ fun PainScreen(
                 }
             }
 
-            SectionCard(title = "Pain Pattern") {
+            SectionCard(title = "Pain Pattern", icon = Icons.Filled.Timeline, accent = MaterialTheme.colorScheme.secondary) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -125,7 +132,7 @@ fun PainScreen(
             }
 
             // Triggers
-            SectionCard(title = "Pain Triggers") {
+            SectionCard(title = "Pain Triggers", icon = Icons.Filled.Warning, accent = MaterialTheme.colorScheme.tertiary) {
                 Text("Select all that apply", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
                 FlowRow(
@@ -148,7 +155,7 @@ fun PainScreen(
             }
 
             // Radiculopathy
-            SectionCard(title = "Radiculopathy / Leg Pain") {
+            SectionCard(title = "Radiculopathy / Leg Pain", icon = Icons.Filled.Bolt) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -182,7 +189,7 @@ fun PainScreen(
             }
 
             // Functional limitation severity
-            SectionCard(title = "Functional Limitation Severity") {
+            SectionCard(title = "Functional Limitation Severity", icon = Icons.Filled.Accessibility) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)

@@ -3,6 +3,10 @@ package noshtek.back_pain_prototype.ui.assessment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +44,7 @@ fun LifestyleScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SectionCard(title = "Sleep") {
+            SectionCard(title = "Sleep", icon = Icons.Filled.Bedtime, accent = MaterialTheme.colorScheme.tertiary) {
                 SliderWithLabel(
                     label = "Sleep Duration",
                     value = lifestyle.sleepHoursPerNight,
@@ -65,7 +69,7 @@ fun LifestyleScreen(
                 }
             }
 
-            SectionCard(title = "Activity") {
+            SectionCard(title = "Activity", icon = Icons.AutoMirrored.Filled.DirectionsRun, accent = MaterialTheme.colorScheme.secondary) {
                 SliderWithLabel(
                     label = "Walking",
                     value = lifestyle.walkingMinutesPerDay,
@@ -84,7 +88,7 @@ fun LifestyleScreen(
                 )
             }
 
-            SectionCard(title = "Exercise Types") {
+            SectionCard(title = "Exercise Types", icon = Icons.Filled.FitnessCenter) {
                 Text(
                     "Select all that apply",
                     style = MaterialTheme.typography.bodySmall,

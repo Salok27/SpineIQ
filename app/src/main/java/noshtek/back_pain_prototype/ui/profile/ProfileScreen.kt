@@ -2,10 +2,14 @@ package noshtek.back_pain_prototype.ui.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,7 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.data.model.Gender
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
+import noshtek.back_pain_prototype.ui.common.entrance
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -42,12 +48,14 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         if (state.isEditMode) "Edit Profile" else "Set Up Your Profile",
                         style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
@@ -58,7 +66,7 @@ fun ProfileScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -84,16 +92,22 @@ fun ProfileScreen(
                 Text(
                     "This information stays on your device and personalises your assessment results.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.entrance(0),
                 )
             }
 
-            SectionCard(title = "Personal Information") {
+            SectionCard(
+                title = "Personal Information",
+                icon = Icons.Filled.Person,
+                modifier = Modifier.entrance(1),
+            ) {
                 OutlinedTextField(
                     value = state.fullName,
                     onValueChange = viewModel::onNameChange,
                     label = { Text("Full Name *") },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
                     singleLine = true
                 )
                 Spacer(Modifier.height(12.dp))
@@ -101,8 +115,6 @@ fun ProfileScreen(
                 Spacer(Modifier.height(12.dp))
                 Text("Gender *", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(4.dp))
-                // FlowRow lets each chip size to its label; "Prefer not to say"
-                // gets the width it needs instead of truncating in a half-width cell.
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -118,7 +130,12 @@ fun ProfileScreen(
                 }
             }
 
-            SectionCard(title = "Body Measurements") {
+            SectionCard(
+                title = "Body Measurements",
+                icon = Icons.Filled.Straighten,
+                accent = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.entrance(2),
+            ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
                         value = state.heightCm,
@@ -126,6 +143,7 @@ fun ProfileScreen(
                         label = { Text("Height (cm) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
                         singleLine = true
                     )
                     OutlinedTextField(
@@ -134,6 +152,7 @@ fun ProfileScreen(
                         label = { Text("Weight (kg) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
                         singleLine = true
                     )
                 }
@@ -154,21 +173,14 @@ fun ProfileScreen(
                 Text(err, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
-            Button(
+            PrimaryButton(
                 onClick = viewModel::saveProfile,
-                enabled = !state.isSaving,
+                label = if (state.isEditMode) "Save Changes" else "Save and Continue",
+                loading = state.isSaving,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-            ) {
-                if (state.isSaving) CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text(
-                    if (state.isEditMode) "Save Changes" else "Save and Continue",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+                    .entrance(3),
+            )
 
             Spacer(Modifier.height(16.dp))
         }
@@ -186,20 +198,19 @@ private fun DobField(dob: LocalDate, onDobChange: (LocalDate) -> Unit) {
     Spacer(Modifier.height(4.dp))
     OutlinedButton(
         onClick = { showPicker = true },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
     ) {
+        Icon(Icons.Filled.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
         Text("${dob.format(formatter)}   •   Age $age")
     }
 
     if (showPicker) {
         // Material 3 calendar picker. rememberDatePickerState owns the selection, so a
-        // tapped day is reflected immediately and always yields a valid LocalDate. The
-        // previous hand-rolled year/month/day text fields couldn't be cleared and retyped
-        // (an empty field reverted to the old number) and silently swallowed impossible
-        // combinations like 31 Feb — which is what blocked users from setting a birthday.
+        // tapped day is reflected immediately and always yields a valid LocalDate.
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = dob.toUtcEpochMillis(),
-            // A birthday can't be in the future; there is deliberately no minimum-age rule.
             yearRange = 1900..LocalDate.now().year,
             selectableDates = PastOrTodayDates
         )
@@ -231,10 +242,6 @@ private fun Long.toLocalDateUtc(): LocalDate =
 
 @OptIn(ExperimentalMaterial3Api::class)
 private val PastOrTodayDates = object : SelectableDates {
-    // Compare both sides in the same UTC frame: the candidate day's UTC midnight vs.
-    // today's UTC midnight (derived from the device-local date). Using the live
-    // System.currentTimeMillis() here would grey out the user's actual "today" for
-    // part of the day in timezones ahead of UTC.
     override fun isSelectableDate(utcTimeMillis: Long): Boolean =
         utcTimeMillis <= LocalDate.now().toUtcEpochMillis()
 

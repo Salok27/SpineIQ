@@ -10,18 +10,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,10 +40,13 @@ import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.LabelledScoreBar
 import noshtek.back_pain_prototype.ui.common.LifestyleTierBadge
+import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.RiskTileSmall
 import noshtek.back_pain_prototype.ui.common.ScoreHeroCard
+import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
+import noshtek.back_pain_prototype.ui.common.entrance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,18 +57,17 @@ fun ResultsDashboardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = {
-                    Text("Your Results", style = MaterialTheme.typography.titleLarge)
-                },
+                title = { Text("Your Results", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -92,24 +95,28 @@ fun ResultsDashboardScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    // Hero card — composite result + SSS score
+                    // Hero card — animated gauge + composite classification
                     ScoreHeroCard(
                         scoreLabel = "SSS Score",
-                        scoreValue = "${scores.totalSSSScore} / 11",
+                        score = scores.totalSSSScore,
+                        maxScore = 11,
                         classification = scores.backPainRiskClassification,
+                        modifier = Modifier.entrance(0),
                     )
 
                     // SSS breakdown
-                    SectionCard(title = "Spine Severity System (SSS)") {
+                    SectionCard(
+                        title = "Spine Severity System (SSS)",
+                        icon = Icons.Filled.MonitorHeart,
+                        accent = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.entrance(1),
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                "Total Score",
-                                style = MaterialTheme.typography.titleSmall,
-                            )
+                            Text("Total Score", style = MaterialTheme.typography.titleSmall)
                             SssTierBadge(scores.sssSeverityTier)
                         }
                         Spacer(Modifier.height(10.dp))
@@ -126,7 +133,12 @@ fun ResultsDashboardScreen(
                     }
 
                     // Lifestyle risk
-                    SectionCard(title = "Lifestyle Risk") {
+                    SectionCard(
+                        title = "Lifestyle Risk",
+                        icon = Icons.AutoMirrored.Filled.DirectionsWalk,
+                        accent = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.entrance(2),
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,7 +148,7 @@ fun ResultsDashboardScreen(
                             LifestyleTierBadge(scores.lifestyleRiskTier)
                         }
                         Spacer(Modifier.height(12.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             RiskTileSmall("Sitting Risk", scores.sittingRisk)
                             RiskTileSmall("Walking Risk", scores.walkingRisk)
                             RiskTileSmall("Exercise Risk", scores.exerciseRisk)
@@ -145,7 +157,12 @@ fun ResultsDashboardScreen(
                     }
 
                     // BMI
-                    SectionCard(title = "BMI") {
+                    SectionCard(
+                        title = "BMI",
+                        icon = Icons.Filled.MonitorWeight,
+                        accent = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.entrance(3),
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -163,39 +180,34 @@ fun ResultsDashboardScreen(
                                 )
                             }
                             Text(
-                                "${"%.1f".format(scores.bmiScore)}",
+                                "%.1f".format(scores.bmiScore),
                                 style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.tertiary,
                             )
                         }
                     }
 
-                    Button(
+                    PrimaryButton(
                         onClick = { navController.navigate(Screen.FullReport.route(scores.assessmentId)) },
+                        label = "View Full Report",
+                        icon = Icons.AutoMirrored.Filled.Article,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-                        Text(
-                            "View Full Report",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+                            .entrance(4),
+                    )
 
-                    OutlinedButton(
+                    SecondaryButton(
                         onClick = {
                             navController.navigate(Screen.Home.route) {
                                 popUpTo(Screen.Home.route) { inclusive = true }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                    ) {
-                        Text("Back to Home")
-                    }
+                        label = "Back to Home",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .entrance(5),
+                    )
 
                     Spacer(Modifier.height(8.dp))
                 }
