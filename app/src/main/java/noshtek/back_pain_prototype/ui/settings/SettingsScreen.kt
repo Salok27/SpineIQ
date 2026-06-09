@@ -103,7 +103,7 @@ fun SettingsScreen(
             SectionCard(title = "About") {
                 SettingsRow("App", "SpineIQ")
                 SettingsRow("Version", "1.0 (Phase 1)")
-                SettingsRow("Scoring System", "SSS v1.0 — Dr. Ayush Sharma")
+                SettingsRow("Scoring System", "SSS v1.0")
             }
 
             // Privacy

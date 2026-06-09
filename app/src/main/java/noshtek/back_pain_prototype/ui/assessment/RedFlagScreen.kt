@@ -72,7 +72,7 @@ fun RedFlagScreen(
                             onCheckedChange = onToggle
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge)
+                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     }
                 }
             }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -45,31 +44,26 @@ fun PainScreen(
             SectionCard(title = "Pain Locations") {
                 Text("Select all that apply", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
-                PainLocation.entries.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { loc ->
-                            val selected = loc in pain.painLocations
-                            FilterChip(
-                                selected = selected,
-                                onClick = {
-                                    viewModel.updatePain {
-                                        copy(painLocations = if (selected) painLocations - loc else painLocations + loc)
-                                    }
-                                },
-                                label = {
-                                    Text(
-                                        loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                // FlowRow: chips size to their labels and wrap, so "Lower back
+                // lumbar" / "Right hip buttock" show in full instead of ellipsising.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PainLocation.entries.forEach { loc ->
+                        val selected = loc in pain.painLocations
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                viewModel.updatePain {
+                                    copy(painLocations = if (selected) painLocations - loc else painLocations + loc)
+                                }
+                            },
+                            label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                        )
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
+                Spacer(Modifier.height(8.dp))
                 RequiredFieldError(show = showError && pain.painLocations.isEmpty(), message = "Select at least one location")
             }
 
@@ -91,7 +85,10 @@ fun PainScreen(
 
             // Duration & pattern
             SectionCard(title = "Pain Duration") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     PainDuration.entries.forEach { dur ->
                         FilterChip(
                             selected = pain.painDuration == dur,
@@ -99,34 +96,28 @@ fun PainScreen(
                             label = {
                                 Text(
                                     when (dur) {
-                                        PainDuration.ACUTE    -> "Acute\n(<3 wks)"
-                                        PainDuration.SUBACUTE -> "Subacute\n(3–6 wks)"
-                                        PainDuration.CHRONIC  -> "Chronic\n(>6 wks)"
-                                    },
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
+                                        PainDuration.ACUTE    -> "Acute (<3 wks)"
+                                        PainDuration.SUBACUTE -> "Subacute (3–6 wks)"
+                                        PainDuration.CHRONIC  -> "Chronic (>6 wks)"
+                                    }
                                 )
-                            },
-                            modifier = Modifier.weight(1f)
+                            }
                         )
                     }
                 }
             }
 
             SectionCard(title = "Pain Pattern") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     PainPattern.entries.forEach { pattern ->
                         FilterChip(
                             selected = pain.painPattern == pattern,
                             onClick = { viewModel.updatePain { copy(painPattern = pattern) } },
-                            label = {
-                                Text(
-                                    pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }
@@ -136,48 +127,36 @@ fun PainScreen(
             SectionCard(title = "Pain Triggers") {
                 Text("Select all that apply", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
-                PainTrigger.entries.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { trigger ->
-                            val selected = trigger in pain.painTriggers
-                            FilterChip(
-                                selected = selected,
-                                onClick = {
-                                    viewModel.updatePain {
-                                        copy(painTriggers = if (selected) painTriggers - trigger else painTriggers + trigger)
-                                    }
-                                },
-                                label = {
-                                    Text(
-                                        trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PainTrigger.entries.forEach { trigger ->
+                        val selected = trigger in pain.painTriggers
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                viewModel.updatePain {
+                                    copy(painTriggers = if (selected) painTriggers - trigger else painTriggers + trigger)
+                                }
+                            },
+                            label = { Text(trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                        )
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
             }
 
             // Radiculopathy
             SectionCard(title = "Radiculopathy / Leg Pain") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     RadiculopathySeverity.entries.forEach { sev ->
                         FilterChip(
                             selected = pain.radiculopathySeverity == sev,
                             onClick = { viewModel.updatePain { copy(radiculopathySeverity = sev, radiationLocation = if (sev == RadiculopathySeverity.NONE) null else radiationLocation) } },
-                            label = {
-                                Text(
-                                    sev.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }
@@ -186,19 +165,15 @@ fun PainScreen(
                     Spacer(Modifier.height(8.dp))
                     Text("Radiation Side", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(4.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         RadiationLocation.entries.forEach { loc ->
                             FilterChip(
                                 selected = pain.radiationLocation == loc,
                                 onClick = { viewModel.updatePain { copy(radiationLocation = loc) } },
-                                label = {
-                                    Text(
-                                        loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                modifier = Modifier.weight(1f)
+                                label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
                             )
                         }
                     }
@@ -207,19 +182,15 @@ fun PainScreen(
 
             // Functional limitation severity
             SectionCard(title = "Functional Limitation Severity") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     FunctionalLimitationSeverity.entries.forEach { sev ->
                         FilterChip(
                             selected = pain.functionalLimitationSeverity == sev,
                             onClick = { viewModel.updatePain { copy(functionalLimitationSeverity = sev) } },
-                            label = {
-                                Text(
-                                    sev.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }

@@ -109,7 +109,7 @@ fun HomeScreen(
             Spacer(Modifier.weight(1f))
 
             Text(
-                "SpineIQ — SSS v1.0 · Dr. Ayush Sharma",
+                "SpineIQ — SSS v1.0",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.align(Alignment.CenterHorizontally)

@@ -91,18 +91,19 @@ fun ProfileScreen(
                 Spacer(Modifier.height(12.dp))
                 Text("Gender *", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    Gender.entries.chunked(2).forEach { row ->
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            row.forEach { g ->
-                                FilterChip(
-                                    selected = state.gender == g,
-                                    onClick = { viewModel.onGenderChange(g) },
-                                    label = { Text(g.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }, maxLines = 1) },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
+                // FlowRow lets each chip size to its label; "Prefer not to say"
+                // gets the width it needs instead of truncating in a half-width cell.
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Gender.entries.forEach { g ->
+                        FilterChip(
+                            selected = state.gender == g,
+                            onClick = { viewModel.onGenderChange(g) },
+                            label = { Text(g.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                        )
                     }
                 }
             }
@@ -157,78 +158,71 @@ fun ProfileScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DobField(dob: LocalDate, onDobChange: (LocalDate) -> Unit) {
     var showPicker by remember { mutableStateOf(false) }
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     val age = java.time.Period.between(dob, LocalDate.now()).years
 
+    Text("Date of Birth *", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+    Spacer(Modifier.height(4.dp))
     OutlinedButton(
         onClick = { showPicker = true },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Date of Birth: ${dob.format(formatter)}  (Age: $age)")
+        Text("${dob.format(formatter)}   •   Age $age")
     }
 
     if (showPicker) {
-        YearMonthDayPicker(
-            initial = dob,
-            onConfirm = { onDobChange(it); showPicker = false },
-            onDismiss = { showPicker = false }
+        // Material 3 calendar picker. rememberDatePickerState owns the selection, so a
+        // tapped day is reflected immediately and always yields a valid LocalDate. The
+        // previous hand-rolled year/month/day text fields couldn't be cleared and retyped
+        // (an empty field reverted to the old number) and silently swallowed impossible
+        // combinations like 31 Feb — which is what blocked users from setting a birthday.
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = dob.toUtcEpochMillis(),
+            // A birthday can't be in the future; there is deliberately no minimum-age rule.
+            yearRange = 1900..LocalDate.now().year,
+            selectableDates = PastOrTodayDates
         )
+        DatePickerDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { onDobChange(it.toLocalDateUtc()) }
+                    showPicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = { TextButton(onClick = { showPicker = false }) { Text("Cancel") } }
+        ) {
+            DatePicker(state = pickerState)
+        }
     }
 }
 
-@Composable
-private fun YearMonthDayPicker(
-    initial: LocalDate,
-    onConfirm: (LocalDate) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var year by remember { mutableIntStateOf(initial.year) }
-    var month by remember { mutableIntStateOf(initial.monthValue) }
-    var day by remember { mutableIntStateOf(initial.dayOfMonth) }
+/**
+ * DatePicker works in UTC epoch-millis while the profile stores DOB as epoch-days
+ * (timezone-independent). Convert through UTC midnight on both sides so the day a
+ * user taps is exactly the day stored — no off-by-one from the local timezone.
+ */
+private fun LocalDate.toUtcEpochMillis(): Long =
+    atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Date of Birth") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = year.toString(),
-                    onValueChange = { year = it.toIntOrNull() ?: year },
-                    label = { Text("Year") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = month.toString(),
-                        onValueChange = { month = (it.toIntOrNull() ?: month).coerceIn(1, 12) },
-                        label = { Text("Month") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = day.toString(),
-                        onValueChange = { day = (it.toIntOrNull() ?: day).coerceIn(1, 31) },
-                        label = { Text("Day") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                try { onConfirm(LocalDate.of(year, month, day)) } catch (_: Exception) {}
-            }) { Text("OK") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
+private fun Long.toLocalDateUtc(): LocalDate =
+    java.time.Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
+
+@OptIn(ExperimentalMaterial3Api::class)
+private val PastOrTodayDates = object : SelectableDates {
+    // Compare both sides in the same UTC frame: the candidate day's UTC midnight vs.
+    // today's UTC midnight (derived from the device-local date). Using the live
+    // System.currentTimeMillis() here would grey out the user's actual "today" for
+    // part of the day in timezones ahead of UTC.
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+        utcTimeMillis <= LocalDate.now().toUtcEpochMillis()
+
+    override fun isSelectableYear(year: Int): Boolean =
+        year <= LocalDate.now().year
 }
 
 private fun bmiCategory(bmi: Float) = when {
