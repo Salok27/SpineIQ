@@ -42,6 +42,11 @@ fun FunctionalScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            AssessmentVideoPlaceholder(
+                title = "Functional Movement Demonstration",
+                description = "This video will demonstrate the movements and activities used in the functional assessment.",
+            )
+
             Text(
                 "Rate your ability to perform each activity.",
                 style = MaterialTheme.typography.bodyMedium,

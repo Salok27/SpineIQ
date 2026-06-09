@@ -49,6 +49,11 @@ fun PainScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AssessmentVideoPlaceholder(
+                title = "Pain Assessment Demonstration",
+                description = "This instructional video will guide you through accurately reporting your pain symptoms.",
+            )
+
             // Pain locations
             SectionCard(title = "Pain Locations", icon = Icons.Filled.Place) {
                 Text("Select all that apply", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
