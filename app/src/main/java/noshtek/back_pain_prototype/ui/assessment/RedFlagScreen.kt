@@ -1,5 +1,14 @@
 package noshtek.back_pain_prototype.ui.assessment
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,11 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.theme.CardShape
 
 @Composable
 fun RedFlagScreen(
@@ -61,40 +73,26 @@ fun RedFlagScreen(
             Spacer(Modifier.height(4.dp))
 
             items.forEach { (label, checked, onToggle) ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = checked,
-                            onCheckedChange = onToggle
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                    }
-                }
+                RedFlagRow(label = label, checked = checked, onToggle = onToggle)
             }
 
-            if (flags.hasAnyRedFlag) {
-                Spacer(Modifier.height(4.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+            AnimatedVisibility(
+                visible = flags.hasAnyRedFlag,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                AppCard(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    border = false,
+                    modifier = Modifier.padding(top = 4.dp),
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Icon(
-                            Icons.Default.Warning,
+                            Icons.Filled.Warning,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(22.dp)
                         )
-                        Spacer(Modifier.width(8.dp))
                         Text(
                             "Red flag confirmed. SSS score will be overridden to 11 (Severe / Urgent). Refer immediately.",
                             color = MaterialTheme.colorScheme.onErrorContainer,
@@ -115,5 +113,40 @@ fun RedFlagScreen(
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+@Composable
+private fun RedFlagRow(label: String, checked: Boolean, onToggle: (Boolean) -> Unit) {
+    val bg by animateColorAsState(
+        if (checked) MaterialTheme.colorScheme.error.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surface,
+        label = "rf-bg",
+    )
+    val borderColor by animateColorAsState(
+        if (checked) MaterialTheme.colorScheme.error.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outlineVariant,
+        label = "rf-border",
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(bg)
+            .border(1.dp, borderColor, CardShape)
+            .clickable { onToggle(!checked) }
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onToggle,
+            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.error),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Normal,
+            modifier = Modifier.weight(1f),
+        )
     }
 }

@@ -3,6 +3,11 @@ package noshtek.back_pain_prototype.ui.assessment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -56,7 +61,7 @@ fun OccupationScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            SectionCard(title = "Occupation Type") {
+            SectionCard(title = "Occupation Type", icon = Icons.Filled.Work) {
                 // FlowRow so each chip sizes to its label and wraps to the next
                 // line — "Office Worker" / "Manual Labor" no longer truncate.
                 FlowRow(
@@ -75,7 +80,7 @@ fun OccupationScreen(
                 RequiredFieldError(show = showError && session.occupation.occupationType == null)
             }
 
-            SectionCard(title = "Daily Hours") {
+            SectionCard(title = "Daily Hours", icon = Icons.Filled.Schedule, accent = MaterialTheme.colorScheme.secondary) {
                 SliderWithLabel(
                     label = "Sitting",
                     value = session.occupation.sittingHoursPerDay,
@@ -101,7 +106,7 @@ fun OccupationScreen(
                 )
             }
 
-            SectionCard(title = "Lifting Level") {
+            SectionCard(title = "Lifting Level", icon = Icons.Filled.FitnessCenter, accent = MaterialTheme.colorScheme.tertiary) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -116,7 +121,7 @@ fun OccupationScreen(
                 }
             }
 
-            SectionCard(title = "Notes (optional)") {
+            SectionCard(title = "Notes (optional)", icon = Icons.Filled.Edit) {
                 OutlinedTextField(
                     value = session.occupation.workPatternNotes,
                     onValueChange = { viewModel.updateOccupation { copy(workPatternNotes = it) } },

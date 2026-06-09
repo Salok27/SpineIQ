@@ -3,6 +3,7 @@ package noshtek.back_pain_prototype.ui.results
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,14 +20,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Healing
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +43,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,9 +53,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.data.db.dao.FullAssessmentData
 import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
+import noshtek.back_pain_prototype.ui.common.AppCard
 import noshtek.back_pain_prototype.ui.common.CompositeBadge
+import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
+import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.theme.brandGradient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -73,16 +85,17 @@ fun FullReportScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Full Report", style = MaterialTheme.typography.titleLarge) },
+                title = { Text("Full Report", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -135,37 +148,40 @@ private fun ReportContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Header card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    "SpineIQ Assessment Report",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-                Text(
-                    dateStr,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SssTierBadge(scores.sssSeverityTier)
-                    CompositeBadge(scores.backPainRiskClassification)
+        // Header card with a gradient document badge
+        AppCard(modifier = Modifier.entrance(0), border = false, shadowElevation = 16.dp) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(brandGradient()),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Filled.Description, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
                 }
+                Column {
+                    Text(
+                        "SpineIQ Assessment Report",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        dateStr,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SssTierBadge(scores.sssSeverityTier)
+                CompositeBadge(scores.backPainRiskClassification)
             }
         }
 
         // Scores summary
-        SectionCard(title = "Scores Summary") {
+        SectionCard(title = "Scores Summary", icon = Icons.Filled.MonitorHeart, modifier = Modifier.entrance(1)) {
             ReportRow("SSS Total", "${scores.totalSSSScore}", bold = true)
             ReportRow("BMI", "${"%.1f".format(scores.bmiScore)} (${scores.bmiCategory.name})")
             ReportRow("VAS (input)", "${scores.vasScore}/10")
@@ -184,7 +200,7 @@ private fun ReportContent(
 
         // Occupation
         fullData.occupation?.let { occ ->
-            SectionCard(title = "Occupation") {
+            SectionCard(title = "Occupation", icon = Icons.Filled.Work, accent = MaterialTheme.colorScheme.secondary, modifier = Modifier.entrance(2)) {
                 ReportRow("Type", occ.occupationType.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 ReportRow("Sitting", "${"%.0f".format(occ.sittingHoursPerDay)} hrs/day")
                 ReportRow("Standing", "${"%.0f".format(occ.standingHoursPerDay)} hrs/day")
@@ -196,7 +212,7 @@ private fun ReportContent(
 
         // Lifestyle
         fullData.lifestyle?.let { ls ->
-            SectionCard(title = "Lifestyle") {
+            SectionCard(title = "Lifestyle", icon = Icons.AutoMirrored.Filled.DirectionsWalk, accent = MaterialTheme.colorScheme.secondary, modifier = Modifier.entrance(3)) {
                 ReportRow("Sleep Duration", "${"%.0f".format(ls.sleepHoursPerNight)} hrs")
                 ReportRow("Sleep Quality", ls.sleepQuality.name.lowercase().replaceFirstChar { it.uppercase() })
                 ReportRow("Walking", "${"%.0f".format(ls.walkingMinutesPerDay)} min/day")
@@ -207,7 +223,7 @@ private fun ReportContent(
 
         // Pain
         fullData.pain?.let { pain ->
-            SectionCard(title = "Pain") {
+            SectionCard(title = "Pain", icon = Icons.Filled.Healing, accent = MaterialTheme.colorScheme.tertiary, modifier = Modifier.entrance(4)) {
                 ReportRow("Locations", pain.painLocations.joinToString { it.name.replace('_', ' ').lowercase() })
                 ReportRow("VAS", "${pain.vasScore}/10")
                 ReportRow("Duration", pain.painDuration.name.lowercase().replaceFirstChar { it.uppercase() })
@@ -224,7 +240,7 @@ private fun ReportContent(
 
         // Functional
         fullData.functional?.let { func ->
-            SectionCard(title = "Functional (Modified ODI)") {
+            SectionCard(title = "Functional (Modified ODI)", icon = Icons.Filled.Accessibility, modifier = Modifier.entrance(5)) {
                 ReportRow("Walking", func.walking.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 ReportRow("Sitting", func.sitting.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 ReportRow("Standing", func.standing.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
@@ -235,7 +251,7 @@ private fun ReportContent(
 
         // Red flags
         fullData.redFlags?.let { rf ->
-            SectionCard(title = "Red Flags") {
+            SectionCard(title = "Red Flags", icon = Icons.Filled.Warning, accent = MaterialTheme.colorScheme.error, modifier = Modifier.entrance(6)) {
                 if (!rf.hasAnyRedFlag) {
                     Text(
                         "No red flags confirmed.",
@@ -271,24 +287,15 @@ private fun ReportContent(
             )
         }
 
-        Button(
+        PrimaryButton(
             onClick = onExport,
-            enabled = !isExporting,
+            label = if (isExporting) "Generating PDF…" else "Export PDF",
+            loading = isExporting,
+            icon = Icons.Filled.Share,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            if (isExporting) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(
-                if (isExporting) "Generating PDF…" else "Export PDF",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+                .entrance(7),
+        )
 
         Spacer(Modifier.height(8.dp))
     }

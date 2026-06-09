@@ -50,3 +50,29 @@ val RiskModerateContainer        = Color(0xFFFEF3C7)
 val RiskModerateSevereContainer  = Color(0xFFFED7AA)
 val RiskHighContainer            = Color(0xFFFEE2E2)
 val RiskSevereUrgentContainer    = Color(0xFFFECACA)
+
+// ── Signature accent: indigo → violet (Design System 2.0) ────────────────────
+// Blue stays the trustworthy base; indigo/violet add the modern "premium" pop,
+// used for the brand gradient, key CTAs, focus states and data highlights.
+// Light
+val Indigo600     = Color(0xFF4F46E5)
+val Indigo50      = Color(0xFFE0E7FF)
+val Indigo900     = Color(0xFF312E81)
+val Violet600     = Color(0xFF7C3AED)
+val Violet50      = Color(0xFFEDE9FE)
+val Violet900     = Color(0xFF4C1D95)
+// Mid stops used for gradients on dark surfaces (more luminous)
+val Blue500       = Color(0xFF3B82F6)
+val Indigo500     = Color(0xFF6366F1)
+val Violet500     = Color(0xFF8B5CF6)
+// Dark scheme accent
+val Indigo300     = Color(0xFFA5B4FC)
+val Indigo700     = Color(0xFF4338CA)
+val Violet300     = Color(0xFFC4B5FD)
+val Violet700     = Color(0xFF6D28D9)
+
+// ── Semantic success / warning (explicit, reuse risk hues) ───────────────────
+val Success           = Color(0xFF16A34A)
+val SuccessContainer  = Color(0xFFDCFCE7)
+val Warning           = Color(0xFFD97706)
+val WarningContainer  = Color(0xFFFEF3C7)

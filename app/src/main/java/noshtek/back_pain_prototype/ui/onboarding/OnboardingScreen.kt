@@ -1,5 +1,12 @@
 package noshtek.back_pain_prototype.ui.onboarding
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,12 +18,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,6 +44,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.common.PrimaryButton
+import noshtek.back_pain_prototype.ui.common.TextActionButton
+import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
+import noshtek.back_pain_prototype.ui.theme.brandGradient
 
 @Composable
 fun OnboardingScreen(
@@ -55,29 +72,29 @@ fun OnboardingScreen(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when (state.currentPage) {
-            0 -> OnboardingPage0(onGetStarted = { viewModel.nextPage() })
-            1 -> OnboardingPage1(
-                onNext = { viewModel.nextPage() },
-                onSkip = {
-                    navController.navigate(Screen.Profile.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
+    val toProfile: () -> Unit = {
+        navController.navigate(Screen.Profile.route) {
+            popUpTo(Screen.Onboarding.route) { inclusive = true }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        AnimatedContent(
+            targetState = state.currentPage,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    (slideInHorizontally { it } + fadeIn()) togetherWith (slideOutHorizontally { -it / 3 } + fadeOut())
+                } else {
+                    (slideInHorizontally { -it } + fadeIn()) togetherWith (slideOutHorizontally { it / 3 } + fadeOut())
                 }
-            )
-            else -> OnboardingPage2(
-                onStart = {
-                    navController.navigate(Screen.Profile.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
-                },
-                onSkip = {
-                    navController.navigate(Screen.Profile.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
-                }
-            )
+            },
+            label = "onboarding-page",
+        ) { page ->
+            when (page) {
+                0 -> OnboardingPage0(onGetStarted = { viewModel.nextPage() })
+                1 -> OnboardingPage1(onNext = { viewModel.nextPage() }, onSkip = toProfile)
+                else -> OnboardingPage2(onStart = toProfile, onSkip = toProfile)
+            }
         }
         PageDots(
             current = state.currentPage,
@@ -90,6 +107,19 @@ fun OnboardingScreen(
 }
 
 @Composable
+private fun IconBadge(icon: ImageVector, accent: Color) {
+    Box(
+        modifier = Modifier
+            .size(104.dp)
+            .clip(CircleShape)
+            .background(accent.copy(alpha = 0.12f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(48.dp))
+    }
+}
+
+@Composable
 private fun PageDots(current: Int, total: Int, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
@@ -97,12 +127,15 @@ private fun PageDots(current: Int, total: Int, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         repeat(total) { i ->
+            val active = i == current
+            val width by animateDpAsState(if (active) 26.dp else 8.dp, label = "dot-width")
             Box(
                 modifier = Modifier
-                    .size(if (i == current) 10.dp else 7.dp)
-                    .clip(CircleShape)
+                    .height(8.dp)
+                    .width(width)
+                    .clip(RoundedCornerShape(50))
                     .background(
-                        if (i == current) MaterialTheme.colorScheme.primary
+                        if (active) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.primaryContainer,
                     )
             )
@@ -119,80 +152,71 @@ private fun OnboardingPage0(onGetStarted: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        IconBadge(Icons.Filled.MonitorHeart, MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(28.dp))
         Text(
             "SpineIQ",
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.displayMedium.copy(brush = brandGradient()),
+            fontWeight = FontWeight.ExtraBold,
         )
         Spacer(Modifier.height(16.dp))
         Text(
             "Understand your back pain.\nTrack your progress.",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(64.dp))
-        Button(
+        Spacer(Modifier.height(56.dp))
+        PrimaryButton(
             onClick = onGetStarted,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Text(
-                "Get Started",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+            label = "Get Started",
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
 @Composable
 private fun OnboardingPage1(onNext: () -> Unit, onSkip: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp, vertical = 48.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            "How It Works",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "SpineIQ uses the Spine Severity System (SSS) — a structured, evidence-based questionnaire to compute your personal spine health score (0–11).\n\n" +
-                "You answer questions about your lifestyle, pain, and daily function. The app calculates your score, identifies contributing risk factors, and tracks your progress over time.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(56.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OutlinedButton(
-                onClick = onSkip,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-            ) { Text("Skip") }
-            Button(
-                onClick = onNext,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-            ) { Text("Next", fontWeight = FontWeight.SemiBold) }
-        }
-    }
+    OnboardingInfoPage(
+        icon = Icons.AutoMirrored.Filled.Assignment,
+        accent = MaterialTheme.colorScheme.secondary,
+        title = "How It Works",
+        body = "SpineIQ uses the Spine Severity System (SSS) — a structured, evidence-based " +
+            "questionnaire to compute your personal spine health score (0–11).\n\n" +
+            "You answer questions about your lifestyle, pain, and daily function. The app calculates " +
+            "your score, identifies contributing risk factors, and tracks your progress over time.",
+        primaryLabel = "Next",
+        onPrimary = onNext,
+        onSkip = onSkip,
+    )
 }
 
 @Composable
 private fun OnboardingPage2(onStart: () -> Unit, onSkip: () -> Unit) {
+    OnboardingInfoPage(
+        icon = Icons.Filled.Lock,
+        accent = MaterialTheme.colorScheme.tertiary,
+        title = "Your Privacy",
+        body = "All your data stays on this device.\n\n" +
+            "SpineIQ never sends your health information to any server without your explicit consent. " +
+            "Optional cloud backup is entirely user-controlled.\n\n" +
+            "No data is shared with anyone without your permission.",
+        primaryLabel = "Let's Start",
+        onPrimary = onStart,
+        onSkip = onSkip,
+    )
+}
+
+@Composable
+private fun OnboardingInfoPage(
+    icon: ImageVector,
+    accent: Color,
+    title: String,
+    body: String,
+    primaryLabel: String,
+    onPrimary: () -> Unit,
+    onSkip: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -200,36 +224,23 @@ private fun OnboardingPage2(onStart: () -> Unit, onSkip: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        IconBadge(icon, accent)
+        Spacer(Modifier.height(28.dp))
+        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(20.dp))
         Text(
-            "Your Privacy",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "All your data stays on this device.\n\n" +
-                "SpineIQ never sends your health information to any server without your explicit consent. Optional cloud backup is entirely user-controlled.\n\n" +
-                "No data is shared with anyone without your permission.",
+            body,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(56.dp))
+        Spacer(Modifier.height(48.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedButton(
-                onClick = onSkip,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-            ) { Text("Skip") }
-            Button(
-                onClick = onStart,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-            ) { Text("Let's Start", fontWeight = FontWeight.SemiBold) }
+            TextActionButton(onClick = onSkip, label = "Skip", modifier = Modifier.weight(1f))
+            PrimaryButton(onClick = onPrimary, label = primaryLabel, modifier = Modifier.weight(1f))
         }
     }
 }

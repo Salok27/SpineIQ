@@ -3,6 +3,13 @@ package noshtek.back_pain_prototype.ui.assessment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Healing
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,32 +49,33 @@ fun ReviewScreen(
             Text(
                 "Review the information below before computing the score.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.entrance(0),
             )
 
             // Personal
-            SectionCard(title = "Personal") {
+            SectionCard(title = "Personal", icon = Icons.Filled.Person, modifier = Modifier.entrance(1)) {
                 ReviewRow("Name", session.userName)
                 ReviewRow("Age", "${session.userAgeYears} yrs")
                 ReviewRow("Weight / Height", "${"%.1f".format(session.userWeightKg)} kg · ${"%.0f".format(session.userHeightCm)} cm")
             }
 
             // Occupation
-            SectionCard(title = "Occupation") {
+            SectionCard(title = "Occupation", icon = Icons.Filled.Work, accent = MaterialTheme.colorScheme.secondary, modifier = Modifier.entrance(2)) {
                 ReviewRow("Type", session.occupation.occupationType?.name?.replace('_', ' ') ?: "—")
                 ReviewRow("Sitting", "${"%.0f".format(session.occupation.sittingHoursPerDay)} hrs/day")
                 ReviewRow("Lifting", session.occupation.liftingLevel.name.lowercase().replaceFirstChar { it.uppercase() })
             }
 
             // Lifestyle
-            SectionCard(title = "Lifestyle") {
+            SectionCard(title = "Lifestyle", icon = Icons.AutoMirrored.Filled.DirectionsWalk, accent = MaterialTheme.colorScheme.secondary, modifier = Modifier.entrance(3)) {
                 ReviewRow("Sleep", "${"%.0f".format(session.lifestyle.sleepHoursPerNight)} hrs · ${session.lifestyle.sleepQuality.name}")
                 ReviewRow("Walking", "${"%.0f".format(session.lifestyle.walkingMinutesPerDay)} min/day")
                 ReviewRow("Exercise", "${session.lifestyle.exerciseDaysPerWeek} days/wk")
             }
 
             // Pain
-            SectionCard(title = "Pain") {
+            SectionCard(title = "Pain", icon = Icons.Filled.Healing, accent = MaterialTheme.colorScheme.tertiary, modifier = Modifier.entrance(4)) {
                 ReviewRow("Locations", session.pain.painLocations.joinToString { it.name.replace('_', ' ').lowercase() }.ifBlank { "—" })
                 ReviewRow("VAS Score", "${session.pain.vasScore} / 10")
                 ReviewRow("Duration", session.pain.painDuration.name.lowercase().replaceFirstChar { it.uppercase() })
@@ -75,7 +83,7 @@ fun ReviewScreen(
             }
 
             // Functional
-            SectionCard(title = "Functional (Modified ODI)") {
+            SectionCard(title = "Functional (Modified ODI)", icon = Icons.Filled.Accessibility, modifier = Modifier.entrance(5)) {
                 ReviewRow("Walking", session.functional.walking.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 ReviewRow("Sitting", session.functional.sitting.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
                 ReviewRow("Standing", session.functional.standing.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() })
@@ -87,56 +95,47 @@ fun ReviewScreen(
 
             // Red flags
             if (session.redFlags.hasAnyRedFlag) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                AppCard(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    border = false,
+                    modifier = Modifier.entrance(6),
                 ) {
-                    Text(
-                        "RED FLAG CONFIRMED — score will be Severe / Urgent",
-                        modifier = Modifier.padding(16.dp),
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                        Text(
+                            "RED FLAG CONFIRMED — score will be Severe / Urgent",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             } else {
-                SectionCard(title = "Red Flags") {
+                SectionCard(title = "Red Flags", icon = Icons.Filled.Warning, modifier = Modifier.entrance(6)) {
                     ReviewRow("Status", "None confirmed")
                 }
             }
 
-            if (session.isScoring) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                val error = session.error
-                if (error != null) {
-                    Text(
-                        error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                Button(
-                    onClick = {
-                        viewModel.computeAndComplete { assessmentId ->
-                            navController.navigate(Screen.Results.route(assessmentId)) {
-                                popUpTo(Screen.AssessmentGraph.route) { inclusive = true }
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                ) {
-                    Text(
-                        "Compute Score & Complete",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+            val error = session.error
+            if (error != null) {
+                Text(
+                    error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
+
+            NextButton(
+                label = "Compute Score & Complete",
+                loading = session.isScoring,
+                onClick = {
+                    viewModel.computeAndComplete { assessmentId ->
+                        navController.navigate(Screen.Results.route(assessmentId)) {
+                            popUpTo(Screen.AssessmentGraph.route) { inclusive = true }
+                        }
+                    }
+                },
+            )
 
             Spacer(Modifier.height(8.dp))
         }
