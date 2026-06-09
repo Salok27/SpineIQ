@@ -41,6 +41,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 return@launch
             }
             val age = Period.between(LocalDate.ofEpochDay(profile.dateOfBirth), LocalDate.now()).years
+                .coerceAtLeast(0)
             val aId = assessmentRepository.startAssessment(profile.id)
             _session.update {
                 it.copy(
@@ -164,26 +165,34 @@ class AssessmentSessionViewModel @Inject constructor(
 
     fun computeAndComplete(onComplete: (String) -> Unit) {
         val s = _session.value
-        _session.update { it.copy(isScoring = true) }
+        if (s.assessmentId.isEmpty()) return
+        _session.update { it.copy(isScoring = true, error = null) }
         viewModelScope.launch {
-            val input = AssessmentInput(
-                demographic = DemographicInput(s.userAgeYears, s.userWeightKg, s.userHeightCm),
-                lifestyle = LifestyleInput(
-                    sittingHoursPerDay = s.occupation.sittingHoursPerDay,
-                    walkingMinutesPerDay = s.lifestyle.walkingMinutesPerDay,
-                    exerciseDaysPerWeek = s.lifestyle.exerciseDaysPerWeek,
-                    sleepHoursPerNight = s.lifestyle.sleepHoursPerNight,
-                    sleepQuality = s.lifestyle.sleepQuality,
-                    exerciseTypes = s.lifestyle.exerciseTypes
-                ),
-                pain = PainInput(s.pain.vasScore, s.pain.radiculopathySeverity, s.pain.painDuration),
-                functional = FunctionalInput(s.functional.walking, s.functional.sitting, s.functional.standing, s.functional.sleep, s.functional.dailyActivities),
-                hasRedFlag = s.redFlags.hasAnyRedFlag
-            )
-            val result = ScoringEngine.compute(input)
-            assessmentRepository.completeAssessment(s.assessmentId, result)
-            _session.update { it.copy(isScoring = false, scoringResult = result) }
-            onComplete(s.assessmentId)
+            try {
+                val input = AssessmentInput(
+                    demographic = DemographicInput(s.userAgeYears, s.userWeightKg, s.userHeightCm),
+                    lifestyle = LifestyleInput(
+                        sittingHoursPerDay = s.occupation.sittingHoursPerDay,
+                        walkingMinutesPerDay = s.lifestyle.walkingMinutesPerDay,
+                        exerciseDaysPerWeek = s.lifestyle.exerciseDaysPerWeek,
+                        sleepHoursPerNight = s.lifestyle.sleepHoursPerNight,
+                        sleepQuality = s.lifestyle.sleepQuality,
+                        exerciseTypes = s.lifestyle.exerciseTypes
+                    ),
+                    pain = PainInput(s.pain.vasScore, s.pain.radiculopathySeverity, s.pain.painDuration),
+                    functional = FunctionalInput(s.functional.walking, s.functional.sitting, s.functional.standing, s.functional.sleep, s.functional.dailyActivities),
+                    hasRedFlag = s.redFlags.hasAnyRedFlag
+                )
+                val result = ScoringEngine.compute(input)
+                assessmentRepository.completeAssessment(s.assessmentId, result)
+                _session.update { it.copy(isScoring = false, scoringResult = result) }
+                onComplete(s.assessmentId)
+            } catch (e: Exception) {
+                // Was: uncaught coroutine exception → app crash + spinner stuck true forever.
+                _session.update {
+                    it.copy(isScoring = false, error = "Couldn't save your assessment. Please try again.")
+                }
+            }
         }
     }
 

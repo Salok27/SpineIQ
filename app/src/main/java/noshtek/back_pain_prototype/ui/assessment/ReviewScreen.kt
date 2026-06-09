@@ -108,6 +108,14 @@ fun ReviewScreen(
                     CircularProgressIndicator()
                 }
             } else {
+                val error = session.error
+                if (error != null) {
+                    Text(
+                        error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 Button(
                     onClick = {
                         viewModel.computeAndComplete { assessmentId ->

@@ -36,6 +36,7 @@ internal object SssScorer {
     // ── Section 4: BMI Mechanical Load ───────────────────────────────────────
 
     fun bmi(weightKg: Float, heightCm: Float): Float {
+        if (heightCm <= 0f) return 0f   // guard invalid input: avoids divide-by-zero → Infinity leaking into scores/UI
         val heightM = heightCm / 100f
         return weightKg / (heightM * heightM)
     }

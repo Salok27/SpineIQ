@@ -50,13 +50,15 @@ fun LifestyleScreen(
                 Spacer(Modifier.height(12.dp))
                 Text("Sleep Quality", style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     SleepQuality.entries.forEach { quality ->
                         FilterChip(
                             selected = lifestyle.sleepQuality == quality,
                             onClick = { viewModel.updateLifestyle { copy(sleepQuality = quality) } },
-                            label = { Text(quality.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(quality.name.lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }
@@ -88,25 +90,23 @@ fun LifestyleScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(8.dp))
-                ExerciseType.entries.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { type ->
-                            val selected = type in lifestyle.exerciseTypes
-                            FilterChip(
-                                selected = selected,
-                                onClick = {
-                                    viewModel.updateLifestyle {
-                                        val updated = if (selected) exerciseTypes - type else exerciseTypes + type
-                                        copy(exerciseTypes = updated)
-                                    }
-                                },
-                                label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ExerciseType.entries.forEach { type ->
+                        val selected = type in lifestyle.exerciseTypes
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                viewModel.updateLifestyle {
+                                    val updated = if (selected) exerciseTypes - type else exerciseTypes + type
+                                    copy(exerciseTypes = updated)
+                                }
+                            },
+                            label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                        )
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
             }
 

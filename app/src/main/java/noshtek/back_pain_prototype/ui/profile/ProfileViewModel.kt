@@ -52,8 +52,8 @@ class ProfileViewModel @Inject constructor(
                         fullName = existing.fullName,
                         dateOfBirth = LocalDate.ofEpochDay(existing.dateOfBirth),
                         gender = existing.gender,
-                        heightCm = existing.heightCm.toInt().toString(),
-                        weightKg = existing.weightKg.toInt().toString()
+                        heightCm = existing.heightCm.toFieldString(),
+                        weightKg = existing.weightKg.toFieldString()
                     )
                 }
             } else {
@@ -74,6 +74,14 @@ class ProfileViewModel @Inject constructor(
         val weight = s.weightKg.toFloatOrNull()
         if (s.fullName.isBlank() || height == null || weight == null) {
             _state.update { it.copy(error = "Please fill in all required fields.") }
+            return
+        }
+        if (height !in 50f..260f || weight !in 20f..500f) {
+            _state.update { it.copy(error = "Enter a realistic height (50–260 cm) and weight (20–500 kg).") }
+            return
+        }
+        if (s.dateOfBirth.isAfter(LocalDate.now())) {
+            _state.update { it.copy(error = "Date of birth can't be in the future.") }
             return
         }
         _state.update { it.copy(isSaving = true, error = null) }
@@ -101,3 +109,7 @@ class ProfileViewModel @Inject constructor(
 
     fun clearError() = _state.update { it.copy(error = null) }
 }
+
+/** Renders a stored measurement without a redundant trailing ".0" while keeping real decimals. */
+private fun Float.toFieldString(): String =
+    if (this == toLong().toFloat()) toLong().toString() else toString()

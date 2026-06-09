@@ -21,7 +21,7 @@ interface ScoresDao {
         SELECT s.* FROM scores_records s
         INNER JOIN assessment_records r ON s.assessment_id = r.id
         WHERE r.user_id = :userId
-        ORDER BY r.assessment_date DESC
+        ORDER BY r.assessment_date DESC, r.created_at DESC
     """)
     fun getScoresHistoryForUser(userId: String): Flow<List<ScoresRecordEntity>>
 }

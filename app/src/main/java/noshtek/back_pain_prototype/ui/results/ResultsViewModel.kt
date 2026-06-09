@@ -24,20 +24,33 @@ class ResultsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val assessmentId: String = checkNotNull(savedStateHandle["assessmentId"])
+    private val assessmentId: String? = savedStateHandle["assessmentId"]
 
     private val _state = MutableStateFlow(ResultsUiState())
     val state: StateFlow<ResultsUiState> = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            assessmentRepository.getScores(assessmentId).collect { scores ->
-                _state.update { it.copy(isLoading = false, scores = scores) }
+        val id = assessmentId
+        if (id.isNullOrEmpty()) {
+            // Missing/blank nav arg — surface a graceful message instead of throwing in the
+            // constructor (checkNotNull would have crashed ViewModel creation).
+            _state.update { it.copy(isLoading = false, error = "Assessment not found.") }
+        } else {
+            viewModelScope.launch {
+                assessmentRepository.getScores(id)
+                    .catch { _state.update { it.copy(isLoading = false, error = "Couldn't load your results.") } }
+                    .collect { scores ->
+                        _state.update { it.copy(isLoading = false, scores = scores) }
+                    }
             }
-        }
-        viewModelScope.launch {
-            val full = assessmentRepository.getFullAssessment(assessmentId)
-            _state.update { it.copy(fullData = full) }
+            viewModelScope.launch {
+                try {
+                    val full = assessmentRepository.getFullAssessment(id)
+                    _state.update { it.copy(fullData = full) }
+                } catch (e: Exception) {
+                    _state.update { it.copy(isLoading = false, error = "Couldn't load your results.") }
+                }
+            }
         }
     }
 }

@@ -40,7 +40,11 @@ class HomeViewModel @Inject constructor(
                         assessmentRepository.getScoresHistory(profile.id),
                         assessmentRepository.getCompletedAssessmentCount(profile.id)
                     ) { records, scoresList, count ->
-                        val latestCompleted = records.firstOrNull { it.completedAt != null }
+                        // Select by completedAt (epoch millis) so the *most recently completed*
+                        // assessment wins even when several share the same epoch-day assessment_date.
+                        val latestCompleted = records
+                            .filter { it.completedAt != null }
+                            .maxByOrNull { it.completedAt!! }
                         val latestScores = latestCompleted?.let { r -> scoresList.find { it.assessmentId == r.id } }
                         HomeUiState(
                             isLoading = false,

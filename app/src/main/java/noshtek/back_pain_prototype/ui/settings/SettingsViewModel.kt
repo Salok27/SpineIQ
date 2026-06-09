@@ -35,8 +35,14 @@ class SettingsViewModel @Inject constructor(
     fun deleteAllData() {
         _state.update { it.copy(isDeleting = true) }
         viewModelScope.launch {
-            userProfileRepository.deleteAllData()
-            _state.update { it.copy(isDeleting = false, dataDeleted = true) }
+            try {
+                userProfileRepository.deleteAllData()
+                _state.update { it.copy(isDeleting = false, dataDeleted = true) }
+            } catch (e: Exception) {
+                // Don't crash and don't strand the spinner; leave dataDeleted false so the
+                // screen stays put rather than navigating to a half-deleted broken state.
+                _state.update { it.copy(isDeleting = false) }
+            }
         }
     }
 }

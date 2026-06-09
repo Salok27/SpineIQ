@@ -56,20 +56,21 @@ fun OccupationScreen(
             )
 
             SectionCard(title = "Occupation Type") {
-                OccupationType.entries.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { type ->
-                            FilterChip(
-                                selected = session.occupation.occupationType == type,
-                                onClick = { viewModel.updateOccupation { copy(occupationType = type) } },
-                                label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                // FlowRow so each chip sizes to its label and wraps to the next
+                // line — "Office Worker" / "Manual Labor" no longer truncate.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OccupationType.entries.forEach { type ->
+                        FilterChip(
+                            selected = session.occupation.occupationType == type,
+                            onClick = { viewModel.updateOccupation { copy(occupationType = type) } },
+                            label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                        )
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
+                Spacer(Modifier.height(8.dp))
                 RequiredFieldError(show = showError && session.occupation.occupationType == null)
             }
 
@@ -100,13 +101,15 @@ fun OccupationScreen(
             }
 
             SectionCard(title = "Lifting Level") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     LiftingLevel.entries.forEach { level ->
                         FilterChip(
                             selected = session.occupation.liftingLevel == level,
                             onClick = { viewModel.updateOccupation { copy(liftingLevel = level) } },
-                            label = { Text(level.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(level.name.lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }

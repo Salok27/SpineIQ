@@ -36,7 +36,7 @@ class PdfExportViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val assessmentId: String = checkNotNull(savedStateHandle["assessmentId"])
+    private val assessmentId: String? = savedStateHandle["assessmentId"]
     private val pdfExporter = PdfExporter(application.applicationContext)
 
     private val _state = MutableStateFlow(PdfExportState())
@@ -44,13 +44,18 @@ class PdfExportViewModel @Inject constructor(
 
     fun generateAndShare() {
         if (_state.value.isGenerating) return
+        val id = assessmentId
+        if (id.isNullOrEmpty()) {
+            _state.update { it.copy(error = "Assessment not found") }
+            return
+        }
         _state.update { it.copy(isGenerating = true, error = null) }
 
         viewModelScope.launch {
             try {
-                val fullData = assessmentRepository.getFullAssessment(assessmentId)
+                val fullData = assessmentRepository.getFullAssessment(id)
                     ?: throw IllegalStateException("Assessment data not found")
-                val scores = assessmentRepository.getScores(assessmentId).firstOrNull()
+                val scores = assessmentRepository.getScores(id).firstOrNull()
                     ?: throw IllegalStateException("Scores not found")
 
                 val profile = userProfileRepository.getUserProfile().firstOrNull()
