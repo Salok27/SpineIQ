@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,6 +21,8 @@ import noshtek.back_pain_prototype.core.scoring.model.ExerciseType
 import noshtek.back_pain_prototype.core.scoring.model.SleepQuality
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
+import noshtek.back_pain_prototype.ui.gamification.StageCompleteOverlay
 
 @Composable
 fun LifestyleScreen(
@@ -26,17 +31,19 @@ fun LifestyleScreen(
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     val lifestyle = session.lifestyle
+    var showStageComplete by remember { mutableStateOf(false) }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Lifestyle  (2 / 6)",
+            title = "Lifestyle",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 2, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 2)
 
         Column(
             modifier = Modifier
@@ -117,12 +124,20 @@ fun LifestyleScreen(
 
             NextButton(
                 label = "Next: Pain",
-                onClick = {
-                    viewModel.persistLifestyle()
-                    navController.navigate(Screen.Pain.route)
-                }
+                onClick = { showStageComplete = true }
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    StageCompleteOverlay(
+        visible = showStageComplete,
+        stepLabel = "Lifestyle complete!",
+        onFinished = {
+            showStageComplete = false
+            viewModel.persistLifestyle()
+            navController.navigate(Screen.Pain.route)
+        },
+    )
     }
 }

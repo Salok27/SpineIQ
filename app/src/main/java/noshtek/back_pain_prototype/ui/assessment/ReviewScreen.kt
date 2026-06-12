@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
 
 @Composable
 fun ReviewScreen(
@@ -35,10 +36,10 @@ fun ReviewScreen(
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Review  (6 / 6)",
+            title = "Review",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 6, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 6)
 
         Column(
             modifier = Modifier
@@ -130,7 +131,7 @@ fun ReviewScreen(
                 loading = session.isScoring,
                 onClick = {
                     viewModel.computeAndComplete { assessmentId ->
-                        navController.navigate(Screen.Results.route(assessmentId)) {
+                        navController.navigate(Screen.Results.route(assessmentId, celebrate = true)) {
                             popUpTo(Screen.AssessmentGraph.route) { inclusive = true }
                         }
                     }

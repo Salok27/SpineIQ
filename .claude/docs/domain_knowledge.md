@@ -26,6 +26,12 @@ Pipeline: **Measure → Assess → Score → Classify → Educate**.
 | **Age group** | Young Adult (≤30), Mid Adult (31–45), Pre-Senior (46–60), Senior (61+). Drives thresholds. |
 | **Composite Back Pain Risk** | Final classification combining SSS score × Lifestyle tier. |
 | **UserProfile** | The single user profile record (one per installation). Renamed from `PatientProfile` in v1.1 — there is no patient management in this app. |
+| **Spine Coins** | V2 spendable virtual currency earned through engagement; spent only on avatar cosmetics. Never gates health functionality. |
+| **XP / Level** | V2 lifetime experience points (monotonic, never spent) mapped to 8 named levels (Beginner → Back Health Expert). Level is derived from XP, never stored. |
+| **Streak** | Consecutive days with a qualifying engagement (daily check-in or assessment completion — *not* per-step saves). Milestones at 3/7/14/30 days pay one-time coin bonuses. |
+| **Daily check-in** | Once-per-calendar-day mood log (Better/Same/Worse) that earns a small reward and keeps the streak alive. |
+| **Achievement** | Code-defined collectible badge with coin/XP reward; only unlock state is persisted. |
+| **Reward ledger** | Append-only grant/spend log whose dedupe-key primary key makes every coin/XP grant idempotent. |
 
 ## SSS scoring (total 0–11) — `SssScorer.kt`
 
@@ -81,6 +87,38 @@ This language must never reference "clinical evaluation", "urgent referral", or
 assume a clinician is present — the user is reading this themselves. This must
 never be silently weakened.
 
+## Gamification economy (V2) — `Economy.kt`, FR-21 – FR-26
+
+| Action | Coins | XP |
+|---|---|---|
+| Complete a wizard section (×5 per assessment) | +10 | +20 |
+| Complete an assessment | +50 | +100 |
+| **Full assessment total** | **+100** | **+200** |
+| Daily check-in (once per calendar day) | +5 | +15 |
+| Streak milestone 3 / 7 / 14 / 30 days (one-time ever) | +50 / +100 / +150 / +300 | — |
+| Achievements | per catalog | per catalog |
+
+Levels (derived from lifetime XP, never persisted): Beginner 0 · Explorer 100 ·
+Spine Explorer 250 · Recovery Champion 500 · Wellness Warrior 1000 ·
+Mobility Master 2000 · Spine Guardian 3500 · Back Health Expert 5500.
+
+Invariants that must never be weakened:
+- **Idempotency** — every grant goes through the reward ledger
+  (`GamificationRepository.tryGrant` + `DedupeKeys`); repeating an action never
+  pays twice. Re-saving a wizard section via back-navigation earns 0 extra.
+- **Cosmetics only** — coins buy avatar items and nothing else; no coin price,
+  level, or achievement may gate any assessment, score, or report feature.
+- **Never blocks the medical flow** — gamification calls in the assessment path
+  are failure-isolated (`runCatching`); a grant error must not stop a save.
+- **Clinical color separation** — the violet/gold reward palette never appears
+  on risk tiers, SSS badges, or clinical chart lines.
+- **Streak honesty** — only check-ins and completions qualify; missed days show
+  0 immediately (lazy reset); milestones are one-time-ever.
+
+Note: the original V2 requirement brief stated the check-in reward
+inconsistently ("+15 coins" vs "+5 coins / +15 XP"); **+5 coins / +15 XP is
+canonical**, keeping assessments the dominant coin source.
+
 ## Report sections
 
 The report has 13 fixed sections (Your Summary → Recommended Next Steps →
@@ -94,11 +132,14 @@ data collected in the assessment.
 
 In scope for Phase 1: onboarding flow (3 screens), push notification reminders,
 Progress / Trends screen (SSS and lifestyle trend charts), Lifestyle Improvement
-Tips in the report, single-user profile, public Play Store distribution.
+Tips in the report, single-user profile, public Play Store distribution, and —
+since V2 (2026-06-12) — the gamification layer (Spine Coins, XP/levels, streaks,
+daily check-ins, achievements, avatar + shop, celebrations, bottom navigation;
+FR-21 – FR-26).
 
 Explicitly **out of scope** (see `PROJECT_PLAN.md` §16): body-diagram pain input
 (text checklist only), LLM-generated narrative, cloud sync / portal, iOS, multi-
-user or clinic-mode, doctor-sharing portal, social sharing, goal setting,
-achievement system.
+user or clinic-mode, doctor-sharing portal, social sharing, user-defined goal
+setting (V2 ships fixed daily goals only).
 
 Health Connect is in scope but currently unimplemented (see `development_workflows.md`).

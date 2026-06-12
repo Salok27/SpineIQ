@@ -21,6 +21,8 @@ import noshtek.back_pain_prototype.core.scoring.model.PainDuration
 import noshtek.back_pain_prototype.core.scoring.model.RadiculopathySeverity
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
+import noshtek.back_pain_prototype.ui.gamification.StageCompleteOverlay
 import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 
 @Composable
@@ -31,17 +33,19 @@ fun PainScreen(
     val session by viewModel.session.collectAsStateWithLifecycle()
     val pain = session.pain
     var showError by remember { mutableStateOf(false) }
+    var showStageComplete by remember { mutableStateOf(false) }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Pain Assessment  (3 / 6)",
+            title = "Pain Assessment",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 3, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 3)
 
         Column(
             modifier = Modifier
@@ -225,12 +229,22 @@ fun PainScreen(
                     if (pain.painLocations.isEmpty()) {
                         showError = true
                     } else {
-                        viewModel.persistPain()
-                        navController.navigate(Screen.Functional.route)
+                        showStageComplete = true
                     }
                 }
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    StageCompleteOverlay(
+        visible = showStageComplete,
+        stepLabel = "Pain assessment complete!",
+        onFinished = {
+            showStageComplete = false
+            viewModel.persistPain()
+            navController.navigate(Screen.Functional.route)
+        },
+    )
     }
 }

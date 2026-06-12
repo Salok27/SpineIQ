@@ -44,6 +44,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.avatar.Avatar
+import noshtek.back_pain_prototype.ui.avatar.AvatarSize
+import noshtek.back_pain_prototype.ui.avatar.AvatarSpec
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.TextActionButton
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
@@ -152,7 +155,16 @@ private fun OnboardingPage0(onGetStarted: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        IconBadge(Icons.Filled.MonitorHeart, MaterialTheme.colorScheme.primary)
+        // The spine buddy greets new users — the avatar they'll level up and style.
+        Box(
+            modifier = Modifier
+                .size(132.dp)
+                .clip(CircleShape)
+                .background(SpineIQTheme.colors.rewardContainer.copy(alpha = 0.55f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Avatar(spec = AvatarSpec.Default, size = AvatarSize.Medium)
+        }
         Spacer(Modifier.height(28.dp))
         Text(
             "SpineIQ",
@@ -161,7 +173,7 @@ private fun OnboardingPage0(onGetStarted: () -> Unit) {
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            "Understand your back pain.\nTrack your progress.",
+            "Understand your back pain.\nTrack progress, build streaks,\nand level up your spine buddy.",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

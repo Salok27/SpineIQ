@@ -6,6 +6,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,6 +19,8 @@ import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.scoring.model.FunctionalLevel
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
+import noshtek.back_pain_prototype.ui.gamification.StageCompleteOverlay
 
 @Composable
 fun FunctionalScreen(
@@ -24,17 +29,19 @@ fun FunctionalScreen(
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     val functional = session.functional
+    var showStageComplete by remember { mutableStateOf(false) }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Functional  (4 / 6)",
+            title = "Functional",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 4, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 4)
 
         Column(
             modifier = Modifier
@@ -114,13 +121,21 @@ fun FunctionalScreen(
 
             NextButton(
                 label = "Next: Red Flags",
-                onClick = {
-                    viewModel.persistFunctional()
-                    navController.navigate(Screen.RedFlag.route)
-                }
+                onClick = { showStageComplete = true }
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    StageCompleteOverlay(
+        visible = showStageComplete,
+        stepLabel = "Functional check complete!",
+        onFinished = {
+            showStageComplete = false
+            viewModel.persistFunctional()
+            navController.navigate(Screen.RedFlag.route)
+        },
+    )
     }
 }
 

@@ -26,6 +26,9 @@ class ResultsViewModel @Inject constructor(
 
     private val assessmentId: String? = savedStateHandle["assessmentId"]
 
+    /** True only when arriving fresh from the wizard — drives the completion celebration. */
+    val celebrate: Boolean = savedStateHandle["celebrate"] ?: false
+
     private val _state = MutableStateFlow(ResultsUiState())
     val state: StateFlow<ResultsUiState> = _state.asStateFlow()
 

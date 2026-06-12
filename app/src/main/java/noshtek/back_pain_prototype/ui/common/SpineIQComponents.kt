@@ -384,58 +384,6 @@ fun RiskTileSmall(label: String, tier: RiskTier) {
     }
 }
 
-// ── Wizard Progress Bar ───────────────────────────────────────────────────────
-
-@Composable
-fun WizardProgressBar(
-    currentStep: Int,
-    totalSteps: Int,
-    modifier: Modifier = Modifier,
-) {
-    val target = currentStep.toFloat() / totalSteps
-    val progress by animateFloatAsState(
-        targetValue = target,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
-        label = "wizard-progress",
-    )
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Step $currentStep of $totalSteps",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "${(target * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(PillShape),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.primaryContainer,
-            strokeCap = StrokeCap.Round,
-            gapSize = 0.dp,
-            drawStopIndicator = {},
-        )
-    }
-}
-
 // ── Score Hero Card (animated gauge) ───────────────────────────────────────────
 
 @Composable

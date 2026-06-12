@@ -29,10 +29,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -47,6 +51,9 @@ import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.core.data.gamification.Economy
+import noshtek.back_pain_prototype.ui.gamification.ConfettiBurst
+import noshtek.back_pain_prototype.ui.gamification.RewardChip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +62,9 @@ fun ResultsDashboardScreen(
     viewModel: ResultsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // One-shot: survives rotation/process death so confetti never replays.
+    var celebrated by rememberSaveable { mutableStateOf(false) }
+    val showConfetti = viewModel.celebrate && !celebrated
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -87,9 +97,19 @@ fun ResultsDashboardScreen(
             }
             else -> {
                 val scores = state.scores!!
+                Box(Modifier.padding(padding).fillMaxSize()) {
+                if (showConfetti) {
+                    // Decorative only — drawn above the content, never interactive.
+                    ConfettiBurst(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zIndex(1f),
+                        particleCount = 120,
+                        onFinished = { celebrated = true },
+                    )
+                }
                 Column(
                     modifier = Modifier
-                        .padding(padding)
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp),
@@ -103,6 +123,28 @@ fun ResultsDashboardScreen(
                         classification = scores.backPainRiskClassification,
                         modifier = Modifier.entrance(0),
                     )
+
+                    if (viewModel.celebrate) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .entrance(1),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RewardChip(
+                                coins = Economy.COINS_PER_FULL_ASSESSMENT,
+                                xp = Economy.XP_PER_FULL_ASSESSMENT,
+                                emphasized = true,
+                            )
+                            Text(
+                                "  Assessment complete!",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
 
                     // SSS breakdown
                     SectionCard(
@@ -210,6 +252,7 @@ fun ResultsDashboardScreen(
                     )
 
                     Spacer(Modifier.height(8.dp))
+                }
                 }
             }
         }

@@ -42,11 +42,16 @@ object MotionTokens {
     const val DurationMedium = 320
     const val DurationSlow = 520
     const val DurationScore = 750
+    const val DurationCelebration = 1200   // reward-overlay card lifecycle
+    const val DurationConfetti = 1800      // confetti particle fall
 
     /** Snappy-in, gentle-out — the default for entrances and emphasis. */
     val Emphasized: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
     val Standard: Easing = FastOutSlowInEasing
     val Linear: Easing = LinearEasing
+
+    /** Springy overshoot for celebratory pop-ins (badges, check circles). */
+    val Overshoot: Easing = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
 }
 
 /**

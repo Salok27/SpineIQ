@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.common.ScreenHeader
 import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.entrance
@@ -47,19 +48,7 @@ fun SettingsScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-            )
+            ScreenHeader(title = "Settings", onBack = { navController.popBackStack() })
         }
     ) { padding ->
         Column(

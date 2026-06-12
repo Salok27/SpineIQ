@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.db.entity.AssessmentRecordEntity
 import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
+import noshtek.back_pain_prototype.core.data.gamification.GamificationManager
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
 import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
 import java.time.LocalDate
@@ -23,13 +24,18 @@ data class ProgressUiState(
     val assessments: List<AssessmentSummary> = emptyList(),
     val latestScoreDelta: Int? = null,
     val latestAssessmentDate: LocalDate? = null,
-    val previousAssessmentDate: LocalDate? = null
+    val previousAssessmentDate: LocalDate? = null,
+    // Stat-strip tiles (V2)
+    val streakDays: Int = 0,
+    val levelNumber: Int = 1,
+    val levelName: String = "Beginner",
 )
 
 @HiltViewModel
 class ProgressViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
-    private val assessmentRepository: AssessmentRepository
+    private val assessmentRepository: AssessmentRepository,
+    private val gamificationManager: GamificationManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProgressUiState())
@@ -42,8 +48,9 @@ class ProgressViewModel @Inject constructor(
                 .flatMapLatest { profile ->
                     combine(
                         assessmentRepository.getAssessmentsForUser(profile.id),
-                        assessmentRepository.getScoresHistory(profile.id)
-                    ) { records, scoresList ->
+                        assessmentRepository.getScoresHistory(profile.id),
+                        gamificationManager.snapshot,
+                    ) { records, scoresList, snapshot ->
                         val completedRecords = records.filter { it.completedAt != null }
                         // Match each completed record with its scores
                         // Chronological oldest→newest. assessment_date is epoch *days*, so
@@ -73,7 +80,10 @@ class ProgressViewModel @Inject constructor(
                             },
                             previousAssessmentDate = if (summaries.size >= 2) {
                                 LocalDate.ofEpochDay(summaries[summaries.size - 2].record.assessmentDate)
-                            } else null
+                            } else null,
+                            streakDays = snapshot.effectiveStreakDays,
+                            levelNumber = snapshot.level.number,
+                            levelName = snapshot.level.name,
                         )
                     }
                 }

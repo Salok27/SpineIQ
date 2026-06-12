@@ -65,10 +65,13 @@ import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.scoring.model.RiskTier
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.AppCard
+import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MotionTokens
 import noshtek.back_pain_prototype.ui.common.PressableCard
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
+import noshtek.back_pain_prototype.ui.common.ScreenHeader
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.gamification.StreakFlame
 import noshtek.back_pain_prototype.ui.theme.RiskHigh
 import noshtek.back_pain_prototype.ui.theme.RiskLow
 import noshtek.back_pain_prototype.ui.theme.RiskModerate
@@ -79,6 +82,27 @@ import kotlin.math.ceil
 import kotlin.math.max
 
 private val PillShape = RoundedCornerShape(50)
+
+/** Small glass stat tile for the strip above the trend charts. */
+@Composable
+private fun StatTile(
+    label: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    GlassCard(modifier = modifier, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+            content()
+            Spacer(Modifier.height(4.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,19 +116,8 @@ fun ProgressScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("My Progress", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-            )
+            // Progress is a hub tab now — header without a back arrow.
+            ScreenHeader(title = "Progress", subtitle = "Trends across your assessments")
         }
     ) { padding ->
         if (state.isLoading) {
@@ -158,6 +171,34 @@ fun ProgressScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Stat strip — engagement context above the clinical charts
+            item {
+                Row(
+                    Modifier.fillMaxWidth().entrance(0),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    StatTile(modifier = Modifier.weight(1f), label = "Streak") {
+                        StreakFlame(streakDays = state.streakDays, activeToday = state.streakDays > 0)
+                    }
+                    StatTile(modifier = Modifier.weight(1f), label = state.levelName) {
+                        Text(
+                            "LV ${state.levelNumber}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = SpineIQTheme.colors.rewardText,
+                        )
+                    }
+                    StatTile(modifier = Modifier.weight(1f), label = "Assessments") {
+                        Text(
+                            "${state.assessments.size}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+
             // Delta callout
             state.latestScoreDelta?.let { delta ->
                 item {

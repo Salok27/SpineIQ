@@ -72,3 +72,26 @@ val RiskModerateContainer        = Color(0xFFFEF3C7)
 val RiskModerateSevereContainer  = Color(0xFFFED7AA)
 val RiskHighContainer            = Color(0xFFFEE2E2)
 val RiskSevereUrgentContainer    = Color(0xFFFECACA)
+
+// ── Reward / progression palette (Violet family — V2 gamification) ──────────
+// Strictly for XP, levels, achievements, shop and celebrations. NEVER used on
+// clinical risk tiers, SSS badges, or chart clinical lines.
+val Violet600 = Color(0xFF7C3AED)   // reward primary (fills, rings, equipped states)
+val Violet500 = Color(0xFF8B5CF6)   // gradient mid stop
+val Violet700 = Color(0xFF6D28D9)   // AA-safe violet text/icons on white
+val Violet400 = Color(0xFFA78BFA)   // dark-scheme reward
+val Violet50  = Color(0xFFEDE9FE)   // reward container
+val Violet800 = Color(0xFF5B21B6)   // dark-scheme reward container
+val Violet900 = Color(0xFF4C1D95)   // on-reward-container
+val Indigo500 = Color(0xFF6366F1)   // reward-gradient start (bridges Blue600 → Violet)
+val Purple400 = Color(0xFFC084FC)   // dark-scheme gradient end
+val Purple500 = Color(0xFFA855F7)   // reward-gradient end
+
+// ── Coin / streak accents (gamification only) ───────────────────────────────
+val CoinGold      = Color(0xFFF59E0B)  // coin fill (matches WarningFill family)
+val CoinGoldLight = Color(0xFFFCD34D)  // coin sheen highlight
+val CoinGoldDeep  = Color(0xFFD97706)  // coin edge / AA text on light containers
+val CoinContainer = Color(0xFFFEF3C7)  // coin pill background
+val StreakOrange  = Color(0xFFF97316)  // flame fill
+val StreakEmber   = Color(0xFFEA580C)  // flame core / AA text on white
+val StreakGlow    = Color(0xFFFB923C)  // dark-scheme streak text

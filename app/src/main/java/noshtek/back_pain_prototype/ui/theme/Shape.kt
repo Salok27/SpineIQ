@@ -20,3 +20,5 @@ val HeroShape      = RoundedCornerShape(28.dp)
 val ChipShape      = RoundedCornerShape(14.dp)
 val TextFieldShape = RoundedCornerShape(14.dp)   // centralised text-field radius
 val PillShape      = RoundedCornerShape(50)
+val SheetShape     = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)  // bottom sheets
+val BadgeShape     = RoundedCornerShape(18.dp)   // achievement tiles

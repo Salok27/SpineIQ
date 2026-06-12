@@ -100,6 +100,25 @@ data class SpineIQColors(
     val brandStops: List<Color>,
     /** Soft tinted colour for elevation glows. */
     val shadowTint: Color,
+    // ── Gamification (V2) — rewards/progression only, never clinical ─────────
+    val reward: Color,
+    val onReward: Color,
+    val rewardContainer: Color,
+    val onRewardContainer: Color,
+    /** AA-safe violet for small reward text/icons on surfaces. */
+    val rewardText: Color,
+    /** Reward gradient: indigo → violet → purple (XP bars, level rings, celebrations). */
+    val rewardStops: List<Color>,
+    val coin: Color,
+    /** AA-safe gold for coin amounts on light containers. */
+    val coinText: Color,
+    val coinContainer: Color,
+    val streak: Color,
+    /** AA-safe streak text on surfaces. */
+    val streakText: Color,
+    /** Faux-glass surface fill / border (no real backdrop blur at minSdk 26). */
+    val glassSurface: Color,
+    val glassBorder: Color,
     val isDark: Boolean,
 )
 
@@ -118,6 +137,19 @@ private val LightSpineIQColors = SpineIQColors(
     warningFill       = WarningFill,
     brandStops        = listOf(Blue600, Sky500, Teal600),
     shadowTint        = Blue600,
+    reward            = Violet600,
+    onReward          = Color.White,
+    rewardContainer   = Violet50,
+    onRewardContainer = Violet900,
+    rewardText        = Violet700,
+    rewardStops       = listOf(Indigo500, Violet600, Purple500),
+    coin              = CoinGold,
+    coinText          = CoinGoldDeep,
+    coinContainer     = CoinContainer,
+    streak            = StreakOrange,
+    streakText        = StreakEmber,
+    glassSurface      = Color.White.copy(alpha = 0.60f),
+    glassBorder       = Color.White.copy(alpha = 0.65f),
     isDark            = false,
 )
 
@@ -136,6 +168,19 @@ private val DarkSpineIQColors = SpineIQColors(
     warningFill       = Color(0xFFFBBF24),
     brandStops        = listOf(Blue500, Sky400, Teal300),
     shadowTint        = Blue500,
+    reward            = Violet400,
+    onReward          = Violet900,
+    rewardContainer   = Violet800,
+    onRewardContainer = Violet50,
+    rewardText        = Violet400,
+    rewardStops       = listOf(Violet400, Purple500, Purple400),
+    coin              = CoinGold,
+    coinText          = CoinGold,
+    coinContainer     = Color(0xFF78350F),     // Amber-900
+    streak            = StreakOrange,
+    streakText        = StreakGlow,
+    glassSurface      = SlateD100.copy(alpha = 0.55f),
+    glassBorder       = Color.White.copy(alpha = 0.12f),
     isDark            = true,
 )
 

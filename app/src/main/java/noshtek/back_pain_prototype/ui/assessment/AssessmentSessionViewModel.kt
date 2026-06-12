@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.db.entity.*
+import noshtek.back_pain_prototype.core.data.gamification.AssessmentStep
+import noshtek.back_pain_prototype.core.data.gamification.GamificationManager
 import noshtek.back_pain_prototype.core.data.model.AssessmentStatus
 import noshtek.back_pain_prototype.core.data.model.DataSource
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
@@ -17,6 +19,7 @@ import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
 import noshtek.back_pain_prototype.core.scoring.ScoringEngine
 import noshtek.back_pain_prototype.core.scoring.model.*
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.RewardToastSuppressor
 import java.time.LocalDate
 import java.time.Period
 import javax.inject.Inject
@@ -24,8 +27,22 @@ import javax.inject.Inject
 @HiltViewModel
 class AssessmentSessionViewModel @Inject constructor(
     private val assessmentRepository: AssessmentRepository,
-    private val userProfileRepository: UserProfileRepository
+    private val userProfileRepository: UserProfileRepository,
+    private val gamificationManager: GamificationManager,
+    private val toastSuppressor: RewardToastSuppressor,
 ) : ViewModel() {
+
+    /**
+     * Awards the step reward after a section save. Idempotent per
+     * (assessment, step) via the reward ledger, so back-navigating and
+     * re-saving never double-pays. The wizard's interstitial shows the reward
+     * inline, so the global toast is suppressed for this grant. Gamification
+     * failures must never block the medical flow.
+     */
+    private suspend fun awardStep(assessmentId: String, step: AssessmentStep) {
+        toastSuppressor.suppress()
+        runCatching { gamificationManager.onAssessmentStepCompleted(assessmentId, step) }
+    }
 
     private val _session = MutableStateFlow(AssessmentSession())
     val session: StateFlow<AssessmentSession> = _session.asStateFlow()
@@ -89,6 +106,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 liftingLevel = s.occupation.liftingLevel,
                 workPatternNotes = s.occupation.workPatternNotes.ifBlank { null }
             ))
+            awardStep(s.assessmentId, AssessmentStep.OCCUPATION)
         }
     }
 
@@ -111,6 +129,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 restingHeartRate = s.lifestyle.restingHeartRate,
                 averageHeartRate = s.lifestyle.averageHeartRate
             ))
+            awardStep(s.assessmentId, AssessmentStep.LIFESTYLE)
         }
     }
 
@@ -129,6 +148,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 functionalLimitationsText = s.pain.functionalLimitationsText.ifBlank { null },
                 functionalLimitationSeverity = s.pain.functionalLimitationSeverity
             ))
+            awardStep(s.assessmentId, AssessmentStep.PAIN)
         }
     }
 
@@ -143,6 +163,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 sleep = s.functional.sleep,
                 dailyActivities = s.functional.dailyActivities
             ))
+            awardStep(s.assessmentId, AssessmentStep.FUNCTIONAL)
         }
     }
 
@@ -160,6 +181,7 @@ class AssessmentSessionViewModel @Inject constructor(
                 progressiveNeurologicalDeficit = s.redFlags.progressiveNeurologicalDeficit,
                 otherSeriousPathologySuspicion = s.redFlags.otherSeriousPathologySuspicion
             ))
+            awardStep(s.assessmentId, AssessmentStep.RED_FLAGS)
         }
     }
 
@@ -185,6 +207,11 @@ class AssessmentSessionViewModel @Inject constructor(
                 )
                 val result = ScoringEngine.compute(input)
                 assessmentRepository.completeAssessment(s.assessmentId, result)
+                // Completion reward + streak advance. The Results screen shows
+                // the reward inline, so the global toast stays quiet; level-up
+                // and achievement overlays still play. Never blocks the flow.
+                toastSuppressor.suppress(windowMillis = 4_000)
+                runCatching { gamificationManager.onAssessmentCompleted(s.assessmentId) }
                 _session.update { it.copy(isScoring = false, scoringResult = result) }
                 onComplete(s.assessmentId)
             } catch (e: Exception) {

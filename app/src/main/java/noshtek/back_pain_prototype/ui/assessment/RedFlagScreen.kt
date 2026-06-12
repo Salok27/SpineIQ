@@ -17,6 +17,9 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
+import noshtek.back_pain_prototype.ui.gamification.StageCompleteOverlay
 import noshtek.back_pain_prototype.ui.theme.CardShape
 
 @Composable
@@ -47,16 +52,19 @@ fun RedFlagScreen(
         Triple("Other serious pathology suspicion", flags.otherSeriousPathologySuspicion) { v: Boolean -> viewModel.updateRedFlags { copy(otherSeriousPathologySuspicion = v) } }
     )
 
+    var showStageComplete by remember { mutableStateOf(false) }
+
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Red Flags  (5 / 6)",
+            title = "Red Flags",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 5, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 5)
 
         Column(
             modifier = Modifier
@@ -111,13 +119,21 @@ fun RedFlagScreen(
 
             NextButton(
                 label = "Review & Complete",
-                onClick = {
-                    viewModel.persistRedFlags()
-                    navController.navigate(Screen.Review.route)
-                }
+                onClick = { showStageComplete = true }
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    StageCompleteOverlay(
+        visible = showStageComplete,
+        stepLabel = "Screening complete!",
+        onFinished = {
+            showStageComplete = false
+            viewModel.persistRedFlags()
+            navController.navigate(Screen.Review.route)
+        },
+    )
     }
 }
 

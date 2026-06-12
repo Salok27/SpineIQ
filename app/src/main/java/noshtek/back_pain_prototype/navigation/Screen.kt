@@ -5,6 +5,8 @@ sealed class Screen(val route: String) {
     object Profile         : Screen("profile")
     object Home            : Screen("home")
     object Progress        : Screen("progress")
+    object Shop            : Screen("shop")
+    object Achievements    : Screen("achievements")
 
     // Nested assessment graph — all 6 wizard screens share one AssessmentSessionViewModel
     object AssessmentGraph : Screen("assessment_graph")
@@ -15,8 +17,10 @@ sealed class Screen(val route: String) {
     object RedFlag         : Screen("red_flag")
     object Review          : Screen("review")
 
-    object Results         : Screen("results/{assessmentId}") {
-        fun route(assessmentId: String) = "results/$assessmentId"
+    object Results         : Screen("results/{assessmentId}?celebrate={celebrate}") {
+        /** [celebrate] plays the completion celebration — true only when arriving fresh from the wizard. */
+        fun route(assessmentId: String, celebrate: Boolean = false) =
+            "results/$assessmentId?celebrate=$celebrate"
     }
     object FullReport      : Screen("full_report/{assessmentId}") {
         fun route(assessmentId: String) = "full_report/$assessmentId"

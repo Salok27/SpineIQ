@@ -18,6 +18,8 @@ import noshtek.back_pain_prototype.core.data.model.LiftingLevel
 import noshtek.back_pain_prototype.core.data.model.OccupationType
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.*
+import noshtek.back_pain_prototype.ui.gamification.JourneyProgressIndicator
+import noshtek.back_pain_prototype.ui.gamification.StageCompleteOverlay
 import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 
 @Composable
@@ -27,21 +29,23 @@ fun OccupationScreen(
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     var showError by remember { mutableStateOf(false) }
+    var showStageComplete by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.initSession()
     }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         SpineIQTopBar(
-            title = "Occupation  (1 / 6)",
+            title = "Occupation",
             onBack = { navController.popBackStack() }
         )
-        WizardProgressBar(currentStep = 1, totalSteps = 6)
+        JourneyProgressIndicator(currentStep = 1)
 
         if (session.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -139,13 +143,23 @@ fun OccupationScreen(
                     if (session.occupation.occupationType == null) {
                         showError = true
                     } else {
-                        viewModel.persistOccupation()
-                        navController.navigate(Screen.Lifestyle.route)
+                        showStageComplete = true
                     }
                 }
             )
 
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    StageCompleteOverlay(
+        visible = showStageComplete,
+        stepLabel = "Occupation complete!",
+        onFinished = {
+            showStageComplete = false
+            viewModel.persistOccupation()
+            navController.navigate(Screen.Lifestyle.route)
+        },
+    )
     }
 }

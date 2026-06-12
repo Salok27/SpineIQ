@@ -9,13 +9,17 @@ Use the Gradle wrapper (`./gradlew` on POSIX, `.\gradlew.bat` on Windows). JDK 1
 | Build debug APK | `./gradlew :app:assembleDebug` |
 | Full build | `./gradlew build` |
 | Scoring unit tests (fast, pure JVM) | `./gradlew :core:scoring:test` |
+| Gamification unit tests (fast, pure JVM) | `./gradlew :core:data:testDebugUnitTest` |
 | App unit tests | `./gradlew :app:testDebugUnitTest` |
 | Instrumented tests (needs device/emulator) | `./gradlew connectedDebugAndroidTest` |
 | Install on device | `./gradlew :app:installDebug` |
 
 The scoring module has no Android dependency, so `:core:scoring:test` runs in
 milliseconds and is the primary fast-feedback loop for rule changes
-(`core/scoring/.../ScoringEngineTest.kt`).
+(`core/scoring/.../ScoringEngineTest.kt`). The gamification rules (levels,
+streaks, achievements, catalogs) are likewise pure Kotlin and covered by JVM
+tests in `core/data/src/test/.../gamification/` — run them after touching
+anything in `core/data/.../gamification/`.
 
 ## Common tasks
 
@@ -47,15 +51,48 @@ milliseconds and is the primary fast-feedback loop for rule changes
 
 ### Add a persisted entity / DAO query
 1. Add the `@Entity` under `core/data/.../db/entity/`, register it in
-   `SpineIQDatabase.kt`'s `entities = [...]`.
+   `SpineIQDatabase.kt`'s `entities = [...]` and bump the `version`.
 2. Add `@TypeConverter`s in `db/converters/Converters.kt` for any enum/collection.
 3. Add DAO methods; expose them through a repository, not directly to the VM.
+4. New user-owned tables should FK → `user_profiles(id)` with CASCADE so
+   "delete all my data" keeps working with no extra code.
+
+### Add a shop cosmetic (avatar item)
+1. Add an `AvatarCatalogItem` to `AvatarCatalog.ALL`
+   (`core/data/.../gamification/AvatarCatalog.kt`) — unique id, category, price.
+2. Write a draw function for it in the matching `ui/avatar/*Layers.kt` file
+   (0..100 unit space; see existing layers for the body landmarks).
+3. Map the id → layer in `ui/avatar/AvatarRegistry.kt`.
+4. Done — the Shop grid, preview, purchase flow, and renderer pick it up from
+   the catalog. `EconomyCatalogInvariantsTest` guards id uniqueness/pricing.
+
+### Add an achievement
+1. Add an `Achievement` to `AchievementCatalog.ALL`
+   (`core/data/.../gamification/AchievementCatalog.kt`) — unique id, rewards, a
+   monotonic `isUnlocked` predicate over `AchievementContext`, and optionally a
+   `progress` hint lambda.
+2. Map an icon for the id in `achievementIcon()`
+   (`ui/gamification/AchievementBadge.kt`).
+3. No schema change needed — only unlock state is persisted. Extend
+   `AchievementContext` + `GamificationRepository.buildAchievementContext()` if
+   the predicate needs a new count.
+4. Add a predicate case to `AchievementCatalogTest`.
+
+### Change reward amounts / level curve
+- All coin/XP amounts and streak-milestone bonuses live in `Economy`
+  (`core/data/.../gamification/Economy.kt`); the level table in `LevelTable.kt`.
+- Levels are derived from XP at read time, so retuning the table requires **no
+  migration** — but keep thresholds ascending and update `LevelTableTest`.
+- Never grant coins/XP directly: all grants must go through
+  `GamificationRepository.tryGrant()` with a `DedupeKeys` key, or rewards can
+  be farmed by repeating the action.
 
 ## Database schema & migrations
 
-- Room schemas are exported to `core/data/schemas/`. The current version is `1.json`.
+- Room schemas are exported to `core/data/schemas/`. The current version is
+  `3.json` (v3 added the five gamification tables).
 - The DB currently uses `.fallbackToDestructiveMigration()`
-  (`di/DatabaseModule.kt:36`) — **schema changes wipe local data**. This is
+  (`di/DatabaseModule.kt`) — **schema changes wipe local data**. This is
   acceptable only for the Phase 1 prototype. Before production, bump the DB
   version and write real `Migration`s.
 
@@ -80,6 +117,19 @@ Implementing the API 28+ import flow and API 26–27 graceful-disable is open wo
 - **Wizard state loss**: confirm the screen resolves the *parent* nav entry
   (`getBackStackEntry(AssessmentGraph.route)`) — a fresh `hiltViewModel()` would
   create a new, empty session.
+- **Reward not granted**: almost always the ledger dedupe working as intended —
+  the `dedupe_key` already exists (e.g. re-saving a section, same-day check-in,
+  one-time streak milestone). Inspect `reward_ledger` rows / the
+  `tryGrant()` return value before suspecting the economy.
+- **Celebration didn't show**: events emit only *after* the DB transaction
+  commits and have no replay — if `CelebrationHost`'s collector wasn't attached
+  (e.g. process death mid-grant) the animation is lost but currency is safe.
+  Toasts inside the wizard are intentionally suppressed by
+  `RewardToastSuppressor` because the stage interstitial shows the same reward.
+- **Streak looks wrong**: display uses `StreakLogic.effectiveStreak` (lazy
+  reset — shows 0 after a missed day even though the stored value is stale);
+  the stored row only updates on the next qualifying event. Only check-ins and
+  completions qualify, not per-step saves.
 
 ## Distribution
 
