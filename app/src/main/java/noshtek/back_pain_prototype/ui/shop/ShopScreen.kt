@@ -23,8 +23,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -50,15 +48,19 @@ import noshtek.back_pain_prototype.ui.avatar.AvatarSize
 import noshtek.back_pain_prototype.ui.avatar.AvatarSpec
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MotionTokens
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PressableCard
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
+import noshtek.back_pain_prototype.ui.common.SelectableChip
 import noshtek.back_pain_prototype.ui.common.TextActionButton
+import noshtek.back_pain_prototype.ui.common.neonGlow
 import noshtek.back_pain_prototype.ui.gamification.CoinBalancePill
 import noshtek.back_pain_prototype.ui.gamification.CoinGlyph
 import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.SheetShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
+import noshtek.back_pain_prototype.ui.theme.rewardBorderBrush
 
 private val CategoryLabels = mapOf<AvatarCategory?, String>(
     null to "All",
@@ -81,9 +83,10 @@ fun ShopScreen(
     var confirmItem by remember { mutableStateOf<ShopItemUi?>(null) }
     var resultHint by remember { mutableStateOf<String?>(null) }
 
+    NebulaBackground {
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
-            title = "Shop",
+            title = "Holo-Shop",
             subtitle = "Style your spine buddy",
             trailing = { CoinBalancePill(coins = state.coins) },
         )
@@ -104,14 +107,10 @@ fun ShopScreen(
         ) {
             CategoryLabels.forEach { (category, label) ->
                 val selected = state.selectedCategory == category
-                FilterChip(
+                SelectableChip(
                     selected = selected,
                     onClick = { viewModel.selectCategory(category) },
-                    label = { Text(label) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = SpineIQTheme.colors.rewardContainer,
-                        selectedLabelColor = SpineIQTheme.colors.rewardText,
-                    ),
+                    label = label,
                 )
             }
         }
@@ -150,6 +149,7 @@ fun ShopScreen(
         }
     }
 
+    }
     confirmItem?.let { itemUi ->
         PurchaseConfirmSheet(
             itemUi = itemUi,
@@ -184,11 +184,14 @@ private fun PreviewPanel(
     val colors = SpineIQTheme.colors
     GlassCard(modifier = modifier, contentPadding = PaddingValues(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            // Holo-pedestal: violet glow under the avatar sells the projection.
             Box(
                 Modifier
                     .size(112.dp)
+                    .neonGlow(colors.reward, PillShape, elevation = 18.dp, alpha = 0.45f)
                     .clip(PillShape)
-                    .background(colors.rewardContainer.copy(alpha = 0.55f)),
+                    .background(colors.rewardContainer.copy(alpha = 0.55f))
+                    .border(1.dp, rewardBorderBrush(), PillShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Crossfade(targetState = spec, animationSpec = tween(MotionTokens.DurationFast), label = "preview") {
@@ -226,7 +229,9 @@ private fun ShopItemCard(
         onClick = onClick,
         contentPadding = PaddingValues(12.dp),
         modifier = if (itemUi.equipped) {
-            Modifier.border(2.dp, colors.reward, noshtek.back_pain_prototype.ui.theme.CardShape)
+            Modifier
+                .neonGlow(colors.reward, noshtek.back_pain_prototype.ui.theme.CardShape, elevation = 12.dp, alpha = 0.40f)
+                .border(1.5.dp, rewardBorderBrush(0.9f), noshtek.back_pain_prototype.ui.theme.CardShape)
         } else Modifier,
     ) {
         Box(

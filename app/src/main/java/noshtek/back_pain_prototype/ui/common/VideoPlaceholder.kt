@@ -28,15 +28,17 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import noshtek.back_pain_prototype.ui.theme.DeepSpaceLow
 import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.Spacing
+import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.brandGradient
 
 /**
- * Polished placeholder that reserves space for a future instructional/demo video
- * shown before an assessment section. Pure UI — there is no playback yet
- * (no ExoPlayer / video deps). It is built from the Design System 2.0 tokens so
- * it reads as a native part of the app rather than a developer stub.
+ * Holo-frame placeholder that reserves space for a future instructional/demo
+ * video shown before an assessment section. Pure UI — there is no playback yet
+ * (no ExoPlayer / video deps). Styled as a dormant holo-projector: deep-space
+ * frame, faint aurora wash, scanlines and a glowing play orb.
  *
  * Future swap: when real assets arrive, replace only [VideoFrameSurface] with an
  * ExoPlayer `AndroidView`. This public signature and every call site stay the same.
@@ -72,39 +74,50 @@ fun AssessmentVideoPlaceholder(
 }
 
 /**
- * The 16:9 "player" area: brand-gradient fill + soft light blooms (matching
- * [GradientHeroCard]) with a frosted circular play button centred. This is the
- * single composable to replace with a real video surface later.
+ * The 16:9 "projector" area: near-black base, low-alpha aurora wash, subtle
+ * scanlines, and a glowing cyan play orb. This is the single composable to
+ * replace with a real video surface later.
  */
 @Composable
 private fun VideoFrameSurface() {
+    val aurora = brandGradient()
+    val glow = SpineIQTheme.colors.glow
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
-            .background(brandGradient())
+            .background(DeepSpaceLow)
             .drawBehind {
-                // Two soft light blooms — quiet futuristic depth, never distracting.
+                // Dormant aurora projection.
+                drawRect(brush = aurora, alpha = 0.16f)
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.10f),
+                    color = Color.White.copy(alpha = 0.05f),
                     radius = size.maxDimension * 0.42f,
                     center = Offset(size.width * 0.86f, size.height * 0.06f),
                 )
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.05f),
-                    radius = size.minDimension * 0.55f,
-                    center = Offset(size.width * 0.08f, size.height * 0.98f),
-                )
+                // Scanlines every 6dp — the holo-screen texture.
+                val step = 6.dp.toPx()
+                var y = 0f
+                while (y < size.height) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.030f),
+                        start = Offset(0f, y),
+                        end = Offset(size.width, y),
+                        strokeWidth = 1f,
+                    )
+                    y += step
+                }
             },
         contentAlignment = Alignment.Center,
     ) {
-        // Frosted circular play button.
+        // Glowing play orb.
         Box(
             modifier = Modifier
                 .size(64.dp)
+                .neonGlow(glow, CircleShape, elevation = 16.dp, alpha = 0.50f)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.18f))
-                .border(1.5.dp, Color.White.copy(alpha = 0.6f), CircleShape),
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(1.5.dp, SpineIQTheme.colors.accent.copy(alpha = 0.70f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -120,12 +133,12 @@ private fun VideoFrameSurface() {
 /** Static, non-interactive status pill — mirrors the [RiskBadge] idiom. */
 @Composable
 private fun ComingSoonPill() {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = SpineIQTheme.colors.accentText
     Row(
         modifier = Modifier
             .clip(PillShape)
-            .background(accent.copy(alpha = 0.12f))
-            .border(1.dp, accent.copy(alpha = 0.35f), PillShape)
+            .background(SpineIQTheme.colors.accent.copy(alpha = 0.12f))
+            .border(1.dp, SpineIQTheme.colors.accent.copy(alpha = 0.35f), PillShape)
             .padding(horizontal = Spacing.md, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

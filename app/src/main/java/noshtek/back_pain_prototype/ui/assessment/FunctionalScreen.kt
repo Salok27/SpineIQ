@@ -31,7 +31,7 @@ fun FunctionalScreen(
     val functional = session.functional
     var showStageComplete by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -86,33 +86,33 @@ fun FunctionalScreen(
                 onSelect = { viewModel.updateFunctional { copy(dailyActivities = it) } }
             )
 
-            // Live ODI total on a brand-gradient card — the number animates as choices change.
-            GradientHeroCard(contentPadding = PaddingValues(20.dp)) {
+            // Live ODI total on a glowing holo-panel — the number animates as choices change.
+            GlowCard(contentPadding = PaddingValues(20.dp), borderAlpha = 0.50f) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
-                        Text("Modified ODI Total", style = MaterialTheme.typography.titleSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                        MicroLabel("Modified ODI Total")
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             "0 = full function · 10 = severe disability",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Row(verticalAlignment = Alignment.Bottom) {
                         AnimatedCountText(
                             target = functional.odiTotal,
                             style = MaterialTheme.typography.displaySmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
                             durationMillis = MotionTokens.DurationFast,
                         )
                         Text(
                             " / 10",
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White.copy(alpha = 0.85f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 4.dp),
                         )
                     }
@@ -148,19 +148,15 @@ private fun FunctionalRow(
     SectionCard(title = label) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FunctionalLevel.entries.forEach { level ->
-                FilterChip(
+                SelectableChip(
                     selected = selected == level,
                     onClick = { onSelect(level) },
-                    label = {
-                        Text(
-                            when (level) {
-                                FunctionalLevel.NORMAL -> "Normal"
-                                FunctionalLevel.MILD_DIFFICULTY -> "Mild"
-                                FunctionalLevel.SEVERE_DIFFICULTY -> "Severe"
-                            }
-                        )
+                    label = when (level) {
+                        FunctionalLevel.NORMAL -> "Normal"
+                        FunctionalLevel.MILD_DIFFICULTY -> "Mild"
+                        FunctionalLevel.SEVERE_DIFFICULTY -> "Severe"
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }

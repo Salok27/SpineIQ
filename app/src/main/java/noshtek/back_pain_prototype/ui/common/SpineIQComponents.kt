@@ -1,9 +1,7 @@
 package noshtek.back_pain_prototype.ui.common
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -58,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.scoring.model.BackPainRiskClassification
 import noshtek.back_pain_prototype.core.scoring.model.RiskTier
 import noshtek.back_pain_prototype.core.scoring.model.SssSeverityTier
-import noshtek.back_pain_prototype.ui.theme.CardShape
 import noshtek.back_pain_prototype.ui.theme.HeroShape
 import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.RiskHigh
@@ -95,7 +92,8 @@ fun SpineIQTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            // Transparent so the nebula background runs uninterrupted behind it.
+            containerColor = Color.Transparent,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
@@ -103,6 +101,9 @@ fun SpineIQTopBar(
 }
 
 // ── Risk Badges ───────────────────────────────────────────────────────────────
+// Clinical semantics: hue ordering is the source of truth and never borrows
+// from the reward palette. On dark panels the badge is a tinted pill with a
+// neon hairline in the risk colour.
 
 @Composable
 fun SssTierBadge(tier: SssSeverityTier, modifier: Modifier = Modifier) {
@@ -143,8 +144,8 @@ fun CompositeBadge(classification: BackPainRiskClassification, modifier: Modifie
 fun RiskBadge(label: String, color: Color, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .background(color.copy(alpha = 0.12f), PillShape)
-            .border(BorderStroke(1.dp, color.copy(alpha = 0.35f)), PillShape)
+            .background(color.copy(alpha = 0.14f), PillShape)
+            .border(BorderStroke(1.dp, color.copy(alpha = 0.50f)), PillShape)
             .padding(horizontal = 12.dp, vertical = 5.dp),
     ) {
         Text(
@@ -168,6 +169,7 @@ fun SliderWithLabel(
     unit: String = "",
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineIQTheme.colors
     val valueText = if (unit.isNotEmpty()) "%.1f %s".format(value, unit) else "%.0f".format(value)
     Column(modifier = modifier) {
         Row(
@@ -183,18 +185,24 @@ fun SliderWithLabel(
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.width(8.dp))
+            // Holo value readout: dark chip + cyan numeral + hairline.
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
                         shape = RoundedCornerShape(10.dp),
+                    )
+                    .border(
+                        1.dp,
+                        colors.accent.copy(alpha = 0.35f),
+                        RoundedCornerShape(10.dp),
                     )
                     .padding(horizontal = 12.dp, vertical = 5.dp),
             ) {
                 Text(
                     text = valueText,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = colors.accentText,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                 )
@@ -206,9 +214,11 @@ fun SliderWithLabel(
             valueRange = valueRange,
             steps = steps,
             colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.secondary,
-                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -227,14 +237,15 @@ fun SectionCard(
     accent: Color = MaterialTheme.colorScheme.primary,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    AppCard(modifier = modifier, shape = CardShape, shadowElevation = 10.dp) {
+    AppCard(modifier = modifier, shadowElevation = 10.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (icon != null) {
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(accent.copy(alpha = 0.12f)),
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(accent.copy(alpha = 0.14f))
+                        .border(1.dp, accent.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(20.dp))
@@ -273,7 +284,15 @@ fun RequiredFieldError(show: Boolean, message: String = "This field is required"
         enter = fadeIn() + expandVertically(),
         exit = fadeOut() + shrinkVertically(),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Clinical-red alert pill — deliberately plain, never playful.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(PillShape)
+                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
+                .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f), PillShape)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+        ) {
             Icon(
                 Icons.Filled.ErrorOutline,
                 contentDescription = null,
@@ -285,6 +304,7 @@ fun RequiredFieldError(show: Boolean, message: String = "This field is required"
                 text = message,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }
@@ -343,7 +363,7 @@ fun LabelledScoreBar(
                 .height(10.dp)
                 .clip(PillShape),
             color = color,
-            trackColor = color.copy(alpha = 0.15f),
+            trackColor = color.copy(alpha = 0.18f),
             strokeCap = StrokeCap.Round,
             gapSize = 0.dp,
             drawStopIndicator = {},
@@ -370,8 +390,8 @@ fun RiskTileSmall(label: String, tier: RiskTier) {
         )
         Box(
             modifier = Modifier
-                .background(color.copy(alpha = 0.12f), PillShape)
-                .border(BorderStroke(1.dp, color.copy(alpha = 0.35f)), PillShape)
+                .background(color.copy(alpha = 0.14f), PillShape)
+                .border(BorderStroke(1.dp, color.copy(alpha = 0.50f)), PillShape)
                 .padding(horizontal = 10.dp, vertical = 3.dp),
         ) {
             Text(
@@ -395,12 +415,11 @@ fun ScoreHeroCard(
     modifier: Modifier = Modifier,
 ) {
     val fraction = if (maxScore > 0) score.coerceIn(0, maxScore).toFloat() / maxScore else 0f
-    AppCard(
+    GlowCard(
         modifier = modifier,
         shape = HeroShape,
-        border = false,
-        shadowElevation = 20.dp,
         contentPadding = PaddingValues(24.dp),
+        borderAlpha = 0.45f,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -412,7 +431,7 @@ fun ScoreHeroCard(
                     progress = fraction,
                     diameter = 132.dp,
                     strokeWidth = 14.dp,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                     brush = brandGradient(),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -420,33 +439,19 @@ fun ScoreHeroCard(
                             target = score,
                             style = MaterialTheme.typography.displayMedium,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                         )
-                        Text(
-                            "of $maxScore",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        MicroLabel("of $maxScore")
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Text(
-                    scoreLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                MicroLabel(scoreLabel)
             }
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    "OVERALL RISK",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold,
-                )
+                MicroLabel("Overall Risk")
                 CompositeBadge(classification = classification)
                 Text(
                     "Based on your spine severity, lifestyle and functional scores.",

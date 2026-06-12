@@ -26,13 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.ui.theme.ButtonShape
+import noshtek.back_pain_prototype.ui.theme.OnCyan
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
+import noshtek.back_pain_prototype.ui.theme.auroraBorderBrush
 import noshtek.back_pain_prototype.ui.theme.brandGradient
 
 private const val PRESSED_SCALE = 0.97f
@@ -49,8 +52,9 @@ private fun rememberPressScale(interaction: MutableInteractionSource, active: Bo
 }
 
 /**
- * The primary call-to-action: brand-gradient fill, soft glow, spring press-scale,
- * plus first-class loading and disabled states and an optional leading icon.
+ * The primary call-to-action: aurora-gradient fill with a cyan neon glow and
+ * dark ink content (highest contrast on the luminous gradient), spring
+ * press-scale, plus first-class loading/disabled states and an optional icon.
  * Width is caller-controlled (pass `Modifier.fillMaxWidth()` or `weight()`).
  */
 @Composable
@@ -73,10 +77,10 @@ fun PrimaryButton(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                alpha = if (enabled) 1f else 0.55f
+                alpha = if (enabled) 1f else 0.45f
             }
             .then(
-                if (active) Modifier.softShadow(SpineIQTheme.colors.shadowTint, ButtonShape, elevation = 16.dp, alpha = 0.38f)
+                if (active) Modifier.neonGlow(SpineIQTheme.colors.glow, ButtonShape, elevation = 18.dp, alpha = 0.50f)
                 else Modifier
             )
             .clip(ButtonShape)
@@ -92,11 +96,11 @@ fun PrimaryButton(
             .padding(horizontal = 24.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val contentColor = if (active) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        val contentColor = if (active) OnCyan else MaterialTheme.colorScheme.onSurfaceVariant
         if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(22.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 strokeWidth = 2.5.dp,
             )
         } else {
@@ -113,7 +117,10 @@ fun PrimaryButton(
     }
 }
 
-/** Medium-emphasis tonal button (soft container) with the same interaction feel. */
+/**
+ * Medium-emphasis "outline glow" button: transparent dark panel with an aurora
+ * hairline border and accent text — the same interaction feel as the primary.
+ */
 @Composable
 fun SecondaryButton(
     onClick: () -> Unit,
@@ -122,13 +129,16 @@ fun SecondaryButton(
     enabled: Boolean = true,
     loading: Boolean = false,
     icon: ImageVector? = null,
-    contentColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = SpineIQTheme.colors.accentText,
     height: Dp = 52.dp,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val active = enabled && !loading
     val scale = rememberPressScale(interaction, active)
     val resolvedContent = if (active) contentColor else MaterialTheme.colorScheme.onSurfaceVariant
+    val borderBrush =
+        if (active && contentColor == SpineIQTheme.colors.accentText) auroraBorderBrush(0.55f)
+        else SolidColor(resolvedContent.copy(alpha = 0.40f))
 
     Box(
         modifier
@@ -136,11 +146,11 @@ fun SecondaryButton(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                alpha = if (enabled) 1f else 0.55f
+                alpha = if (enabled) 1f else 0.45f
             }
             .clip(ButtonShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.5.dp, resolvedContent.copy(alpha = 0.35f), ButtonShape)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f))
+            .border(1.dp, borderBrush, ButtonShape)
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(color = contentColor),

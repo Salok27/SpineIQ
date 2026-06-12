@@ -53,12 +53,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.data.db.dao.FullAssessmentData
 import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
-import noshtek.back_pain_prototype.ui.common.AppCard
 import noshtek.back_pain_prototype.ui.common.CompositeBadge
+import noshtek.back_pain_prototype.ui.common.GlowCard
+import noshtek.back_pain_prototype.ui.common.MicroLabel
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.theme.OnCyan
 import noshtek.back_pain_prototype.ui.theme.brandGradient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -84,18 +87,24 @@ fun FullReportScreen(
         }
     }
 
+    NebulaBackground {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Full Report", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Full Report", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        MicroLabel("Complete assessment record")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = Color.Transparent,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -125,6 +134,7 @@ fun FullReportScreen(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -148,8 +158,8 @@ private fun ReportContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Header card with a gradient document badge
-        AppCard(modifier = Modifier.entrance(0), border = false, shadowElevation = 16.dp) {
+        // Header panel with a gradient document badge
+        GlowCard(modifier = Modifier.entrance(0), borderAlpha = 0.45f) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Box(
                     modifier = Modifier
@@ -158,7 +168,7 @@ private fun ReportContent(
                         .background(brandGradient()),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Filled.Description, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
+                    Icon(Icons.Filled.Description, contentDescription = null, tint = OnCyan, modifier = Modifier.size(26.dp))
                 }
                 Column {
                     Text(

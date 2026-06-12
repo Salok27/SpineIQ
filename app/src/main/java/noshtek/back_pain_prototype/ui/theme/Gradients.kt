@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Brush
 
-/** Diagonal blue → sky → teal brand gradient (top-start → bottom-end). */
+/** Diagonal cyan → indigo → magenta aurora gradient (top-start → bottom-end). */
 @Composable
 @ReadOnlyComposable
 fun brandGradient(): Brush = Brush.linearGradient(SpineIQTheme.colors.brandStops)
 
-/** Horizontal variant of the brand gradient — used on wide hero banners. */
+/** Horizontal variant of the aurora gradient — used on wide hero banners. */
 @Composable
 @ReadOnlyComposable
 fun brandGradientHorizontal(): Brush =
@@ -31,3 +31,18 @@ fun rewardGradientHorizontal(): Brush =
 @ReadOnlyComposable
 fun coinGradient(): Brush =
     Brush.radialGradient(listOf(CoinGoldLight, CoinGold, CoinGoldDeep))
+
+/**
+ * Faded aurora sweep for 1dp panel borders — the signature hairline that makes
+ * dark panels read as lit from within. Alpha keeps it a glint, not a stripe.
+ */
+@Composable
+@ReadOnlyComposable
+fun auroraBorderBrush(alpha: Float = 0.35f): Brush =
+    Brush.linearGradient(SpineIQTheme.colors.brandStops.map { it.copy(alpha = alpha) })
+
+/** Reward-tinted variant of the border hairline — equipped/unlocked states. */
+@Composable
+@ReadOnlyComposable
+fun rewardBorderBrush(alpha: Float = 0.45f): Brush =
+    Brush.linearGradient(SpineIQTheme.colors.rewardStops.map { it.copy(alpha = alpha) })

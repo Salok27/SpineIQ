@@ -61,7 +61,7 @@ fun RewardToast(
                 coins = coins,
                 xp = xp,
                 emphasized = true,
-                modifier = Modifier.softShadow(SpineIQTheme.colors.shadowTint, PillShape, elevation = 12.dp),
+                modifier = Modifier.softShadow(SpineIQTheme.colors.reward, PillShape, elevation = 14.dp, alpha = 0.45f),
             )
         }
     }

@@ -86,7 +86,7 @@ private fun CelebrationOverlay(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Ink.copy(alpha = 0.45f))
+            .background(Ink.copy(alpha = 0.62f))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

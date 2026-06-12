@@ -33,7 +33,7 @@ fun LifestyleScreen(
     val lifestyle = session.lifestyle
     var showStageComplete by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,10 +67,10 @@ fun LifestyleScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     SleepQuality.entries.forEach { quality ->
-                        FilterChip(
+                        SelectableChip(
                             selected = lifestyle.sleepQuality == quality,
                             onClick = { viewModel.updateLifestyle { copy(sleepQuality = quality) } },
-                            label = { Text(quality.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = quality.name.lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -108,7 +108,7 @@ fun LifestyleScreen(
                 ) {
                     ExerciseType.entries.forEach { type ->
                         val selected = type in lifestyle.exerciseTypes
-                        FilterChip(
+                        SelectableChip(
                             selected = selected,
                             onClick = {
                                 viewModel.updateLifestyle {
@@ -116,7 +116,7 @@ fun LifestyleScreen(
                                     copy(exerciseTypes = updated)
                                 }
                             },
-                            label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }

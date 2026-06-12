@@ -4,6 +4,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -108,6 +109,31 @@ fun AnimatedCountText(
         color = color,
         fontWeight = fontWeight,
     )
+}
+
+/**
+ * Infinite "breathing" neon glow for the highest-emphasis CTA or hero element.
+ * Use sparingly — at most one pulsing element per screen.
+ */
+@Composable
+fun Modifier.pulseGlow(
+    color: Color,
+    shape: Shape,
+    minAlpha: Float = 0.25f,
+    maxAlpha: Float = 0.55f,
+    durationMillis: Int = 1600,
+): Modifier {
+    val transition = rememberInfiniteTransition(label = "pulse-glow")
+    val alpha by transition.animateFloat(
+        initialValue = minAlpha,
+        targetValue = maxAlpha,
+        animationSpec = infiniteRepeatable(
+            tween(durationMillis, easing = MotionTokens.Standard),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulse-glow-alpha",
+    )
+    return this.softShadow(color, shape, elevation = 20.dp, alpha = alpha)
 }
 
 /** Lightweight shimmer placeholder used for skeleton loading states. */

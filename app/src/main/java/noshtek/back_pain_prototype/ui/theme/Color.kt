@@ -2,96 +2,91 @@ package noshtek.back_pain_prototype.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ── Brand palette: Blue (primary) + Teal (accent) — Design System 2.1 ────────
-// Blue is the trustworthy clinical base; teal is the modern, calming accent.
-// The signature gradient sweeps blue → sky → teal (no indigo/violet).
+// ── NEON AURORA palette — Design System 3.0 (dark-only) ─────────────────────
+// Deep-space ink surfaces lit by an aurora sweeping cyan → indigo → magenta.
+// Rewards keep their violet/gold identity; clinical risk hues keep their
+// semantic green→amber→orange→red ordering, re-tuned to stay luminous and
+// AA-legible on dark panels.
 
-// Light scheme
-val Blue600   = Color(0xFF2563EB)   // primary
-val Blue50    = Color(0xFFDBEAFE)   // primary container
-val Blue900   = Color(0xFF1E3A8A)   // on-primary-container / PDF title navy
-val Blue500   = Color(0xFF3B82F6)   // gradient mid stop (dark surfaces)
+// ── Deep-space neutrals ──────────────────────────────────────────────────────
+val DeepSpace    = Color(0xFF060B18)   // app background
+val DeepSpaceLow = Color(0xFF04070F)   // lowest container / splash window
+val Panel        = Color(0xFF0C1426)   // surface (cards, sheets)
+val PanelHigh    = Color(0xFF131C33)   // raised surface / surfaceVariant
+val PanelHigher  = Color(0xFF1A2542)   // chips, input fills, high containers
+val Ink          = Color(0xFF02040A)   // overlay scrims (kept name — overlay consumers)
 
-val Teal600   = Color(0xFF14B8A6)   // accent (spec) — fills, containers, gradient end
-val Teal50    = Color(0xFFCCFBF1)   // accent container
-val Teal700   = Color(0xFF0F766E)   // teal text/icons on white (WCAG AA-safe)
-val Teal900   = Color(0xFF042F2A)   // on-accent-container
+// Starlight text ramp
+val Starlight = Color(0xFFEAF2FF)      // primary text
+val StarDim   = Color(0xFF93A5C8)      // secondary text
+val StarFaint = Color(0xFF5A6B8C)      // muted text / disabled
 
-val Sky500    = Color(0xFF0EA5E9)   // gradient mid stop + tertiary accent (2nd chart line)
-val Sky100    = Color(0xFFE0F2FE)   // tertiary container
-val Sky900    = Color(0xFF0C4A6E)   // on-tertiary-container
+// Hairlines (gradient borders are built from these in Gradients.kt)
+val HairlineBright = Color(0x29FFFFFF) // 16% white — outline
+val Hairline       = Color(0x14FFFFFF) // 8% white  — outlineVariant
 
-// Neutral foundation (Slate)
-val Ink        = Color(0xFF0F172A)  // primary text (spec)
-val SlateText  = Color(0xFF475569)  // secondary text (spec) — onSurfaceVariant
-val SlateMuted = Color(0xFF64748B)  // muted text (spec)
-val Slate50    = Color(0xFFF8FAFC)  // background
-val Slate100   = Color(0xFFF1F5F9)  // surface elevated
-val Slate200   = Color(0xFFE2E8F0)  // outline variant
-val Slate300   = Color(0xFFCBD5E1)  // outline (spec)
+// ── Aurora accents ───────────────────────────────────────────────────────────
+val Cyan      = Color(0xFF38E1FF)      // primary — electric cyan
+val CyanDim   = Color(0xFF22D3EE)      // aurora gradient start / accent
+val CyanText  = Color(0xFF7DE9FF)      // AA-safe cyan for small text on panels
+val OnCyan    = Color(0xFF052433)      // text/icons on cyan fills
+val CyanContainer   = Color(0xFF0B3A4F)
+val OnCyanContainer = Color(0xFFC8F4FF)
 
-// Dark scheme neutrals
-val SlateD50   = Color(0xFF162032)
-val SlateD100  = Color(0xFF1E293B)
-val SlateD200  = Color(0xFF263548)
-val SlateD500  = Color(0xFF475569)
-val SlateD600  = Color(0xFF94A3B8)
-val SlateD700  = Color(0xFF334155)
-val SlateD900  = Color(0xFF0F172A)
-// Dark scheme accents (more luminous for dark surfaces)
-val Blue300    = Color(0xFF93C5FD)
-val Blue800    = Color(0xFF1D4ED8)
-val BlueOnDark = Color(0xFF1D3461)
-val Teal300    = Color(0xFF5EEAD4)
-val Teal800    = Color(0xFF115E59)
-val Sky400     = Color(0xFF38BDF8)
+val IndigoGlow      = Color(0xFF818CF8) // aurora mid stop / secondary
+val OnIndigo        = Color(0xFF101542)
+val IndigoContainer = Color(0xFF1E2660)
+val OnIndigoContainer = Color(0xFFDDE1FF)
 
-// ── Semantic colours (AA-tuned: bright hue = fills, darker hue = text/icons) ─
-// Spec hues (#10B981 / #F59E0B / #EF4444) are kept for large fills & indicators,
-// but text/icon variants are darkened so they pass WCAG AA on white surfaces.
-val Success          = Color(0xFF059669)  // text/icon on white (AA)
-val SuccessFill      = Color(0xFF10B981)  // spec bright — fills/indicators
-val SuccessContainer = Color(0xFFD1FAE5)
-val Warning          = Color(0xFFB45309)  // text/icon on white (AA)
-val WarningFill      = Color(0xFFF59E0B)  // spec bright — fills
-val WarningContainer = Color(0xFFFEF3C7)
-val Error            = Color(0xFFDC2626)  // text/border on white (AA)
-val ErrorFill        = Color(0xFFEF4444)  // spec bright — fills
-val ErrorContainer   = Color(0xFFFEE2E2)
+val Magenta         = Color(0xFFE879F9) // aurora end stop / tertiary
+val OnMagenta       = Color(0xFF3A0E44)
+val MagentaContainer = Color(0xFF471A54)
+val OnMagentaContainer = Color(0xFFFAD7FF)
+
+// ── Semantic colours (dark-tuned: luminous hue = text/fills on dark panels) ──
+val Success          = Color(0xFF34D399)
+val SuccessFill      = Color(0xFF34D399)
+val SuccessContainer = Color(0xFF0C3A2A)
+val Warning          = Color(0xFFFBBF24)
+val WarningFill      = Color(0xFFFBBF24)
+val WarningContainer = Color(0xFF2E2208)
+val Error            = Color(0xFFF87171)
+val ErrorFill        = Color(0xFFEF4444)
+val ErrorContainer   = Color(0xFF3A1320)
+val OnErrorContainer = Color(0xFFFECACA)
 
 // ── Clinical risk tier colours (semantic, used in SpineIQComponents) ─────────
-// Already WCAG AA-tuned for white backgrounds. UNCHANGED — clinical source of truth.
-val RiskLow              = Color(0xFF16A34A)
-val RiskModerate         = Color(0xFFD97706)
-val RiskModerateSevere   = Color(0xFFEA580C)
-val RiskHigh             = Color(0xFFDC2626)
-val RiskSevereUrgent     = Color(0xFF991B1B)
+// Hue ordering green → amber → orange → red → deep red is the clinical source
+// of truth. Values are the luminous dark-surface variants; containers are
+// solid dark tints of the same hue. NEVER mix with the reward palette.
+val RiskLow              = Color(0xFF4ADE80)
+val RiskModerate         = Color(0xFFFBBF24)
+val RiskModerateSevere   = Color(0xFFFB923C)
+val RiskHigh             = Color(0xFFF87171)
+val RiskSevereUrgent     = Color(0xFFEF4444)
 
-val RiskLowContainer             = Color(0xFFDCFCE7)
-val RiskModerateContainer        = Color(0xFFFEF3C7)
-val RiskModerateSevereContainer  = Color(0xFFFED7AA)
-val RiskHighContainer            = Color(0xFFFEE2E2)
-val RiskSevereUrgentContainer    = Color(0xFFFECACA)
+val RiskLowContainer             = Color(0xFF0D2B1D)
+val RiskModerateContainer        = Color(0xFF2E2208)
+val RiskModerateSevereContainer  = Color(0xFF331B07)
+val RiskHighContainer            = Color(0xFF331114)
+val RiskSevereUrgentContainer    = Color(0xFF3A0D11)
 
-// ── Reward / progression palette (Violet family — V2 gamification) ──────────
+// ── Reward / progression palette (Violet family — gamification only) ────────
 // Strictly for XP, levels, achievements, shop and celebrations. NEVER used on
 // clinical risk tiers, SSS badges, or chart clinical lines.
-val Violet600 = Color(0xFF7C3AED)   // reward primary (fills, rings, equipped states)
-val Violet500 = Color(0xFF8B5CF6)   // gradient mid stop
-val Violet700 = Color(0xFF6D28D9)   // AA-safe violet text/icons on white
-val Violet400 = Color(0xFFA78BFA)   // dark-scheme reward
-val Violet50  = Color(0xFFEDE9FE)   // reward container
-val Violet800 = Color(0xFF5B21B6)   // dark-scheme reward container
-val Violet900 = Color(0xFF4C1D95)   // on-reward-container
-val Indigo500 = Color(0xFF6366F1)   // reward-gradient start (bridges Blue600 → Violet)
-val Purple400 = Color(0xFFC084FC)   // dark-scheme gradient end
-val Purple500 = Color(0xFFA855F7)   // reward-gradient end
+val RewardViolet          = Color(0xFFA78BFA)  // reward primary on dark
+val RewardVioletBright    = Color(0xFFC4B5FD)  // AA-safe reward text on panels
+val RewardVioletDeep      = Color(0xFF221148)  // on-reward (text on violet fills)
+val RewardVioletContainer = Color(0xFF2A1D4E)
+val OnRewardVioletContainer = Color(0xFFEDE9FE)
+val PurpleGlow            = Color(0xFFC084FC)  // reward gradient end
 
 // ── Coin / streak accents (gamification only) ───────────────────────────────
-val CoinGold      = Color(0xFFF59E0B)  // coin fill (matches WarningFill family)
-val CoinGoldLight = Color(0xFFFCD34D)  // coin sheen highlight
-val CoinGoldDeep  = Color(0xFFD97706)  // coin edge / AA text on light containers
-val CoinContainer = Color(0xFFFEF3C7)  // coin pill background
+val CoinGold      = Color(0xFFFBBF24)  // coin fill
+val CoinGoldLight = Color(0xFFFDE68A)  // coin sheen highlight
+val CoinGoldDeep  = Color(0xFFD97706)  // coin edge / embossing
+val CoinText      = Color(0xFFFCD34D)  // AA-safe gold text on dark panels
+val CoinContainer = Color(0xFF2E2108)  // coin pill background
 val StreakOrange  = Color(0xFFF97316)  // flame fill
-val StreakEmber   = Color(0xFFEA580C)  // flame core / AA text on white
-val StreakGlow    = Color(0xFFFB923C)  // dark-scheme streak text
+val StreakEmber   = Color(0xFFEA580C)  // flame core
+val StreakGlow    = Color(0xFFFDBA74)  // streak text on dark

@@ -67,6 +67,7 @@ import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.AppCard
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MotionTokens
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PressableCard
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
@@ -113,11 +114,12 @@ fun ProgressScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val fmt = remember { DateTimeFormatter.ofPattern("d MMM yy") }
 
+    NebulaBackground {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         topBar = {
             // Progress is a hub tab now — header without a back arrow.
-            ScreenHeader(title = "Progress", subtitle = "Trends across your assessments")
+            ScreenHeader(title = "Progress", subtitle = "Stats HUD · trends across assessments")
         }
     ) { padding ->
         if (state.isLoading) {
@@ -277,7 +279,7 @@ fun ProgressScreen(
                         }
                     }
                     val dates = state.assessments.map { LocalDate.ofEpochDay(it.record.assessmentDate).format(fmt) }
-                    SimpleLineChart(values = tiers, labels = dates, maxY = 3f, color = MaterialTheme.colorScheme.secondary)
+                    SimpleLineChart(values = tiers, labels = dates, maxY = 3f, color = MaterialTheme.colorScheme.tertiary)
                     Spacer(Modifier.height(4.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         listOf("1=Low", "2=Moderate", "3=High").forEach {
@@ -329,6 +331,7 @@ fun ProgressScreen(
                 )
             }
         }
+    }
     }
 }
 
@@ -448,10 +451,12 @@ private fun SimpleLineChart(
         }
         drawPath(fillPath, fillBrush, alpha = anim)
 
-        // Trace the line on with a PathMeasure segment.
+        // Trace the line on with a PathMeasure segment. Drawn twice — a wide
+        // low-alpha pass underneath gives the crisp line a neon glow.
         pathMeasure.setPath(linePath, false)
         val traced = Path()
         pathMeasure.getSegment(0f, pathMeasure.length * anim, traced, true)
+        drawPath(traced, lineColor, style = Stroke(width = 9.dp.toPx()), alpha = 0.18f)
         drawPath(traced, lineColor, style = Stroke(width = 3.dp.toPx()))
 
         points.forEachIndexed { i, p ->

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.ui.common.AnimatedCountText
 import noshtek.back_pain_prototype.ui.common.MotionTokens
+import noshtek.back_pain_prototype.ui.common.neonGlow
 import noshtek.back_pain_prototype.ui.theme.CoinGoldDeep
 import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
@@ -103,9 +104,10 @@ fun CoinBalancePill(
     Row(
         modifier
             .graphicsLayer { scaleX = pulse.value; scaleY = pulse.value }
+            .neonGlow(colors.coin, PillShape, elevation = 10.dp, alpha = 0.30f)
             .clip(PillShape)
             .background(colors.coinContainer)
-            .border(1.dp, colors.coin.copy(alpha = 0.35f), PillShape)
+            .border(1.dp, colors.coin.copy(alpha = 0.45f), PillShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,

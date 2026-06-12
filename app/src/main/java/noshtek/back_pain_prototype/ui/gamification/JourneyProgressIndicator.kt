@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.data.gamification.Economy
+import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.MotionTokens
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
@@ -66,10 +67,9 @@ fun JourneyProgressIndicator(
 
     Column(modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "Stage $currentStep of $totalSteps",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
+            MicroLabel(
+                "Stage $currentStep / $totalSteps",
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.weight(1f))
             RewardChip(coins = stepRewardCoins, xp = stepRewardXp)

@@ -30,6 +30,7 @@ fun ReviewScreen(
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
 
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -140,6 +141,7 @@ fun ReviewScreen(
 
             Spacer(Modifier.height(8.dp))
         }
+    }
     }
 }
 

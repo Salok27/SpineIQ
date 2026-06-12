@@ -1,12 +1,12 @@
 package noshtek.back_pain_prototype.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,8 +48,8 @@ import noshtek.back_pain_prototype.ui.avatar.AvatarSize
 import noshtek.back_pain_prototype.ui.avatar.AvatarWithLevelRing
 import noshtek.back_pain_prototype.ui.common.AnimatedCountText
 import noshtek.back_pain_prototype.ui.common.GlassCard
-import noshtek.back_pain_prototype.ui.common.GlassOnGradient
-import noshtek.back_pain_prototype.ui.common.GradientHeroCard
+import noshtek.back_pain_prototype.ui.common.MicroLabel
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PressableCard
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
@@ -57,6 +57,7 @@ import noshtek.back_pain_prototype.ui.common.ShimmerBox
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
 import noshtek.back_pain_prototype.ui.common.TextActionButton
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.common.pulseGlow
 import noshtek.back_pain_prototype.ui.gamification.AchievementBadge
 import noshtek.back_pain_prototype.ui.gamification.CoinBalancePill
 import noshtek.back_pain_prototype.ui.gamification.DailyCheckInCard
@@ -64,8 +65,10 @@ import noshtek.back_pain_prototype.ui.gamification.RewardChip
 import noshtek.back_pain_prototype.ui.gamification.StreakFlame
 import noshtek.back_pain_prototype.ui.gamification.XpLevelBar
 import noshtek.back_pain_prototype.ui.gamification.achievementIcon
+import noshtek.back_pain_prototype.ui.theme.ButtonShape
 import noshtek.back_pain_prototype.ui.theme.CardShape
 import noshtek.back_pain_prototype.ui.theme.HeroShape
+import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.rewardGradient
 import java.time.LocalDate
@@ -83,8 +86,9 @@ private val MotivationalTips = listOf(
 )
 
 /**
- * V2 dashboard — the engagement hub: avatar + level hero, daily check-in,
- * goals, rewards preview, achievements strip, last result and insight.
+ * The command center: avatar pilot hero floating on the nebula, daily
+ * missions, the assessment launch CTA, achievements rail, last result and
+ * insight.
  */
 @Composable
 fun HomeScreen(
@@ -110,6 +114,7 @@ fun HomeScreen(
         }
     }
 
+    NebulaBackground {
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
             title = "SpineIQ",
@@ -138,50 +143,54 @@ fun HomeScreen(
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // 1 ── Avatar hero
-            GradientHeroCard(modifier = Modifier.entrance(0)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    AvatarWithLevelRing(
-                        spec = state.equippedSpec,
-                        level = state.level.number,
-                        levelProgress = state.levelProgress,
-                        size = AvatarSize.Large,
+            // 1 ── Pilot hero — floats directly on the nebula, no boxed card.
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .entrance(0)
+                    .padding(top = 4.dp, start = 4.dp, end = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AvatarWithLevelRing(
+                    spec = state.equippedSpec,
+                    level = state.level.number,
+                    levelProgress = state.levelProgress,
+                    size = AvatarSize.Large,
+                    onGradient = false,
+                )
+                Spacer(Modifier.width(18.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    MicroLabel(greeting)
+                    Text(
+                        state.userName.substringBefore(' ').ifBlank { "there" },
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
-                    Spacer(Modifier.width(16.dp))
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(
+                        Modifier
+                            .clip(PillShape)
+                            .background(SpineIQTheme.colors.rewardContainer)
+                            .border(1.dp, SpineIQTheme.colors.reward.copy(alpha = 0.40f), PillShape)
+                            .padding(horizontal = 10.dp, vertical = 3.dp),
+                    ) {
                         Text(
-                            "$greeting,",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.85f),
-                        )
-                        Text(
-                            state.userName.substringBefore(' ').ifBlank { "there" },
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White,
-                        )
-                        GlassOnGradient {
-                            Text(
-                                state.level.name,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                        XpLevelBar(
-                            level = state.level.number,
-                            levelName = state.level.name,
-                            xpIntoLevel = state.xpIntoLevel,
-                            xpForNextLevel = state.xpForNextLevel,
-                            compact = true,
-                            onGradient = true,
-                        )
-                        StreakFlame(
-                            streakDays = state.streakDays,
-                            activeToday = state.checkedInToday || state.assessmentCompletedToday,
-                            onGradient = true,
+                            state.level.name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SpineIQTheme.colors.rewardText,
+                            fontWeight = FontWeight.Bold,
                         )
                     }
+                    XpLevelBar(
+                        level = state.level.number,
+                        levelName = state.level.name,
+                        xpIntoLevel = state.xpIntoLevel,
+                        xpForNextLevel = state.xpForNextLevel,
+                        compact = true,
+                    )
+                    StreakFlame(
+                        streakDays = state.streakDays,
+                        activeToday = state.checkedInToday || state.assessmentCompletedToday,
+                    )
                 }
             }
 
@@ -195,7 +204,7 @@ fun HomeScreen(
                 modifier = Modifier.entrance(1),
             )
 
-            // 3 ── Today's goals
+            // 3 ── Today's missions
             DailyGoalsCard(
                 checkedIn = state.checkedInToday,
                 assessmentDone = state.assessmentCompletedToday,
@@ -208,7 +217,9 @@ fun HomeScreen(
                     onClick = { navController.navigate(Screen.AssessmentGraph.route) },
                     label = "Start New Assessment",
                     icon = Icons.Filled.Add,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pulseGlow(SpineIQTheme.colors.glow, ButtonShape),
                 )
                 Row(
                     Modifier.fillMaxWidth(),
@@ -232,15 +243,18 @@ fun HomeScreen(
             if (state.recentAchievements.isNotEmpty()) {
                 Column(Modifier.entrance(4)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Achievements",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f),
-                        )
+                        Column(Modifier.weight(1f)) {
+                            MicroLabel("Trophy Hall")
+                            Text(
+                                "Achievements",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                         TextActionButton(
                             onClick = { navigateToTab(Screen.Achievements.route) },
                             label = "View all",
+                            color = SpineIQTheme.colors.accentText,
                         )
                     }
                     Spacer(Modifier.height(4.dp))
@@ -274,17 +288,11 @@ fun HomeScreen(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            Text(
-                                "LAST ASSESSMENT",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            MicroLabel("Last Assessment")
                             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 AnimatedCountText(
                                     target = state.lastScores!!.totalSSSScore,
                                     style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.ExtraBold,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
                                 Text(
@@ -369,6 +377,7 @@ fun HomeScreen(
             )
         }
     }
+    }
 }
 
 @Composable
@@ -378,6 +387,8 @@ private fun DailyGoalsCard(
     modifier: Modifier = Modifier,
 ) {
     GlassCard(modifier = modifier) {
+        MicroLabel("Daily Missions")
+        Spacer(Modifier.height(4.dp))
         Text(
             "Today's goals",
             style = MaterialTheme.typography.titleMedium,
@@ -420,7 +431,7 @@ private fun GoalRow(
                 Icon(
                     Icons.Filled.Check,
                     contentDescription = "Done",
-                    tint = Color.White,
+                    tint = colors.onReward,
                     modifier = Modifier.size(14.dp),
                 )
             }

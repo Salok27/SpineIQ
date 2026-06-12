@@ -22,9 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
- * V2 top-level screen header — replaces the M3 TopAppBar on hub screens for a
- * consistent rhythm (no scroll-tint behaviour, ExtraBold title, optional
- * trailing actions like the coin pill).
+ * DS 3.0 screen header — Space Grotesk title over the nebula background with a
+ * HUD-style micro-label subtitle and optional trailing actions (coin pill,
+ * settings). No scroll-tint behaviour, by design.
  */
 @Composable
 fun ScreenHeader(
@@ -38,7 +38,7 @@ fun ScreenHeader(
         modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
             .heightIn(min = 48.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -55,16 +55,12 @@ fun ScreenHeader(
         Column(Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (subtitle != null) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                MicroLabel(text = subtitle)
             }
         }
         trailing()

@@ -35,7 +35,7 @@ fun OccupationScreen(
         viewModel.initSession()
     }
 
-    Box(Modifier.fillMaxSize()) {
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,10 +74,10 @@ fun OccupationScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OccupationType.entries.forEach { type ->
-                        FilterChip(
+                        SelectableChip(
                             selected = session.occupation.occupationType == type,
                             onClick = { viewModel.updateOccupation { copy(occupationType = type) } },
-                            label = { Text(type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = type.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -117,10 +117,10 @@ fun OccupationScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LiftingLevel.entries.forEach { level ->
-                        FilterChip(
+                        SelectableChip(
                             selected = session.occupation.liftingLevel == level,
                             onClick = { viewModel.updateOccupation { copy(liftingLevel = level) } },
-                            label = { Text(level.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = level.name.lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -133,6 +133,7 @@ fun OccupationScreen(
                     placeholder = { Text("Work pattern notes…") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = TextFieldShape,
+                    colors = auroraTextFieldColors(),
                     maxLines = 3
                 )
             }

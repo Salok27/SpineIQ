@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
 import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
@@ -45,8 +46,9 @@ fun SettingsScreen(
         }
     }
 
+    NebulaBackground {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             ScreenHeader(title = "Settings", onBack = { navController.popBackStack() })
         }
@@ -167,6 +169,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(8.dp))
         }
+    }
     }
 
     if (showDeleteConfirm) {

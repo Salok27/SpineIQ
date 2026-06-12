@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.data.gamification.CheckInMood
 import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.common.GlassCard
+import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
 private data class MoodOption(
@@ -80,6 +81,8 @@ fun DailyCheckInCard(
     }
 
     GlassCard(modifier = modifier) {
+        MicroLabel("Daily Mission")
+        Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "Daily check-in",
@@ -169,8 +172,8 @@ private fun MoodButton(
                 .size(46.dp)
                 .graphicsLayer { scaleX = scale; scaleY = scale }
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(1.dp, option.tint.copy(alpha = 0.4f), CircleShape)
+                .background(option.tint.copy(alpha = 0.14f))
+                .border(1.dp, option.tint.copy(alpha = 0.55f), CircleShape)
                 .clickable(interactionSource = interaction, indication = ripple(), onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {

@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MotionTokens
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
 import noshtek.back_pain_prototype.ui.common.entrance
 import noshtek.back_pain_prototype.ui.gamification.AchievementBadge
@@ -61,9 +62,10 @@ fun AchievementsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var detail by remember { mutableStateOf<AchievementUi?>(null) }
 
+    NebulaBackground {
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
-            title = "Awards",
+            title = "Trophy Hall",
             subtitle = "${state.unlockedCount} of ${state.totalCount} unlocked",
         )
         LazyVerticalGrid(
@@ -94,6 +96,7 @@ fun AchievementsScreen(
                 }
             }
         }
+    }
     }
 
     detail?.let { item ->

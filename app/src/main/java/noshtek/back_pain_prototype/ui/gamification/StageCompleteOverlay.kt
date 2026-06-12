@@ -35,7 +35,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.common.GlassCard
+import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.MotionTokens
+import noshtek.back_pain_prototype.ui.common.neonGlow
 import noshtek.back_pain_prototype.ui.theme.Ink
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.rewardGradient
@@ -71,7 +73,7 @@ fun StageCompleteOverlay(
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { started = true }
     val scrimAlpha by animateFloatAsState(
-        targetValue = if (started) 0.40f else 0f,
+        targetValue = if (started) 0.62f else 0f,
         animationSpec = tween(MotionTokens.DurationFast),
         label = "stage-scrim",
     )
@@ -103,6 +105,7 @@ fun StageCompleteOverlay(
                 Box(
                     Modifier
                         .size(56.dp)
+                        .neonGlow(SpineIQTheme.colors.reward, CircleShape, elevation = 16.dp, alpha = 0.55f)
                         .clip(CircleShape)
                         .background(rewardGradient()),
                     contentAlignment = Alignment.Center,
@@ -115,10 +118,12 @@ fun StageCompleteOverlay(
                     )
                 }
                 Spacer(Modifier.height(10.dp))
+                MicroLabel("Stage clear", color = SpineIQTheme.colors.rewardText)
+                Spacer(Modifier.height(2.dp))
                 Text(
                     stepLabel,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.height(10.dp))
                 RewardChip(coins = coins, xp = xp, emphasized = true)

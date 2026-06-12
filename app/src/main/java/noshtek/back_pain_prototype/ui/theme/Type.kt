@@ -11,14 +11,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import noshtek.back_pain_prototype.R
 
-// Plus Jakarta Sans — a geometric, modern sans bundled as a single variable
-// font (res/font/plus_jakarta_sans.ttf, OFL). Each weight drives the `wght`
-// variation axis (supported on API 26+, our minSdk). If the resource ever fails
-// to load, Compose falls back to the platform default — never a crash.
+// ── NEON AURORA dual-font system ─────────────────────────────────────────────
+// Space Grotesk (variable, OFL) drives display/headline/title — geometric and
+// techy, it carries the futuristic identity and all hero numerals.
+// Plus Jakarta Sans (variable, OFL) stays on body/label for long-form
+// legibility. Both are single variable TTFs driving the `wght` axis (API 26+).
+// If a resource ever fails to load, Compose falls back to the platform
+// default — never a crash.
+
+private fun grotesk(weight: FontWeight) = Font(
+    resId = R.font.space_grotesk,
+    weight = weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
+)
+
 private fun jakarta(weight: FontWeight) = Font(
     resId = R.font.plus_jakarta_sans,
     weight = weight,
     variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
+)
+
+// Space Grotesk's wght axis spans 300–700 — Bold (700) is its heaviest cut.
+private val Grotesk = FontFamily(
+    grotesk(FontWeight.Normal),
+    grotesk(FontWeight.Medium),
+    grotesk(FontWeight.SemiBold),
+    grotesk(FontWeight.Bold),
 )
 
 private val Jakarta = FontFamily(
@@ -26,47 +44,46 @@ private val Jakarta = FontFamily(
     jakarta(FontWeight.Medium),
     jakarta(FontWeight.SemiBold),
     jakarta(FontWeight.Bold),
-    jakarta(FontWeight.ExtraBold),
 )
 
-// Display/headline use ExtraBold with tight negative tracking for a confident,
-// premium feel; body keeps comfortable size, weight and line-height for legibility.
+// Display/headline: Grotesk Bold with tight tracking for the sci-fi HUD feel.
+// Labels: wide positive tracking — the uppercase "micro-label" signature.
 val Typography = Typography(
     displayLarge = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.ExtraBold,
-        fontSize = 48.sp, lineHeight = 52.sp, letterSpacing = (-1.0).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 52.sp, lineHeight = 56.sp, letterSpacing = (-1.2).sp,
     ),
     displayMedium = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.ExtraBold,
-        fontSize = 38.sp, lineHeight = 44.sp, letterSpacing = (-0.6).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 40.sp, lineHeight = 46.sp, letterSpacing = (-0.8).sp,
     ),
     displaySmall = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.Bold,
-        fontSize = 30.sp, lineHeight = 38.sp, letterSpacing = (-0.4).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 32.sp, lineHeight = 40.sp, letterSpacing = (-0.5).sp,
     ),
     headlineLarge = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.Bold,
-        fontSize = 28.sp, lineHeight = 36.sp, letterSpacing = (-0.5).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 28.sp, lineHeight = 36.sp, letterSpacing = (-0.4).sp,
     ),
     headlineMedium = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.Bold,
-        fontSize = 24.sp, lineHeight = 32.sp, letterSpacing = (-0.4).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 24.sp, lineHeight = 32.sp, letterSpacing = (-0.3).sp,
     ),
     headlineSmall = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.Bold,
-        fontSize = 20.sp, lineHeight = 28.sp, letterSpacing = (-0.3).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.Bold,
+        fontSize = 20.sp, lineHeight = 28.sp, letterSpacing = (-0.2).sp,
     ),
     titleLarge = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp, lineHeight = 26.sp, letterSpacing = (-0.2).sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp, lineHeight = 26.sp, letterSpacing = 0.sp,
     ),
     titleMedium = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp, lineHeight = 22.sp, letterSpacing = 0.sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp, lineHeight = 22.sp, letterSpacing = 0.1.sp,
     ),
     titleSmall = TextStyle(
-        fontFamily = Jakarta, fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp,
+        fontFamily = Grotesk, fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.2.sp,
     ),
     bodyLarge = TextStyle(
         fontFamily = Jakarta, fontWeight = FontWeight.Normal,
@@ -82,14 +99,14 @@ val Typography = Typography(
     ),
     labelLarge = TextStyle(
         fontFamily = Jakarta, fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp,
+        fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.2.sp,
     ),
     labelMedium = TextStyle(
         fontFamily = Jakarta, fontWeight = FontWeight.Medium,
-        fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.4.sp,
+        fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 1.2.sp,
     ),
     labelSmall = TextStyle(
         fontFamily = Jakarta, fontWeight = FontWeight.Medium,
-        fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 0.4.sp,
+        fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 1.4.sp,
     ),
 )

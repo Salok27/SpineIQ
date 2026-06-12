@@ -24,16 +24,16 @@ import noshtek.back_pain_prototype.ui.theme.ChipShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
 /**
- * Faux glassmorphism — real backdrop blur needs RenderEffect (API 31+), so at
- * minSdk 26 the glass look is built from a translucent fill, a light gradient
- * border, and a diagonal highlight wash. Reads identically on the app's light
- * tinted backgrounds.
+ * Dark faux glass — real backdrop blur needs RenderEffect (API 31+), so at
+ * minSdk 26 the glass look is built from a translucent panel fill, a faint
+ * diagonal starlight wash and a light hairline border. Over [NebulaBackground]
+ * the blooms shine through the translucent fill, which sells the effect.
  */
 fun Modifier.glass(
     shape: Shape,
     surface: Color,
     border: Color,
-    highlightAlpha: Float = 0.25f,
+    highlightAlpha: Float = 0.07f,
 ): Modifier = this
     .clip(shape)
     .background(surface)
@@ -54,7 +54,7 @@ fun Modifier.glass(
         shape = shape,
     )
 
-/** Glass content card for use on the app background. */
+/** Glass content card for use on the nebula background. */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -66,12 +66,11 @@ fun GlassCard(
     Column(
         modifier
             .fillMaxWidth()
-            .softShadow(colors.shadowTint, shape, elevation = 14.dp, alpha = 0.10f)
+            .softShadow(colors.shadowTint, shape, elevation = 14.dp, alpha = 0.20f)
             .glass(
                 shape = shape,
                 surface = colors.glassSurface,
                 border = colors.glassBorder,
-                highlightAlpha = if (colors.isDark) 0.06f else 0.25f,
             )
             .padding(contentPadding),
         content = content,
@@ -89,8 +88,8 @@ fun GlassOnGradient(
     Row(
         modifier
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), shape)
+            .background(Color.Black.copy(alpha = 0.22f))
+            .border(1.dp, Color.White.copy(alpha = 0.28f), shape)
             .padding(contentPadding),
         verticalAlignment = Alignment.CenterVertically,
         content = content,

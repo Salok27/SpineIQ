@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import noshtek.back_pain_prototype.ui.common.neonGlow
 import noshtek.back_pain_prototype.ui.theme.BadgeShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
@@ -88,6 +89,10 @@ fun AchievementBadge(
         Box(
             Modifier
                 .size(size)
+                .then(
+                    if (unlocked) Modifier.neonGlow(colors.reward, BadgeShape, elevation = 12.dp, alpha = 0.38f)
+                    else Modifier
+                )
                 .drawBehind {
                     val stroke = Stroke(width = 2.dp.toPx())
                     val inset = stroke.width / 2f

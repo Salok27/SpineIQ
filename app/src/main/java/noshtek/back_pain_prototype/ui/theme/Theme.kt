@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -15,69 +14,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary                = Blue600,
-    onPrimary              = Color.White,
-    primaryContainer       = Blue50,
-    onPrimaryContainer     = Blue900,
-    secondary              = Teal600,          // teal accent
-    onSecondary            = Color.White,
-    secondaryContainer     = Teal50,
-    onSecondaryContainer   = Teal900,
-    tertiary               = Sky500,           // cyan — second data accent (charts)
-    onTertiary             = Color.White,
-    tertiaryContainer      = Sky100,
-    onTertiaryContainer    = Sky900,
+// ── NEON AURORA — single dark scheme (DS 3.0 is dark-only by design) ────────
+
+private val AuroraColorScheme = darkColorScheme(
+    primary                = Cyan,
+    onPrimary              = OnCyan,
+    primaryContainer       = CyanContainer,
+    onPrimaryContainer     = OnCyanContainer,
+    secondary              = IndigoGlow,
+    onSecondary            = OnIndigo,
+    secondaryContainer     = IndigoContainer,
+    onSecondaryContainer   = OnIndigoContainer,
+    tertiary               = Magenta,
+    onTertiary             = OnMagenta,
+    tertiaryContainer      = MagentaContainer,
+    onTertiaryContainer    = OnMagentaContainer,
     error                  = Error,
-    onError                = Color.White,
+    onError                = Color(0xFF3A0D11),
     errorContainer         = ErrorContainer,
-    onErrorContainer       = RiskSevereUrgent,
-    background             = Slate50,
-    onBackground           = Ink,
-    surface                = Color.White,
-    onSurface              = Ink,
-    surfaceVariant         = Slate100,
-    onSurfaceVariant       = SlateText,
-    outline                = Slate300,
-    outlineVariant         = Slate200,
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow    = Slate50,
-    surfaceContainer       = Slate100,
-    surfaceContainerHigh   = Slate200,
+    onErrorContainer       = OnErrorContainer,
+    background             = DeepSpace,
+    onBackground           = Starlight,
+    surface                = Panel,
+    onSurface              = Starlight,
+    surfaceVariant         = PanelHigh,
+    onSurfaceVariant       = StarDim,
+    outline                = HairlineBright,
+    outlineVariant         = Hairline,
+    surfaceContainerLowest = DeepSpaceLow,
+    surfaceContainerLow    = Color(0xFF0A1120),
+    surfaceContainer       = Panel,
+    surfaceContainerHigh   = PanelHigh,
+    surfaceContainerHighest = PanelHigher,
 )
 
-private val DarkColorScheme = darkColorScheme(
-    primary                = Blue300,
-    onPrimary              = BlueOnDark,
-    primaryContainer       = Blue800,
-    onPrimaryContainer     = Blue50,
-    secondary              = Teal300,
-    onSecondary            = Teal900,
-    secondaryContainer     = Teal800,
-    onSecondaryContainer   = Teal50,
-    tertiary               = Sky400,
-    onTertiary             = Sky900,
-    tertiaryContainer      = Color(0xFF075985),
-    onTertiaryContainer    = Sky100,
-    error                  = RiskHighContainer,
-    onError                = RiskSevereUrgent,
-    errorContainer         = RiskSevereUrgent,
-    onErrorContainer       = RiskHighContainer,
-    background             = SlateD900,
-    onBackground           = Slate200,
-    surface                = SlateD100,
-    onSurface              = Slate200,
-    surfaceVariant         = SlateD200,
-    onSurfaceVariant       = SlateD600,
-    outline                = SlateD500,
-    outlineVariant         = SlateD700,
-    surfaceContainerLowest = SlateD900,
-    surfaceContainerLow    = SlateD50,
-    surfaceContainer       = SlateD100,
-    surfaceContainerHigh   = SlateD200,
-)
-
-// ── Extended colors (the teal "accent identity" + gradients M3 has no slot for) ─
+// ── Extended colors (aurora identity + gradients M3 has no slot for) ─────────
 
 @Immutable
 data class SpineIQColors(
@@ -85,106 +56,81 @@ data class SpineIQColors(
     val onAccent: Color,
     val accentContainer: Color,
     val onAccentContainer: Color,
-    /** AA-safe accent for teal text/icons on white surfaces (accent fails AA for small text). */
+    /** AA-safe accent for small cyan text/icons on dark panels. */
     val accentText: Color,
     val success: Color,
     val onSuccess: Color,
     val successContainer: Color,
-    /** Bright spec success — large fills / indicators only. */
+    /** Bright success — large fills / indicators only. */
     val successFill: Color,
     val warning: Color,
     val warningContainer: Color,
-    /** Bright spec warning — large fills only. */
+    /** Bright warning — large fills only. */
     val warningFill: Color,
-    /** Signature brand gradient: blue → sky → teal. Hero surfaces + primary CTAs. */
+    /** Signature aurora gradient: cyan → indigo → magenta. Hero surfaces + primary CTAs. */
     val brandStops: List<Color>,
-    /** Soft tinted colour for elevation glows. */
+    /** Tint colour for neon glow shadows. */
     val shadowTint: Color,
-    // ── Gamification (V2) — rewards/progression only, never clinical ─────────
+    // ── Gamification — rewards/progression only, never clinical ─────────────
     val reward: Color,
     val onReward: Color,
     val rewardContainer: Color,
     val onRewardContainer: Color,
-    /** AA-safe violet for small reward text/icons on surfaces. */
+    /** AA-safe violet for small reward text/icons on panels. */
     val rewardText: Color,
     /** Reward gradient: indigo → violet → purple (XP bars, level rings, celebrations). */
     val rewardStops: List<Color>,
     val coin: Color,
-    /** AA-safe gold for coin amounts on light containers. */
+    /** AA-safe gold for coin amounts on dark panels. */
     val coinText: Color,
     val coinContainer: Color,
     val streak: Color,
-    /** AA-safe streak text on surfaces. */
+    /** AA-safe streak text on panels. */
     val streakText: Color,
     /** Faux-glass surface fill / border (no real backdrop blur at minSdk 26). */
     val glassSurface: Color,
     val glassBorder: Color,
+    /** Raised panel tone for nested surfaces. */
+    val surfaceHigh: Color,
+    /** Default neon glow tint (cyan). */
+    val glow: Color,
     val isDark: Boolean,
 )
 
-private val LightSpineIQColors = SpineIQColors(
-    accent            = Teal600,
-    onAccent          = Color.White,
-    accentContainer   = Teal50,
-    onAccentContainer = Teal900,
-    accentText        = Teal700,
+private val AuroraSpineIQColors = SpineIQColors(
+    accent            = CyanDim,
+    onAccent          = OnCyan,
+    accentContainer   = CyanContainer,
+    onAccentContainer = OnCyanContainer,
+    accentText        = CyanText,
     success           = Success,
-    onSuccess         = Color.White,
+    onSuccess         = Color(0xFF052E16),
     successContainer  = SuccessContainer,
     successFill       = SuccessFill,
     warning           = Warning,
     warningContainer  = WarningContainer,
     warningFill       = WarningFill,
-    brandStops        = listOf(Blue600, Sky500, Teal600),
-    shadowTint        = Blue600,
-    reward            = Violet600,
-    onReward          = Color.White,
-    rewardContainer   = Violet50,
-    onRewardContainer = Violet900,
-    rewardText        = Violet700,
-    rewardStops       = listOf(Indigo500, Violet600, Purple500),
+    brandStops        = listOf(CyanDim, IndigoGlow, Magenta),
+    shadowTint        = Cyan,
+    reward            = RewardViolet,
+    onReward          = RewardVioletDeep,
+    rewardContainer   = RewardVioletContainer,
+    onRewardContainer = OnRewardVioletContainer,
+    rewardText        = RewardVioletBright,
+    rewardStops       = listOf(IndigoGlow, RewardViolet, PurpleGlow),
     coin              = CoinGold,
-    coinText          = CoinGoldDeep,
+    coinText          = CoinText,
     coinContainer     = CoinContainer,
     streak            = StreakOrange,
-    streakText        = StreakEmber,
-    glassSurface      = Color.White.copy(alpha = 0.60f),
-    glassBorder       = Color.White.copy(alpha = 0.65f),
-    isDark            = false,
-)
-
-private val DarkSpineIQColors = SpineIQColors(
-    accent            = Teal300,
-    onAccent          = Teal900,
-    accentContainer   = Teal800,
-    onAccentContainer = Teal50,
-    accentText        = Teal300,
-    success           = Color(0xFF34D399),     // Emerald-400
-    onSuccess         = Color(0xFF052E16),
-    successContainer  = Color(0xFF065F46),     // Emerald-800
-    successFill       = Color(0xFF34D399),
-    warning           = Color(0xFFFBBF24),     // Amber-300
-    warningContainer  = Color(0xFF78350F),     // Amber-900
-    warningFill       = Color(0xFFFBBF24),
-    brandStops        = listOf(Blue500, Sky400, Teal300),
-    shadowTint        = Blue500,
-    reward            = Violet400,
-    onReward          = Violet900,
-    rewardContainer   = Violet800,
-    onRewardContainer = Violet50,
-    rewardText        = Violet400,
-    rewardStops       = listOf(Violet400, Purple500, Purple400),
-    coin              = CoinGold,
-    coinText          = CoinGold,
-    coinContainer     = Color(0xFF78350F),     // Amber-900
-    streak            = StreakOrange,
     streakText        = StreakGlow,
-    glassSurface      = SlateD100.copy(alpha = 0.55f),
-    glassBorder       = Color.White.copy(alpha = 0.12f),
+    glassSurface      = PanelHigh.copy(alpha = 0.62f),
+    glassBorder       = Color.White.copy(alpha = 0.10f),
+    surfaceHigh       = PanelHigh,
+    glow              = Cyan,
     isDark            = true,
 )
 
-private val LocalSpineIQColors = staticCompositionLocalOf { LightSpineIQColors }
+private val LocalSpineIQColors = staticCompositionLocalOf { AuroraSpineIQColors }
 
 /** Accessor for Design-System tokens, e.g. `SpineIQTheme.colors.accent`. */
 object SpineIQTheme {
@@ -194,27 +140,25 @@ object SpineIQTheme {
 
 @Composable
 fun SpineIQTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    @Suppress("UNUSED_PARAMETER") darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-    val extendedColors = if (darkTheme) DarkSpineIQColors else LightSpineIQColors
-
-    // Keep status/navigation bar icons legible against our edge-to-edge surfaces.
+    // DS 3.0 "Neon Aurora" is dark-only: the system setting is intentionally
+    // ignored so the neon identity stays consistent.
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             (view.context as? Activity)?.window?.let { window ->
                 val controller = WindowCompat.getInsetsController(window, view)
-                controller.isAppearanceLightStatusBars = !darkTheme
-                controller.isAppearanceLightNavigationBars = !darkTheme
+                controller.isAppearanceLightStatusBars = false
+                controller.isAppearanceLightNavigationBars = false
             }
         }
     }
 
-    CompositionLocalProvider(LocalSpineIQColors provides extendedColors) {
+    CompositionLocalProvider(LocalSpineIQColors provides AuroraSpineIQColors) {
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = AuroraColorScheme,
             typography = Typography,
             shapes = SpineIQShapes,
             content = content

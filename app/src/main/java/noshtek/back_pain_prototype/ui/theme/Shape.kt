@@ -4,21 +4,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
-// Design System 2.0 shape scale — larger radii read more premium and modern.
+// NEON AURORA shape scale — generous radii so dark panels read as smooth,
+// machined holo-glass rather than paper cards.
 val SpineIQShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small      = RoundedCornerShape(12.dp),
-    medium     = RoundedCornerShape(16.dp),
-    large      = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    extraSmall = RoundedCornerShape(10.dp),
+    small      = RoundedCornerShape(14.dp),
+    medium     = RoundedCornerShape(18.dp),
+    large      = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp),
 )
 
 // Shared shapes referenced directly by custom components.
-val CardShape      = RoundedCornerShape(20.dp)
-val ButtonShape    = RoundedCornerShape(16.dp)   // spec: 16dp button corners
-val HeroShape      = RoundedCornerShape(28.dp)
-val ChipShape      = RoundedCornerShape(14.dp)
-val TextFieldShape = RoundedCornerShape(14.dp)   // centralised text-field radius
+val CardShape      = RoundedCornerShape(24.dp)
+val ButtonShape    = RoundedCornerShape(18.dp)
+val HeroShape      = RoundedCornerShape(32.dp)
+val ChipShape      = RoundedCornerShape(50)      // full-pill chips (DS 3.0 signature)
+val TextFieldShape = RoundedCornerShape(16.dp)
 val PillShape      = RoundedCornerShape(50)
-val SheetShape     = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)  // bottom sheets
-val BadgeShape     = RoundedCornerShape(18.dp)   // achievement tiles
+val SheetShape     = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+val BadgeShape     = RoundedCornerShape(20.dp)   // achievement tiles
+val DockShape      = RoundedCornerShape(32.dp)   // floating nav dock

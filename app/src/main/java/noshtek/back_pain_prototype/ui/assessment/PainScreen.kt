@@ -35,7 +35,7 @@ fun PainScreen(
     var showError by remember { mutableStateOf(false) }
     var showStageComplete by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,14 +70,14 @@ fun PainScreen(
                 ) {
                     PainLocation.entries.forEach { loc ->
                         val selected = loc in pain.painLocations
-                        FilterChip(
+                        SelectableChip(
                             selected = selected,
                             onClick = {
                                 viewModel.updatePain {
                                     copy(painLocations = if (selected) painLocations - loc else painLocations + loc)
                                 }
                             },
-                            label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -108,18 +108,14 @@ fun PainScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     PainDuration.entries.forEach { dur ->
-                        FilterChip(
+                        SelectableChip(
                             selected = pain.painDuration == dur,
                             onClick = { viewModel.updatePain { copy(painDuration = dur) } },
-                            label = {
-                                Text(
-                                    when (dur) {
-                                        PainDuration.ACUTE    -> "Acute (<3 wks)"
-                                        PainDuration.SUBACUTE -> "Subacute (3–6 wks)"
-                                        PainDuration.CHRONIC  -> "Chronic (>6 wks)"
-                                    }
-                                )
-                            }
+                            label = when (dur) {
+                                PainDuration.ACUTE    -> "Acute (<3 wks)"
+                                PainDuration.SUBACUTE -> "Subacute (3–6 wks)"
+                                PainDuration.CHRONIC  -> "Chronic (>6 wks)"
+                            },
                         )
                     }
                 }
@@ -132,10 +128,10 @@ fun PainScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     PainPattern.entries.forEach { pattern ->
-                        FilterChip(
+                        SelectableChip(
                             selected = pain.painPattern == pattern,
                             onClick = { viewModel.updatePain { copy(painPattern = pattern) } },
-                            label = { Text(pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = pattern.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -151,14 +147,14 @@ fun PainScreen(
                 ) {
                     PainTrigger.entries.forEach { trigger ->
                         val selected = trigger in pain.painTriggers
-                        FilterChip(
+                        SelectableChip(
                             selected = selected,
                             onClick = {
                                 viewModel.updatePain {
                                     copy(painTriggers = if (selected) painTriggers - trigger else painTriggers + trigger)
                                 }
                             },
-                            label = { Text(trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = trigger.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -171,10 +167,10 @@ fun PainScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     RadiculopathySeverity.entries.forEach { sev ->
-                        FilterChip(
+                        SelectableChip(
                             selected = pain.radiculopathySeverity == sev,
                             onClick = { viewModel.updatePain { copy(radiculopathySeverity = sev, radiationLocation = if (sev == RadiculopathySeverity.NONE) null else radiationLocation) } },
-                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = sev.name.lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -188,10 +184,10 @@ fun PainScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         RadiationLocation.entries.forEach { loc ->
-                            FilterChip(
+                            SelectableChip(
                                 selected = pain.radiationLocation == loc,
                                 onClick = { viewModel.updatePain { copy(radiationLocation = loc) } },
-                                label = { Text(loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                                label = loc.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                             )
                         }
                     }
@@ -205,10 +201,10 @@ fun PainScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FunctionalLimitationSeverity.entries.forEach { sev ->
-                        FilterChip(
+                        SelectableChip(
                             selected = pain.functionalLimitationSeverity == sev,
                             onClick = { viewModel.updatePain { copy(functionalLimitationSeverity = sev) } },
-                            label = { Text(sev.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = sev.name.lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -219,6 +215,7 @@ fun PainScreen(
                     placeholder = { Text("Describe limitations (optional)…") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = TextFieldShape,
+                    colors = auroraTextFieldColors(),
                     maxLines = 3
                 )
             }

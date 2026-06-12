@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -36,9 +37,9 @@ import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.brandGradient
 
 /**
- * Soft, optionally colour-tinted drop shadow — the core "depth" cue of Design
- * System 2.0. The ambient/spot tint applies on API 28+; on 26–27 it degrades to
- * a default shadow, never an error.
+ * Tinted shadow — on the dark theme this reads as a neon glow emitted by the
+ * surface rather than paper elevation. The ambient/spot tint applies on
+ * API 28+; on 26–27 it degrades to a default shadow, never an error.
  */
 fun Modifier.softShadow(
     color: Color,
@@ -53,7 +54,10 @@ fun Modifier.softShadow(
     spotColor = color.copy(alpha = alpha),
 )
 
-/** Elevated, optionally bordered surface used as the base for content cards. */
+/**
+ * Quiet content panel: dark surface with a plain hairline border. Featured
+ * content uses [GlowCard] (aurora border + glow) instead.
+ */
 @Composable
 fun AppCard(
     modifier: Modifier = Modifier,
@@ -67,7 +71,7 @@ fun AppCard(
     Column(
         modifier
             .fillMaxWidth()
-            .softShadow(SpineIQTheme.colors.shadowTint, shape, elevation = shadowElevation, alpha = 0.12f)
+            .softShadow(SpineIQTheme.colors.shadowTint, shape, elevation = shadowElevation, alpha = 0.18f)
             .clip(shape)
             .background(containerColor)
             .then(
@@ -79,7 +83,7 @@ fun AppCard(
     )
 }
 
-/** Tappable card with a spring press-scale + ripple — for list rows and shortcuts. */
+/** Tappable panel with a spring press-scale + ripple — for list rows and shortcuts. */
 @Composable
 fun PressableCard(
     onClick: () -> Unit,
@@ -101,22 +105,29 @@ fun PressableCard(
         modifier
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .softShadow(SpineIQTheme.colors.shadowTint, shape, elevation = if (pressed) 6.dp else 12.dp, alpha = 0.14f)
+            .softShadow(
+                SpineIQTheme.colors.shadowTint, shape,
+                elevation = if (pressed) 6.dp else 12.dp,
+                alpha = if (pressed) 0.30f else 0.18f,
+            )
             .clip(shape)
             .background(containerColor)
             .then(
                 if (border) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
                 else Modifier
             )
-            .clickable(interactionSource = interaction, indication = ripple()) { onClick() }
+            .clickable(
+                interactionSource = interaction,
+                indication = ripple(color = SpineIQTheme.colors.accent),
+            ) { onClick() }
             .padding(contentPadding),
         content = content,
     )
 }
 
 /**
- * Brand-gradient hero surface with subtle light blooms for depth. Content (score,
- * badges, etc.) is laid out on top via the [BoxScope] slot.
+ * Aurora-gradient hero surface with nebula light blooms and an inner glass rim.
+ * Content (score, badges, etc.) is laid out on top via the [BoxScope] slot.
  */
 @Composable
 fun GradientHeroCard(
@@ -128,22 +139,28 @@ fun GradientHeroCard(
     Box(
         modifier
             .fillMaxWidth()
-            .softShadow(SpineIQTheme.colors.shadowTint, shape, elevation = 24.dp, alpha = 0.30f)
+            .neonGlow(SpineIQTheme.colors.glow, shape, elevation = 24.dp, alpha = 0.45f)
             .clip(shape)
             .background(brandGradient())
             .drawBehind {
-                // Two soft light blooms — quiet futuristic depth, never distracting.
+                // Soft light blooms + a darkening base so ink text stays legible.
+                drawRect(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.18f)),
+                    )
+                )
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.10f),
+                    color = Color.White.copy(alpha = 0.12f),
                     radius = size.maxDimension * 0.42f,
                     center = Offset(size.width * 0.86f, size.height * 0.06f),
                 )
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.05f),
+                    color = Color.White.copy(alpha = 0.06f),
                     radius = size.minDimension * 0.55f,
                     center = Offset(size.width * 0.08f, size.height * 0.98f),
                 )
             }
+            .border(1.dp, Color.White.copy(alpha = 0.22f), shape)
             .padding(contentPadding),
         content = content,
     )

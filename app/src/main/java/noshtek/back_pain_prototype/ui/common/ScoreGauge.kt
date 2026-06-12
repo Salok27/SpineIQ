@@ -25,9 +25,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Animated 270° arc gauge. The progress arc sweeps from 0 to [progress] on first
- * appearance using the score-motion timing, with an optional [brush] (e.g. the
- * brand gradient). The centre is a free content slot for the score numeral.
+ * Animated 270° holo-gauge. The progress arc sweeps from 0 to [progress] on
+ * first appearance using the score-motion timing. The arc is drawn twice — a
+ * wide low-alpha pass underneath gives the crisp arc a neon halo. The centre
+ * is a free content slot for the score numeral.
  */
 @Composable
 fun ScoreGauge(
@@ -67,7 +68,18 @@ fun ScoreGauge(
             )
             val sweep = maxSweep * animated
             if (sweep > 0f) {
+                // Halo pass: same arc, wider stroke at low alpha = neon bleed.
                 if (brush != null) {
+                    drawArc(
+                        brush = brush,
+                        startAngle = startAngle,
+                        sweepAngle = sweep,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = stroke * 2.1f, cap = StrokeCap.Round),
+                        alpha = 0.22f,
+                    )
                     drawArc(
                         brush = brush,
                         startAngle = startAngle,
@@ -78,6 +90,16 @@ fun ScoreGauge(
                         style = Stroke(width = stroke, cap = StrokeCap.Round),
                     )
                 } else {
+                    drawArc(
+                        color = progressColor,
+                        startAngle = startAngle,
+                        sweepAngle = sweep,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = stroke * 2.1f, cap = StrokeCap.Round),
+                        alpha = 0.22f,
+                    )
                     drawArc(
                         color = progressColor,
                         startAngle = startAngle,

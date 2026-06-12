@@ -44,6 +44,8 @@ import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
 import noshtek.back_pain_prototype.navigation.Screen
 import noshtek.back_pain_prototype.ui.common.LabelledScoreBar
 import noshtek.back_pain_prototype.ui.common.LifestyleTierBadge
+import noshtek.back_pain_prototype.ui.common.MicroLabel
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.RiskTileSmall
 import noshtek.back_pain_prototype.ui.common.ScoreHeroCard
@@ -66,18 +68,24 @@ fun ResultsDashboardScreen(
     var celebrated by rememberSaveable { mutableStateOf(false) }
     val showConfetti = viewModel.celebrate && !celebrated
 
+    NebulaBackground {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Your Results", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Your Results", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        MicroLabel("Mission debrief")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -256,6 +264,7 @@ fun ResultsDashboardScreen(
                 }
             }
         }
+    }
     }
 }
 

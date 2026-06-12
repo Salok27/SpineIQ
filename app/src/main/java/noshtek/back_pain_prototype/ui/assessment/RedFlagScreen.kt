@@ -54,7 +54,7 @@ fun RedFlagScreen(
 
     var showStageComplete by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
+    NebulaBackground {
     Column(
         modifier = Modifier
             .fillMaxSize()

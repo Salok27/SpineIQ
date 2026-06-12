@@ -20,9 +20,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.core.data.model.Gender
 import noshtek.back_pain_prototype.navigation.Screen
+import noshtek.back_pain_prototype.ui.common.MicroLabel
+import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
+import noshtek.back_pain_prototype.ui.common.SelectableChip
+import noshtek.back_pain_prototype.ui.common.auroraTextFieldColors
 import noshtek.back_pain_prototype.ui.common.entrance
+import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.TextFieldShape
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -47,16 +52,20 @@ fun ProfileScreen(
         }
     }
 
+    NebulaBackground {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        if (state.isEditMode) "Edit Profile" else "Set Up Your Profile",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
+                    Column {
+                        Text(
+                            if (state.isEditMode) "Edit Profile" else "Set Up Your Profile",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        MicroLabel(if (state.isEditMode) "Pilot details" else "Create your pilot profile")
+                    }
                 },
                 navigationIcon = {
                     if (state.isEditMode) {
@@ -66,7 +75,7 @@ fun ProfileScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -108,23 +117,24 @@ fun ProfileScreen(
                     label = { Text("Full Name *") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = TextFieldShape,
+                    colors = auroraTextFieldColors(),
                     singleLine = true
                 )
                 Spacer(Modifier.height(12.dp))
                 DobField(dob = state.dateOfBirth, onDobChange = viewModel::onDobChange)
                 Spacer(Modifier.height(12.dp))
-                Text("Gender *", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
-                Spacer(Modifier.height(4.dp))
+                MicroLabel("Gender *")
+                Spacer(Modifier.height(8.dp))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Gender.entries.forEach { g ->
-                        FilterChip(
+                        SelectableChip(
                             selected = state.gender == g,
                             onClick = { viewModel.onGenderChange(g) },
-                            label = { Text(g.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = g.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
                         )
                     }
                 }
@@ -144,6 +154,7 @@ fun ProfileScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         shape = TextFieldShape,
+                        colors = auroraTextFieldColors(),
                         singleLine = true
                     )
                     OutlinedTextField(
@@ -153,6 +164,7 @@ fun ProfileScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         shape = TextFieldShape,
+                        colors = auroraTextFieldColors(),
                         singleLine = true
                     )
                 }
@@ -160,12 +172,17 @@ fun ProfileScreen(
                 val w = state.weightKg.toFloatOrNull()
                 if (h != null && w != null && h > 0f) {
                     val bmi = w / ((h / 100f) * (h / 100f))
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "BMI: ${"%.1f".format(bmi)} — ${bmiCategory(bmi)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        MicroLabel("Live BMI")
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "${"%.1f".format(bmi)} — ${bmiCategory(bmi)}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = SpineIQTheme.colors.accentText,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
 
@@ -184,6 +201,7 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(16.dp))
         }
+    }
     }
 }
 
