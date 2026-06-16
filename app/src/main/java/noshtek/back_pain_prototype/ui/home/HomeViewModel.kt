@@ -6,25 +6,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
-import noshtek.back_pain_prototype.core.data.gamification.Achievement
-import noshtek.back_pain_prototype.core.data.gamification.AchievementCatalog
 import noshtek.back_pain_prototype.core.data.gamification.CheckInMood
-import noshtek.back_pain_prototype.core.data.gamification.GameLevel
 import noshtek.back_pain_prototype.core.data.gamification.GamificationManager
 import noshtek.back_pain_prototype.core.data.gamification.GamificationSnapshot
-import noshtek.back_pain_prototype.core.data.gamification.LevelTable
+import noshtek.back_pain_prototype.core.data.gamification.RitualStatus
+import noshtek.back_pain_prototype.core.data.gamification.SpineVitality
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
 import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
-import noshtek.back_pain_prototype.ui.avatar.AvatarSpec
 import java.time.LocalDate
 import javax.inject.Inject
-
-/** Achievement strip entry: recently unlocked badges plus the next locked goal. */
-data class HomeAchievementUi(
-    val achievement: Achievement,
-    val unlocked: Boolean,
-    val progress: Float?,
-)
 
 data class HomeUiState(
     val isLoading: Boolean = true,
@@ -34,20 +24,16 @@ data class HomeUiState(
     val lastAssessmentDate: LocalDate? = null,
     val lastScores: ScoresRecordEntity? = null,
     val completedAssessmentCount: Int = 0,
-    // ── Gamification ──────────────────────────────────────────────────────────
-    val coins: Int = 0,
-    val level: GameLevel = LevelTable.LEVELS.first(),
-    val xpIntoLevel: Int = 0,
-    val xpForNextLevel: Int? = LevelTable.LEVELS.getOrNull(1)?.xpThreshold,
-    val levelProgress: Float = 0f,
+    // ── Aura engagement ─────────────────────────────────────────────────────
+    val vitality: Int = SpineVitality.NEUTRAL_BASE_VITALITY,
     val streakDays: Int = 0,
     val checkedInToday: Boolean = false,
     val todayMood: CheckInMood? = null,
     /** Oldest → today; true = checked in that day. */
     val last7Days: List<Boolean> = List(7) { false },
-    val equippedSpec: AvatarSpec = AvatarSpec.Default,
-    val assessmentCompletedToday: Boolean = false,
-    val recentAchievements: List<HomeAchievementUi> = emptyList(),
+    val rituals: List<RitualStatus> = emptyList(),
+    val ritualsDoneToday: Int = 0,
+    val ritualsTotalToday: Int = 0,
 )
 
 @HiltViewModel
@@ -64,42 +50,19 @@ class HomeViewModel @Inject constructor(
         val snapshot: GamificationSnapshot,
         val todayMood: CheckInMood?,
         val last7Days: List<Boolean>,
-        val equippedSpec: AvatarSpec,
-        val recentAchievements: List<HomeAchievementUi>,
     )
 
     init {
         val gamification = combine(
             gamificationManager.snapshot,
-            gamificationManager.ownedItems,
-            gamificationManager.unlocks,
             gamificationManager.checkInHistory,
-        ) { snapshot, owned, unlocks, checkIns ->
+        ) { snapshot, checkIns ->
             val today = LocalDate.now().toEpochDay()
             val checkedDays = checkIns.mapTo(mutableSetOf()) { it.checkInDay }
-            val unlockedIds = unlocks.map { it.achievementId }
-            val context = runCatching { gamificationManager.achievementContext() }.getOrNull()
-            val recentUnlocked = unlocks.take(2).mapNotNull { unlock ->
-                AchievementCatalog.byId(unlock.achievementId)
-                    ?.let { HomeAchievementUi(it, unlocked = true, progress = null) }
-            }
-            val nextLocked = AchievementCatalog.ALL
-                .firstOrNull { it.id !in unlockedIds }
-                ?.let { achievement ->
-                    HomeAchievementUi(
-                        achievement = achievement,
-                        unlocked = false,
-                        progress = context?.let { ctx -> achievement.progress?.invoke(ctx) },
-                    )
-                }
             GamificationHomeData(
                 snapshot = snapshot,
                 todayMood = checkIns.firstOrNull { it.checkInDay == today }?.mood,
                 last7Days = (6 downTo 0).map { (today - it) in checkedDays },
-                equippedSpec = AvatarSpec(
-                    owned.filter { it.equipped }.associate { it.category to it.itemId }
-                ),
-                recentAchievements = recentUnlocked + listOfNotNull(nextLocked),
             )
         }
 
@@ -113,8 +76,6 @@ class HomeViewModel @Inject constructor(
                         assessmentRepository.getCompletedAssessmentCount(profile.id),
                         gamification,
                     ) { records, scoresList, count, game ->
-                        // Select by completedAt (epoch millis) so the *most recently completed*
-                        // assessment wins even when several share the same epoch-day assessment_date.
                         val latestCompleted = records
                             .filter { it.completedAt != null }
                             .maxByOrNull { it.completedAt!! }
@@ -128,18 +89,14 @@ class HomeViewModel @Inject constructor(
                             lastAssessmentDate = latestDate,
                             lastScores = latestScores,
                             completedAssessmentCount = count,
-                            coins = game.snapshot.coins,
-                            level = game.snapshot.level,
-                            xpIntoLevel = game.snapshot.xpIntoLevel,
-                            xpForNextLevel = game.snapshot.xpForNextLevel,
-                            levelProgress = game.snapshot.progressToNext,
+                            vitality = game.snapshot.vitality,
                             streakDays = game.snapshot.effectiveStreakDays,
                             checkedInToday = game.snapshot.checkedInToday,
                             todayMood = game.todayMood,
                             last7Days = game.last7Days,
-                            equippedSpec = game.equippedSpec,
-                            assessmentCompletedToday = latestDate == LocalDate.now(),
-                            recentAchievements = game.recentAchievements,
+                            rituals = game.snapshot.rituals,
+                            ritualsDoneToday = game.snapshot.ritualsDoneToday,
+                            ritualsTotalToday = game.snapshot.ritualsTotalToday,
                         )
                     }
                 }
@@ -148,10 +105,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /** Gamification must never block the dashboard — failures are swallowed. */
+    /** Engagement must never block the dashboard — failures are swallowed. */
     fun checkIn(mood: CheckInMood) {
         viewModelScope.launch {
             runCatching { gamificationManager.checkInToday(mood) }
+        }
+    }
+
+    fun completeRitual(ritualId: String) {
+        viewModelScope.launch {
+            runCatching { gamificationManager.completeRitual(ritualId) }
         }
     }
 }

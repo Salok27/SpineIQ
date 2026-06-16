@@ -3,7 +3,7 @@ package noshtek.back_pain_prototype.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -14,9 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// ── NEON AURORA — single dark scheme (DS 3.0 is dark-only by design) ────────
+// ── AURA — single light scheme (the Aura prototype is light-only by design) ──
 
-private val AuroraColorScheme = darkColorScheme(
+private val AuraColorScheme = lightColorScheme(
     primary                = Cyan,
     onPrimary              = OnCyan,
     primaryContainer       = CyanContainer,
@@ -30,7 +30,7 @@ private val AuroraColorScheme = darkColorScheme(
     tertiaryContainer      = MagentaContainer,
     onTertiaryContainer    = OnMagentaContainer,
     error                  = Error,
-    onError                = Color(0xFF3A0D11),
+    onError                = Color(0xFFFFFFFF),
     errorContainer         = ErrorContainer,
     onErrorContainer       = OnErrorContainer,
     background             = DeepSpace,
@@ -41,14 +41,14 @@ private val AuroraColorScheme = darkColorScheme(
     onSurfaceVariant       = StarDim,
     outline                = HairlineBright,
     outlineVariant         = Hairline,
-    surfaceContainerLowest = DeepSpaceLow,
-    surfaceContainerLow    = Color(0xFF0A1120),
-    surfaceContainer       = Panel,
-    surfaceContainerHigh   = PanelHigh,
+    surfaceContainerLowest = Panel,
+    surfaceContainerLow    = Color(0xFFFCF9F4),
+    surfaceContainer       = PanelHigh,
+    surfaceContainerHigh   = DeepSpaceLow,
     surfaceContainerHighest = PanelHigher,
 )
 
-// ── Extended colors (aurora identity + gradients M3 has no slot for) ─────────
+// ── Extended colors (Aura identity + gradients M3 has no slot for) ───────────
 
 @Immutable
 data class SpineIQColors(
@@ -56,7 +56,7 @@ data class SpineIQColors(
     val onAccent: Color,
     val accentContainer: Color,
     val onAccentContainer: Color,
-    /** AA-safe accent for small cyan text/icons on dark panels. */
+    /** AA-safe accent for small sage text/icons on light panels. */
     val accentText: Color,
     val success: Color,
     val onSuccess: Color,
@@ -67,51 +67,54 @@ data class SpineIQColors(
     val warningContainer: Color,
     /** Bright warning — large fills only. */
     val warningFill: Color,
-    /** Signature aurora gradient: cyan → indigo → magenta. Hero surfaces + primary CTAs. */
+    /** Signature wellness gradient: sage → sky → coral. Hero surfaces + primary CTAs. */
     val brandStops: List<Color>,
-    /** Tint colour for neon glow shadows. */
+    /** Tint colour for soft drop shadows. */
     val shadowTint: Color,
-    // ── Gamification — rewards/progression only, never clinical ─────────────
+    // ── Engagement — rewards/progression only, never clinical ───────────────
     val reward: Color,
     val onReward: Color,
     val rewardContainer: Color,
     val onRewardContainer: Color,
     /** AA-safe violet for small reward text/icons on panels. */
     val rewardText: Color,
-    /** Reward gradient: indigo → violet → purple (XP bars, level rings, celebrations). */
+    /** Reward gradient: sky → violet → purple (vitality, milestones, celebrations). */
     val rewardStops: List<Color>,
     val coin: Color,
-    /** AA-safe gold for coin amounts on dark panels. */
+    /** AA-safe gold for coin amounts on light panels. */
     val coinText: Color,
     val coinContainer: Color,
     val streak: Color,
     /** AA-safe streak text on panels. */
     val streakText: Color,
-    /** Faux-glass surface fill / border (no real backdrop blur at minSdk 26). */
+    /** Frosted surface fill / border (no real backdrop blur at minSdk 26). */
     val glassSurface: Color,
     val glassBorder: Color,
     /** Raised panel tone for nested surfaces. */
     val surfaceHigh: Color,
-    /** Default neon glow tint (cyan). */
+    /** Default soft-shadow tint (warm taupe). */
     val glow: Color,
     val isDark: Boolean,
 )
 
-private val AuroraSpineIQColors = SpineIQColors(
+private val AuraSpineIQColors = SpineIQColors(
     accent            = CyanDim,
     onAccent          = OnCyan,
     accentContainer   = CyanContainer,
     onAccentContainer = OnCyanContainer,
     accentText        = CyanText,
     success           = Success,
-    onSuccess         = Color(0xFF052E16),
+    onSuccess         = Color(0xFFFFFFFF),
     successContainer  = SuccessContainer,
     successFill       = SuccessFill,
     warning           = Warning,
     warningContainer  = WarningContainer,
     warningFill       = WarningFill,
-    brandStops        = listOf(CyanDim, IndigoGlow, Magenta),
-    shadowTint        = Cyan,
+    // Deep sage → teal → coral: rich enough for crisp white text on CTAs/hero
+    // and a legible gauge arc on white, while the lighter CyanDim/IndigoGlow/
+    // Magenta accents stay for chips, blooms and tints.
+    brandStops        = listOf(Color(0xFF3E7A57), Color(0xFF3D8196), Color(0xFFC25E43)),
+    shadowTint        = Color(0xFFB8A990),
     reward            = RewardViolet,
     onReward          = RewardVioletDeep,
     rewardContainer   = RewardVioletContainer,
@@ -123,14 +126,14 @@ private val AuroraSpineIQColors = SpineIQColors(
     coinContainer     = CoinContainer,
     streak            = StreakOrange,
     streakText        = StreakGlow,
-    glassSurface      = PanelHigh.copy(alpha = 0.62f),
-    glassBorder       = Color.White.copy(alpha = 0.10f),
+    glassSurface      = Panel.copy(alpha = 0.72f),
+    glassBorder       = Ink.copy(alpha = 0.06f),
     surfaceHigh       = PanelHigh,
-    glow              = Cyan,
-    isDark            = true,
+    glow              = Color(0xFFB8A990),
+    isDark            = false,
 )
 
-private val LocalSpineIQColors = staticCompositionLocalOf { AuroraSpineIQColors }
+private val LocalSpineIQColors = staticCompositionLocalOf { AuraSpineIQColors }
 
 /** Accessor for Design-System tokens, e.g. `SpineIQTheme.colors.accent`. */
 object SpineIQTheme {
@@ -143,22 +146,22 @@ fun SpineIQTheme(
     @Suppress("UNUSED_PARAMETER") darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // DS 3.0 "Neon Aurora" is dark-only: the system setting is intentionally
-    // ignored so the neon identity stays consistent.
+    // Aura is light-only: the system dark setting is intentionally ignored so
+    // the calm wellness identity stays consistent across devices.
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             (view.context as? Activity)?.window?.let { window ->
                 val controller = WindowCompat.getInsetsController(window, view)
-                controller.isAppearanceLightStatusBars = false
-                controller.isAppearanceLightNavigationBars = false
+                controller.isAppearanceLightStatusBars = true
+                controller.isAppearanceLightNavigationBars = true
             }
         }
     }
 
-    CompositionLocalProvider(LocalSpineIQColors provides AuroraSpineIQColors) {
+    CompositionLocalProvider(LocalSpineIQColors provides AuraSpineIQColors) {
         MaterialTheme(
-            colorScheme = AuroraColorScheme,
+            colorScheme = AuraColorScheme,
             typography = Typography,
             shapes = SpineIQShapes,
             content = content

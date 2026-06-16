@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Post-splash app theme: dark window so there is never a light flash
-         before Compose draws the Neon Aurora surface. -->
-    <style name="Theme.Back_pain_prototype" parent="android:Theme.Material.NoActionBar">
+    <!-- Post-splash app theme: warm-paper window so there is never a dark flash
+         before Compose draws the Aura surface. -->
+    <style name="Theme.Back_pain_prototype" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/deep_space</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <!-- Launch theme: AndroidX SplashScreen on deep-space ink, handing off to
-         the app theme once MainActivity is ready. -->
+    <!-- Launch theme: AndroidX SplashScreen on warm paper, handing off to the
+         app theme once MainActivity is ready. -->
     <style name="Theme.Back_pain_prototype.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/deep_space</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>

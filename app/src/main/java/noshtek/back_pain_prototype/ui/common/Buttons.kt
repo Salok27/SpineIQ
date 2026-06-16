@@ -80,7 +80,7 @@ fun PrimaryButton(
                 alpha = if (enabled) 1f else 0.45f
             }
             .then(
-                if (active) Modifier.neonGlow(SpineIQTheme.colors.glow, ButtonShape, elevation = 18.dp, alpha = 0.50f)
+                if (active) Modifier.neonGlow(SpineIQTheme.colors.shadowTint, ButtonShape, elevation = 12.dp, alpha = 0.30f)
                 else Modifier
             )
             .clip(ButtonShape)

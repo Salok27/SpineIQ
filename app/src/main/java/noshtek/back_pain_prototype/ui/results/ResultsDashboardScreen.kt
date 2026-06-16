@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,9 +55,7 @@ import noshtek.back_pain_prototype.ui.common.SecondaryButton
 import noshtek.back_pain_prototype.ui.common.SectionCard
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
 import noshtek.back_pain_prototype.ui.common.entrance
-import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.gamification.ConfettiBurst
-import noshtek.back_pain_prototype.ui.gamification.RewardChip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,13 +140,14 @@ fun ResultsDashboardScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            RewardChip(
-                                coins = Economy.COINS_PER_FULL_ASSESSMENT,
-                                xp = Economy.XP_PER_FULL_ASSESSMENT,
-                                emphasized = true,
+                            Icon(
+                                Icons.Filled.AutoAwesome,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
                             )
                             Text(
-                                "  Assessment complete!",
+                                "  Assessment complete · vitality refreshed",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

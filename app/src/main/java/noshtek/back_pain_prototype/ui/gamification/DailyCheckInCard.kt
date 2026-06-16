@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import noshtek.back_pain_prototype.core.data.gamification.CheckInMood
-import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
@@ -81,7 +80,7 @@ fun DailyCheckInCard(
     }
 
     GlassCard(modifier = modifier) {
-        MicroLabel("Daily Mission")
+        MicroLabel("Today")
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -112,12 +111,6 @@ fun DailyCheckInCard(
                         moods.forEach { option ->
                             MoodButton(option = option, onClick = { onCheckIn(option.mood) })
                         }
-                        Spacer(Modifier.weight(1f))
-                        RewardChip(
-                            coins = Economy.COINS_PER_CHECKIN,
-                            xp = Economy.XP_PER_CHECKIN,
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                        )
                     }
                 }
             } else {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Neon Aurora (DS 3.0) window colors — keep in sync with ui/theme/Color.kt -->
-    <color name="deep_space">#060B18</color>
-    <color name="aurora_cyan">#38E1FF</color>
+    <!-- Aura (light) window colors — keep in sync with ui/theme/Color.kt -->
+    <color name="deep_space">#FBF8F3</color>
+    <color name="aurora_cyan">#3E7A57</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

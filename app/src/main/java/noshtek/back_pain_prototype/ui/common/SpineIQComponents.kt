@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -144,13 +145,15 @@ fun CompositeBadge(classification: BackPainRiskClassification, modifier: Modifie
 fun RiskBadge(label: String, color: Color, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .background(color.copy(alpha = 0.14f), PillShape)
-            .border(BorderStroke(1.dp, color.copy(alpha = 0.50f)), PillShape)
+            .background(color.copy(alpha = 0.16f), PillShape)
+            .border(BorderStroke(1.dp, color.copy(alpha = 0.45f)), PillShape)
             .padding(horizontal = 12.dp, vertical = 5.dp),
     ) {
         Text(
             text = label,
-            color = color,
+            // Deepen the hue for AA-legible text on the pale tint (amber/orange
+            // would be unreadable at full brightness on a light pill).
+            color = lerp(color, Color.Black, 0.40f),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
         )
@@ -396,7 +399,7 @@ fun RiskTileSmall(label: String, tier: RiskTier) {
         ) {
             Text(
                 text = tierLabel,
-                color = color,
+                color = lerp(color, Color.Black, 0.40f),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
             )

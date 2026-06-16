@@ -3,8 +3,12 @@
 package noshtek.back_pain_prototype.ui.common
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -51,53 +55,67 @@ import noshtek.back_pain_prototype.ui.theme.Magenta
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 import noshtek.back_pain_prototype.ui.theme.auroraBorderBrush
 import noshtek.back_pain_prototype.ui.theme.brandGradient
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
-// ── NEON AURORA primitives (DS 3.0) ──────────────────────────────────────────
-// The shared visual vocabulary of the redesign: deep-space backgrounds with
-// nebula blooms, glowing panels with aurora hairline borders, wide-tracked
-// micro-labels and gradient hero text.
+// ── AURA primitives ──────────────────────────────────────────────────────────
+// The shared visual vocabulary of the redesign: a warm-paper canvas lit by
+// slowly drifting organic blobs (sage / coral / sky), soft elevated cards with
+// gentle drop shadows, sentence-case eyebrows and gradient hero text.
 
 /**
- * Full-screen deep-space backdrop with three large, very-low-alpha radial
- * nebula blooms (cyan, magenta, indigo). Every screen lays its content on top
- * of this so panels read as glass floating in space.
+ * Full-screen warm-paper backdrop with two or three large, very-low-alpha
+ * organic light blooms (sage, coral, sky) that drift slowly so the background
+ * feels alive and breathing. Every screen lays its content on top of this.
  */
 @Composable
 fun NebulaBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val transition = rememberInfiniteTransition(label = "aura-bg")
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * PI).toFloat(),
+        animationSpec = infiniteRepeatable(tween(20000, easing = LinearEasing)),
+        label = "aura-phase",
+    )
     Box(
         modifier
             .fillMaxSize()
             .background(DeepSpace)
             .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        listOf(CyanDim.copy(alpha = 0.09f), Color.Transparent),
-                        center = Offset(size.width * 0.12f, size.height * 0.05f),
-                        radius = size.width * 0.85f,
-                    ),
-                    radius = size.width * 0.85f,
-                    center = Offset(size.width * 0.12f, size.height * 0.05f),
+                val w = size.width
+                val h = size.height
+                fun blob(cx: Float, cy: Float, r: Float, color: Color, a: Float) {
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            listOf(color.copy(alpha = a), Color.Transparent),
+                            center = Offset(cx, cy),
+                            radius = r,
+                        ),
+                        radius = r,
+                        center = Offset(cx, cy),
+                    )
+                }
+                // Sage bloom — top-left, drifting in a small orbit.
+                blob(
+                    w * (0.18f + 0.05f * cos(phase)),
+                    h * (0.08f + 0.03f * sin(phase)),
+                    w * 0.90f, CyanDim, 0.16f,
                 )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        listOf(Magenta.copy(alpha = 0.07f), Color.Transparent),
-                        center = Offset(size.width * 0.95f, size.height * 0.32f),
-                        radius = size.width * 0.70f,
-                    ),
-                    radius = size.width * 0.70f,
-                    center = Offset(size.width * 0.95f, size.height * 0.32f),
+                // Coral bloom — top-right.
+                blob(
+                    w * (0.92f - 0.04f * sin(phase)),
+                    h * (0.30f + 0.04f * cos(phase * 0.8f)),
+                    w * 0.72f, Magenta, 0.12f,
                 )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        listOf(IndigoGlow.copy(alpha = 0.08f), Color.Transparent),
-                        center = Offset(size.width * 0.40f, size.height * 1.02f),
-                        radius = size.width * 0.95f,
-                    ),
-                    radius = size.width * 0.95f,
-                    center = Offset(size.width * 0.40f, size.height * 1.02f),
+                // Sky bloom — bottom-centre.
+                blob(
+                    w * (0.42f + 0.06f * sin(phase * 0.6f)),
+                    h * (1.00f + 0.02f * cos(phase)),
+                    w * 0.98f, IndigoGlow, 0.14f,
                 )
             },
         content = content,
@@ -105,19 +123,21 @@ fun NebulaBackground(
 }
 
 /**
- * Neon glow shadow — the dark-theme replacement for paper elevation. A tinted
- * shadow reads as light emitted by the panel rather than light blocked by it.
+ * Soft drop shadow — kept under the legacy name. On the light Aura theme this is
+ * a gentle warm-taupe shadow (no neon emission). The ambient/spot tint applies
+ * on API 28+; on 26–27 it degrades to a default shadow, never an error.
  */
 fun Modifier.neonGlow(
     color: Color,
     shape: Shape,
-    elevation: Dp = 18.dp,
-    alpha: Float = 0.45f,
+    elevation: Dp = 12.dp,
+    alpha: Float = 0.22f,
 ): Modifier = softShadow(color, shape, elevation, alpha)
 
 /**
- * The DS 3.0 feature panel: dark surface + 1dp aurora hairline border + soft
- * tinted glow. Use for hero/featured content; plain [AppCard] stays quieter.
+ * The feature panel: white surface, large soft radius, gentle drop shadow and a
+ * whisper-thin sage→coral hairline. Use for hero/featured content; plain
+ * [AppCard] stays quieter.
  */
 @Composable
 fun GlowCard(
@@ -132,7 +152,7 @@ fun GlowCard(
     Column(
         modifier
             .fillMaxWidth()
-            .neonGlow(glowColor, shape, elevation = 16.dp, alpha = 0.35f)
+            .neonGlow(glowColor, shape, elevation = 14.dp, alpha = 0.22f)
             .clip(shape)
             .background(containerColor)
             .border(1.dp, auroraBorderBrush(borderAlpha), shape)
@@ -142,8 +162,9 @@ fun GlowCard(
 }
 
 /**
- * Wide-tracked uppercase caption — the HUD-style micro-label used for section
- * eyebrows ("DAILY MISSIONS", "STAGE 2/6", "OVERALL RISK").
+ * Sentence-case section eyebrow — the calm label used above content groups
+ * ("Today's rituals", "Stage 2 of 6", "Overall risk"). The old wide-tracked
+ * uppercase HUD label is gone; this reads soft and humanist.
  */
 @Composable
 fun MicroLabel(
@@ -153,16 +174,16 @@ fun MicroLabel(
     textAlign: TextAlign? = null,
 ) {
     Text(
-        text = text.uppercase(),
+        text = text,
         modifier = modifier,
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.SemiBold,
         color = color,
         textAlign = textAlign,
     )
 }
 
-/** Aurora-gradient text for hero numerals and the wordmark. */
+/** Wellness-gradient text for hero numerals and the wordmark (sage → sky → coral). */
 @Composable
 fun AuroraText(
     text: String,
@@ -178,7 +199,7 @@ fun AuroraText(
     )
 }
 
-/** Holo input styling shared by every OutlinedTextField: dark fill, cyan focus glow border. */
+/** Input styling shared by every OutlinedTextField: soft fill, sage focus border. */
 @Composable
 fun auroraTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -191,9 +212,9 @@ fun auroraTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
 )
 
 /**
- * DS 3.0 selectable pill chip — replaces every M3 FilterChip in the app.
- * Selected: cyan-tinted fill + aurora hairline + glow. Unselected: quiet dark
- * pill. Spring press-scale matches the button language.
+ * Selectable pill chip — replaces every M3 FilterChip in the app. Selected:
+ * sage-tinted fill + sage→coral hairline + soft lift. Unselected: quiet pill.
+ * Spring press-scale matches the button language.
  */
 @Composable
 fun SelectableChip(
@@ -239,7 +260,7 @@ fun SelectableChip(
                 alpha = if (enabled) 1f else 0.6f
             }
             .then(
-                if (selected) Modifier.neonGlow(SpineIQTheme.colors.glow, ChipShape, elevation = 10.dp, alpha = 0.35f)
+                if (selected) Modifier.neonGlow(SpineIQTheme.colors.accent, ChipShape, elevation = 8.dp, alpha = 0.18f)
                 else Modifier
             )
             .clip(ChipShape)
@@ -250,7 +271,7 @@ fun SelectableChip(
                 indication = ripple(color = SpineIQTheme.colors.accent),
                 enabled = enabled,
             ) { onClick() }
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
         Text(

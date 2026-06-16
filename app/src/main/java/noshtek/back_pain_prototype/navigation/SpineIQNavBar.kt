@@ -23,12 +23,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,9 +58,9 @@ enum class BottomNavDestination(
     val selectedIcon: ImageVector,
 ) {
     Home(Screen.Home.route, "Home", Icons.Outlined.Home, Icons.Filled.Home),
+    Journey(Screen.Journey.route, "Journey", Icons.Outlined.Timeline, Icons.Filled.Timeline),
     Progress(Screen.Progress.route, "Progress", Icons.AutoMirrored.Outlined.TrendingUp, Icons.AutoMirrored.Filled.TrendingUp),
-    Shop(Screen.Shop.route, "Shop", Icons.Outlined.Storefront, Icons.Filled.Storefront),
-    Awards(Screen.Achievements.route, "Awards", Icons.Outlined.EmojiEvents, Icons.Filled.EmojiEvents);
+    Profile(Screen.Profile.route, "Profile", Icons.Outlined.Person, Icons.Filled.Person);
 
     companion object {
         val routes = entries.map { it.route }.toSet()

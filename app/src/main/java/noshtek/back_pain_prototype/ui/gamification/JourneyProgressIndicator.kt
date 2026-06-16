@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.MotionTokens
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
@@ -41,8 +40,6 @@ fun JourneyProgressIndicator(
     currentStep: Int,
     totalSteps: Int = 6,
     modifier: Modifier = Modifier,
-    stepRewardCoins: Int = Economy.COINS_PER_STEP,
-    stepRewardXp: Int = Economy.XP_PER_STEP,
 ) {
     val colors = SpineIQTheme.colors
     val rewardStops = colors.rewardStops
@@ -66,20 +63,10 @@ fun JourneyProgressIndicator(
     )
 
     Column(modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MicroLabel(
-                "Stage $currentStep / $totalSteps",
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.weight(1f))
-            RewardChip(coins = stepRewardCoins, xp = stepRewardXp)
-            Spacer(Modifier.width(6.dp))
-            Text(
-                "per stage",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        MicroLabel(
+            "Stage $currentStep of $totalSteps",
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Spacer(Modifier.height(8.dp))
         Canvas(
             Modifier

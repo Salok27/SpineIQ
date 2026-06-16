@@ -58,9 +58,9 @@ class StreakLogicTest {
     }
 
     @Test
-    fun `all milestones exist in the economy table`() {
+    fun `all milestones exist in the streak-milestones set`() {
         for (days in listOf(3, 7, 14, 30)) {
-            assertTrue(Economy.STREAK_MILESTONE_COINS.containsKey(days))
+            assertTrue(StreakMilestones.DAYS.contains(days))
         }
     }
 

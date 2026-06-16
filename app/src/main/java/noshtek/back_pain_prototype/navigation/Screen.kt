@@ -4,9 +4,8 @@ sealed class Screen(val route: String) {
     object Onboarding      : Screen("onboarding")
     object Profile         : Screen("profile")
     object Home            : Screen("home")
+    object Journey         : Screen("journey")
     object Progress        : Screen("progress")
-    object Shop            : Screen("shop")
-    object Achievements    : Screen("achievements")
 
     // Nested assessment graph — all 6 wizard screens share one AssessmentSessionViewModel
     object AssessmentGraph : Screen("assessment_graph")

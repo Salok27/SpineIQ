@@ -11,7 +11,6 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import noshtek.back_pain_prototype.core.data.db.DatabaseKeyProvider
 import noshtek.back_pain_prototype.core.data.db.SpineIQDatabase
 import noshtek.back_pain_prototype.core.data.db.dao.AssessmentDao
-import noshtek.back_pain_prototype.core.data.db.dao.AvatarDao
 import noshtek.back_pain_prototype.core.data.db.dao.GamificationDao
 import noshtek.back_pain_prototype.core.data.db.dao.ScoresDao
 import noshtek.back_pain_prototype.core.data.db.dao.UserProfileDao
@@ -51,7 +50,4 @@ object DatabaseModule {
 
     @Provides
     fun provideGamificationDao(db: SpineIQDatabase): GamificationDao = db.gamificationDao()
-
-    @Provides
-    fun provideAvatarDao(db: SpineIQDatabase): AvatarDao = db.avatarDao()
 }

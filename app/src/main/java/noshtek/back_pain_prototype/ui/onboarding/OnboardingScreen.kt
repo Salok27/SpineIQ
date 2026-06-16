@@ -43,10 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import noshtek.back_pain_prototype.navigation.Screen
-import noshtek.back_pain_prototype.ui.avatar.Avatar
-import noshtek.back_pain_prototype.ui.avatar.AvatarSize
-import noshtek.back_pain_prototype.ui.avatar.AvatarSpec
 import noshtek.back_pain_prototype.ui.common.AuroraText
+import noshtek.back_pain_prototype.ui.common.LivingSpine
 import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
@@ -169,21 +167,21 @@ private fun OnboardingPage0(onGetStarted: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // The spine buddy greets new users — the avatar they'll level up and style.
+        // A Living Spine greets new users — it brightens as they improve.
         Box(
             modifier = Modifier
-                .size(140.dp)
-                .neonGlow(SpineIQTheme.colors.reward, CircleShape, elevation = 26.dp, alpha = 0.50f)
+                .size(150.dp)
+                .neonGlow(SpineIQTheme.colors.accent, CircleShape, elevation = 18.dp, alpha = 0.22f)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.5.dp, auroraBorderBrush(0.8f), CircleShape)
                 .entrance(0),
             contentAlignment = Alignment.Center,
         ) {
-            Avatar(spec = AvatarSpec.Default, size = AvatarSize.Medium)
+            LivingSpine(vitality = 66, modifier = Modifier.size(96.dp, 128.dp))
         }
         Spacer(Modifier.height(30.dp))
-        MicroLabel("Your spine. Your mission.", modifier = Modifier.entrance(1))
+        MicroLabel("Your spine, brighter every day", modifier = Modifier.entrance(1))
         Spacer(Modifier.height(8.dp))
         AuroraText(
             "SpineIQ",
@@ -192,7 +190,7 @@ private fun OnboardingPage0(onGetStarted: () -> Unit) {
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            "Understand your back pain.\nTrack progress, build streaks,\nand level up your spine buddy.",
+            "Understand your back pain.\nBuild daily rituals and watch\nyour spine come alive.",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

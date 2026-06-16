@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import noshtek.back_pain_prototype.core.data.db.entity.AssessmentRecordEntity
 import noshtek.back_pain_prototype.core.data.db.entity.ScoresRecordEntity
 import noshtek.back_pain_prototype.core.data.gamification.GamificationManager
+import noshtek.back_pain_prototype.core.data.gamification.SpineVitality
 import noshtek.back_pain_prototype.core.data.repository.AssessmentRepository
 import noshtek.back_pain_prototype.core.data.repository.UserProfileRepository
 import java.time.LocalDate
@@ -27,8 +28,7 @@ data class ProgressUiState(
     val previousAssessmentDate: LocalDate? = null,
     // Stat-strip tiles (V2)
     val streakDays: Int = 0,
-    val levelNumber: Int = 1,
-    val levelName: String = "Beginner",
+    val vitality: Int = SpineVitality.NEUTRAL_BASE_VITALITY,
 )
 
 @HiltViewModel
@@ -82,8 +82,7 @@ class ProgressViewModel @Inject constructor(
                                 LocalDate.ofEpochDay(summaries[summaries.size - 2].record.assessmentDate)
                             } else null,
                             streakDays = snapshot.effectiveStreakDays,
-                            levelNumber = snapshot.level.number,
-                            levelName = snapshot.level.name,
+                            vitality = snapshot.vitality,
                         )
                     }
                 }

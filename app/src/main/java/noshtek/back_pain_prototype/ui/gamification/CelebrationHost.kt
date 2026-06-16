@@ -1,10 +1,11 @@
 package noshtek.back_pain_prototype.ui.gamification
 
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,18 +38,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
-import noshtek.back_pain_prototype.core.data.gamification.Achievement
-import noshtek.back_pain_prototype.core.data.gamification.GameLevel
+import noshtek.back_pain_prototype.core.data.gamification.Milestone
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MotionTokens
 import noshtek.back_pain_prototype.ui.theme.Ink
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
 
 /**
- * Global celebration layer mounted ABOVE the NavHost in MainActivity. When
- * idle it emits nothing at all — no box, no pointer handling — so it can
- * never eat a tap. Toasts pass touches through; overlay celebrations scrim
- * the screen and dismiss on tap or after a short auto-timeout.
+ * Global celebration layer mounted ABOVE the NavHost in MainActivity. When idle
+ * it emits nothing at all — no box, no pointer handling — so it can never eat a
+ * tap. Toasts pass touches through; overlay celebrations scrim the screen and
+ * dismiss on tap or after a short auto-timeout.
  */
 @Composable
 fun CelebrationHost(viewModel: CelebrationViewModel = hiltViewModel()) {
@@ -57,23 +56,19 @@ fun CelebrationHost(viewModel: CelebrationViewModel = hiltViewModel()) {
     when (val celebration = current) {
         null -> Unit
         is Celebration.Toast -> RewardToast(
-            coins = celebration.coins,
-            xp = celebration.xp,
+            message = celebration.message,
             onTimeout = viewModel::dismissCurrent,
         )
-        is Celebration.LevelUpOverlay -> CelebrationOverlay(onDismiss = viewModel::dismissCurrent) {
-            LevelUpContent(celebration.level)
-        }
-        is Celebration.AchievementOverlay -> CelebrationOverlay(onDismiss = viewModel::dismissCurrent) {
-            AchievementContent(celebration.achievement)
+        is Celebration.MilestoneOverlay -> CelebrationOverlay(onDismiss = viewModel::dismissCurrent) {
+            MilestoneContent(celebration.milestone)
         }
         is Celebration.StreakOverlay -> CelebrationOverlay(onDismiss = viewModel::dismissCurrent) {
-            StreakContent(celebration.days, celebration.coinBonus)
+            StreakContent(celebration.days)
         }
     }
 }
 
-/** Scrim + confetti + centred glass card; tap anywhere or wait to dismiss. */
+/** Scrim + confetti + centred soft card; tap anywhere or wait to dismiss. */
 @Composable
 private fun CelebrationOverlay(
     onDismiss: () -> Unit,
@@ -86,7 +81,7 @@ private fun CelebrationOverlay(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Ink.copy(alpha = 0.62f))
+            .background(Ink.copy(alpha = 0.55f))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -110,7 +105,7 @@ private fun CelebrationOverlay(
 private fun Modifier.popIn(): Modifier {
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { started = true }
-    val animated by androidx.compose.animation.core.animateFloatAsState(
+    val animated by animateFloatAsState(
         targetValue = if (started) 1f else 0.7f,
         animationSpec = tween(MotionTokens.DurationMedium, easing = MotionTokens.Overshoot),
         label = "pop-in-scale",
@@ -119,100 +114,42 @@ private fun Modifier.popIn(): Modifier {
 }
 
 @Composable
-private fun LevelUpContent(level: GameLevel) {
-    val colors = SpineIQTheme.colors
+private fun MilestoneContent(milestone: Milestone) {
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            RayDisc()
-            Box(
-                Modifier
-                    .size(76.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    "${level.number}",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = colors.reward,
-                )
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Level up!",
-            style = MaterialTheme.typography.labelLarge,
-            color = colors.rewardText,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            level.name,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-/** Slowly rotating ray wedges behind the level number. */
-@Composable
-private fun RayDisc(diameter: androidx.compose.ui.unit.Dp = 140.dp) {
-    val colors = SpineIQTheme.colors
-    val transition = rememberInfiniteTransition(label = "rays")
-    val rotation by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(8_000, easing = MotionTokens.Linear)),
-        label = "ray-rotation",
-    )
-    val rayColor = colors.reward.copy(alpha = 0.16f)
-    Canvas(Modifier.size(diameter)) {
-        for (i in 0 until 12) {
-            drawArc(
-                color = rayColor,
-                startAngle = rotation + i * 30f - 7f,
-                sweepAngle = 14f,
-                useCenter = true,
-            )
-        }
-    }
-}
-
-@Composable
-private fun AchievementContent(achievement: Achievement) {
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AchievementBadge(
+        MilestoneBadge(
             title = "",
-            icon = achievementIcon(achievement.id),
+            icon = milestoneIcon(milestone.id),
             unlocked = true,
             size = 96.dp,
         )
         Text(
-            "Achievement unlocked",
+            "Milestone reached",
             style = MaterialTheme.typography.labelLarge,
             color = SpineIQTheme.colors.rewardText,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            achievement.title,
+            milestone.title,
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(10.dp))
-        RewardChip(coins = achievement.coinReward, xp = achievement.xpReward, emphasized = true)
+        Spacer(Modifier.height(6.dp))
+        Text(
+            milestone.description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
 @Composable
-private fun StreakContent(days: Int, coinBonus: Int) {
+private fun StreakContent(days: Int) {
     val colors = SpineIQTheme.colors
     val transition = rememberInfiniteTransition(label = "streak-flame")
     val pulse by transition.animateFloat(
@@ -220,7 +157,7 @@ private fun StreakContent(days: Int, coinBonus: Int) {
         targetValue = 1.12f,
         animationSpec = infiniteRepeatable(
             tween(900, easing = MotionTokens.Standard),
-            androidx.compose.animation.core.RepeatMode.Reverse,
+            RepeatMode.Reverse,
         ),
         label = "streak-pulse",
     )
@@ -240,7 +177,7 @@ private fun StreakContent(days: Int, coinBonus: Int) {
         Text(
             "$days-day streak!",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(4.dp))
@@ -250,7 +187,5 @@ private fun StreakContent(days: Int, coinBonus: Int) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(10.dp))
-        RewardChip(coins = coinBonus, emphasized = true)
     }
 }

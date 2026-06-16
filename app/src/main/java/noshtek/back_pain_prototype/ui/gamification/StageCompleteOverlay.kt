@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.ui.common.GlassCard
 import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.MotionTokens
@@ -53,8 +52,6 @@ fun StageCompleteOverlay(
     visible: Boolean,
     stepLabel: String,
     onFinished: () -> Unit,
-    coins: Int = Economy.COINS_PER_STEP,
-    xp: Int = Economy.XP_PER_STEP,
 ) {
     if (!visible) return
 
@@ -118,15 +115,13 @@ fun StageCompleteOverlay(
                     )
                 }
                 Spacer(Modifier.height(10.dp))
-                MicroLabel("Stage clear", color = SpineIQTheme.colors.rewardText)
+                MicroLabel("Section saved", color = SpineIQTheme.colors.rewardText)
                 Spacer(Modifier.height(2.dp))
                 Text(
                     stepLabel,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
-                Spacer(Modifier.height(10.dp))
-                RewardChip(coins = coins, xp = xp, emphasized = true)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "Tap to continue",

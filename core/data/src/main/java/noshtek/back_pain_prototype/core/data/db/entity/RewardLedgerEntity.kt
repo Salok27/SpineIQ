@@ -8,11 +8,12 @@ import androidx.room.PrimaryKey
 import noshtek.back_pain_prototype.core.data.gamification.RewardType
 
 /**
- * Append-only record of every coin/XP grant and spend. The [dedupeKey]
- * primary key (formats owned by DedupeKeys) is the idempotency mechanism:
- * grants insert with OnConflictStrategy.IGNORE, and a -1 row id means the
- * reward was already given — re-saving a wizard section, retrying a
- * completion, or double-tapping a purchase can never pay out twice.
+ * Append-only log of every engagement event (step, completion, check-in,
+ * ritual, streak milestone, milestone unlock). The [dedupeKey] primary key
+ * (formats owned by DedupeKeys) is the idempotency mechanism: events insert
+ * with OnConflictStrategy.IGNORE, and a -1 row id means it already happened —
+ * re-saving a wizard section, retrying a completion, or double-tapping a ritual
+ * can never count twice. Doubles as the count source for milestone progress.
  */
 @Entity(
     tableName = "reward_ledger",
@@ -38,12 +39,9 @@ data class RewardLedgerEntity(
     @ColumnInfo(name = "reward_type")
     val rewardType: RewardType,
 
-    /** Negative for purchases. */
-    @ColumnInfo(name = "coins_delta")
-    val coinsDelta: Int,
-
-    @ColumnInfo(name = "xp_delta")
-    val xpDelta: Int,
+    /** Optional informational payload (e.g. the streak day count at the event). */
+    @ColumnInfo(name = "meta")
+    val meta: Int? = null,
 
     /** Epoch millis. */
     @ColumnInfo(name = "created_at")

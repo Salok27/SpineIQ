@@ -136,6 +136,33 @@ fun Modifier.pulseGlow(
     return this.softShadow(color, shape, elevation = 20.dp, alpha = alpha)
 }
 
+/**
+ * Infinite gentle "breathing" scale — a calm pulse for the highest-emphasis CTA
+ * or hero element (e.g. the Living Spine, the primary assessment button). Use
+ * sparingly; animates only the cheap [graphicsLayer] scale.
+ */
+@Composable
+fun Modifier.breathe(
+    minScale: Float = 1f,
+    maxScale: Float = 1.03f,
+    durationMillis: Int = 3800,
+): Modifier {
+    val transition = rememberInfiniteTransition(label = "breathe")
+    val scale by transition.animateFloat(
+        initialValue = minScale,
+        targetValue = maxScale,
+        animationSpec = infiniteRepeatable(
+            tween(durationMillis, easing = MotionTokens.Standard),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "breathe-scale",
+    )
+    return this.graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }
+}
+
 /** Lightweight shimmer placeholder used for skeleton loading states. */
 @Composable
 fun ShimmerBox(

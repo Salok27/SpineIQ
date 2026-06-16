@@ -182,12 +182,12 @@ fun ProgressScreen(
                     StatTile(modifier = Modifier.weight(1f), label = "Streak") {
                         StreakFlame(streakDays = state.streakDays, activeToday = state.streakDays > 0)
                     }
-                    StatTile(modifier = Modifier.weight(1f), label = state.levelName) {
+                    StatTile(modifier = Modifier.weight(1f), label = "Vitality") {
                         Text(
-                            "LV ${state.levelNumber}",
+                            "${state.vitality}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
-                            color = SpineIQTheme.colors.rewardText,
+                            color = SpineIQTheme.colors.accentText,
                         )
                     }
                     StatTile(modifier = Modifier.weight(1f), label = "Assessments") {

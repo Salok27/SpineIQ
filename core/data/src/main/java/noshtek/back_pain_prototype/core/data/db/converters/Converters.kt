@@ -1,7 +1,6 @@
 package noshtek.back_pain_prototype.core.data.db.converters
 
 import androidx.room.TypeConverter
-import noshtek.back_pain_prototype.core.data.gamification.AvatarCategory
 import noshtek.back_pain_prototype.core.data.gamification.CheckInMood
 import noshtek.back_pain_prototype.core.data.gamification.RewardType
 import noshtek.back_pain_prototype.core.data.model.*
@@ -116,7 +115,4 @@ class Converters {
 
     @TypeConverter fun rewardTypeToString(v: RewardType): String = v.name
     @TypeConverter fun stringToRewardType(v: String): RewardType = RewardType.valueOf(v)
-
-    @TypeConverter fun avatarCategoryToString(v: AvatarCategory): String = v.name
-    @TypeConverter fun stringToAvatarCategory(v: String): AvatarCategory = AvatarCategory.valueOf(v)
 }

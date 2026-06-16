@@ -25,17 +25,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import noshtek.back_pain_prototype.ui.achievements.AchievementsScreen
 import noshtek.back_pain_prototype.ui.assessment.*
 import noshtek.back_pain_prototype.ui.common.MotionTokens
 import noshtek.back_pain_prototype.ui.home.HomeScreen
+import noshtek.back_pain_prototype.ui.journey.JourneyScreen
 import noshtek.back_pain_prototype.ui.onboarding.OnboardingScreen
 import noshtek.back_pain_prototype.ui.profile.ProfileScreen
 import noshtek.back_pain_prototype.ui.progress.ProgressScreen
 import noshtek.back_pain_prototype.ui.results.FullReportScreen
 import noshtek.back_pain_prototype.ui.results.ResultsDashboardScreen
 import noshtek.back_pain_prototype.ui.settings.SettingsScreen
-import noshtek.back_pain_prototype.ui.shop.ShopScreen
 
 // ── Shared transition language ────────────────────────────────────────────────
 // Top-level screens: gentle fade + zoom. Wizard steps: horizontal slide that
@@ -90,25 +89,21 @@ fun SpineIQNavGraph() {
                 OnboardingScreen(navController = navController)
             }
 
-            composable(Screen.Profile.route) {
-                ProfileScreen(navController = navController)
-            }
-
             // Hub tabs cross-fade between each other (no zoom) so switching feels instant.
             composable(Screen.Home.route, enterTransition = { hubTransitionEnter() }) {
                 HomeScreen(navController = navController)
+            }
+
+            composable(Screen.Journey.route, enterTransition = { hubTransitionEnter() }) {
+                JourneyScreen(navController = navController)
             }
 
             composable(Screen.Progress.route, enterTransition = { hubTransitionEnter() }) {
                 ProgressScreen(navController = navController)
             }
 
-            composable(Screen.Shop.route, enterTransition = { hubTransitionEnter() }) {
-                ShopScreen(navController = navController)
-            }
-
-            composable(Screen.Achievements.route, enterTransition = { hubTransitionEnter() }) {
-                AchievementsScreen(navController = navController)
+            composable(Screen.Profile.route, enterTransition = { hubTransitionEnter() }) {
+                ProfileScreen(navController = navController)
             }
 
             // Assessment wizard — all 6 screens share one ViewModel scoped to this graph

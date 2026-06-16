@@ -1,7 +1,6 @@
 package noshtek.back_pain_prototype.ui.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,18 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.TipsAndUpdates
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,41 +31,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import noshtek.back_pain_prototype.core.data.gamification.Economy
 import noshtek.back_pain_prototype.navigation.Screen
-import noshtek.back_pain_prototype.ui.avatar.AvatarSize
-import noshtek.back_pain_prototype.ui.avatar.AvatarWithLevelRing
 import noshtek.back_pain_prototype.ui.common.AnimatedCountText
 import noshtek.back_pain_prototype.ui.common.GlassCard
+import noshtek.back_pain_prototype.ui.common.GlowCard
+import noshtek.back_pain_prototype.ui.common.LivingSpine
 import noshtek.back_pain_prototype.ui.common.MicroLabel
 import noshtek.back_pain_prototype.ui.common.NebulaBackground
 import noshtek.back_pain_prototype.ui.common.PressableCard
 import noshtek.back_pain_prototype.ui.common.PrimaryButton
+import noshtek.back_pain_prototype.ui.common.RitualRow
 import noshtek.back_pain_prototype.ui.common.ScreenHeader
 import noshtek.back_pain_prototype.ui.common.ShimmerBox
 import noshtek.back_pain_prototype.ui.common.SssTierBadge
-import noshtek.back_pain_prototype.ui.common.TextActionButton
+import noshtek.back_pain_prototype.ui.common.breathe
 import noshtek.back_pain_prototype.ui.common.entrance
-import noshtek.back_pain_prototype.ui.common.pulseGlow
-import noshtek.back_pain_prototype.ui.gamification.AchievementBadge
-import noshtek.back_pain_prototype.ui.gamification.CoinBalancePill
+import noshtek.back_pain_prototype.ui.common.ritualIcon
 import noshtek.back_pain_prototype.ui.gamification.DailyCheckInCard
-import noshtek.back_pain_prototype.ui.gamification.RewardChip
 import noshtek.back_pain_prototype.ui.gamification.StreakFlame
-import noshtek.back_pain_prototype.ui.gamification.XpLevelBar
-import noshtek.back_pain_prototype.ui.gamification.achievementIcon
 import noshtek.back_pain_prototype.ui.theme.ButtonShape
 import noshtek.back_pain_prototype.ui.theme.CardShape
 import noshtek.back_pain_prototype.ui.theme.HeroShape
-import noshtek.back_pain_prototype.ui.theme.PillShape
 import noshtek.back_pain_prototype.ui.theme.SpineIQTheme
-import noshtek.back_pain_prototype.ui.theme.rewardGradient
+import noshtek.back_pain_prototype.ui.theme.brandGradient
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -86,9 +74,9 @@ private val MotivationalTips = listOf(
 )
 
 /**
- * The command center: avatar pilot hero floating on the nebula, daily
- * missions, the assessment launch CTA, achievements rail, last result and
- * insight.
+ * Home — the calm command center: a Living Spine that reflects your vitality,
+ * a daily check-in, today's personalized rituals, the assessment CTA, your last
+ * result and a daily insight.
  */
 @Composable
 fun HomeScreen(
@@ -106,351 +94,245 @@ fun HomeScreen(
     }
     val tip = remember { MotivationalTips[(LocalDate.now().dayOfYear) % MotivationalTips.size] }
 
-    fun navigateToTab(route: String) {
-        navController.navigate(route) {
-            popUpTo(Screen.Home.route) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
     NebulaBackground {
-    Column(Modifier.fillMaxSize()) {
-        ScreenHeader(
-            title = "SpineIQ",
-            trailing = {
-                CoinBalancePill(coins = state.coins, onClick = { navigateToTab(Screen.Shop.route) })
-                Spacer(Modifier.width(4.dp))
-                IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-        )
-
-        if (state.isLoading) {
-            HomeLoading()
-            return@Column
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            // 1 ── Pilot hero — floats directly on the nebula, no boxed card.
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .entrance(0)
-                    .padding(top = 4.dp, start = 4.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AvatarWithLevelRing(
-                    spec = state.equippedSpec,
-                    level = state.level.number,
-                    levelProgress = state.levelProgress,
-                    size = AvatarSize.Large,
-                    onGradient = false,
-                )
-                Spacer(Modifier.width(18.dp))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    MicroLabel(greeting)
-                    Text(
-                        state.userName.substringBefore(' ').ifBlank { "there" },
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Box(
-                        Modifier
-                            .clip(PillShape)
-                            .background(SpineIQTheme.colors.rewardContainer)
-                            .border(1.dp, SpineIQTheme.colors.reward.copy(alpha = 0.40f), PillShape)
-                            .padding(horizontal = 10.dp, vertical = 3.dp),
-                    ) {
-                        Text(
-                            state.level.name,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = SpineIQTheme.colors.rewardText,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                    XpLevelBar(
-                        level = state.level.number,
-                        levelName = state.level.name,
-                        xpIntoLevel = state.xpIntoLevel,
-                        xpForNextLevel = state.xpForNextLevel,
-                        compact = true,
-                    )
-                    StreakFlame(
-                        streakDays = state.streakDays,
-                        activeToday = state.checkedInToday || state.assessmentCompletedToday,
-                    )
-                }
-            }
-
-            // 2 ── Daily check-in
-            DailyCheckInCard(
-                checkedInToday = state.checkedInToday,
-                todayMood = state.todayMood,
-                streakDays = state.streakDays,
-                last7Days = state.last7Days,
-                onCheckIn = viewModel::checkIn,
-                modifier = Modifier.entrance(1),
-            )
-
-            // 3 ── Today's missions
-            DailyGoalsCard(
-                checkedIn = state.checkedInToday,
-                assessmentDone = state.assessmentCompletedToday,
-                modifier = Modifier.entrance(2),
-            )
-
-            // 4 ── Primary CTA + reward preview
-            Column(Modifier.entrance(3), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                PrimaryButton(
-                    onClick = { navController.navigate(Screen.AssessmentGraph.route) },
-                    label = "Start New Assessment",
-                    icon = Icons.Filled.Add,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .pulseGlow(SpineIQTheme.colors.glow, ButtonShape),
-                )
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RewardChip(
-                        coins = Economy.COINS_PER_FULL_ASSESSMENT,
-                        xp = Economy.XP_PER_FULL_ASSESSMENT,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "earned on completion",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            // 5 ── Recent achievements
-            if (state.recentAchievements.isNotEmpty()) {
-                Column(Modifier.entrance(4)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            MicroLabel("Trophy Hall")
-                            Text(
-                                "Achievements",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                        TextActionButton(
-                            onClick = { navigateToTab(Screen.Achievements.route) },
-                            label = "View all",
-                            color = SpineIQTheme.colors.accentText,
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(state.recentAchievements, key = { it.achievement.id }) { item ->
-                            AchievementBadge(
-                                title = item.achievement.title,
-                                icon = achievementIcon(item.achievement.id),
-                                unlocked = item.unlocked,
-                                progress = item.progress,
-                                size = 64.dp,
-                                onClick = { navigateToTab(Screen.Achievements.route) },
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 6 ── Last assessment summary
-            if (state.lastAssessmentId != null && state.lastScores != null) {
-                PressableCard(
-                    onClick = { navController.navigate(Screen.FullReport.route(state.lastAssessmentId!!)) },
-                    modifier = Modifier.entrance(5),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            MicroLabel("Last Assessment")
-                            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                AnimatedCountText(
-                                    target = state.lastScores!!.totalSSSScore,
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                                Text(
-                                    "/ 11",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(bottom = 4.dp),
-                                )
-                            }
-                            SssTierBadge(state.lastScores!!.sssSeverityTier)
-                            state.lastAssessmentDate?.let {
-                                Text(
-                                    it.format(fmt),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
+        Column(Modifier.fillMaxSize()) {
+            ScreenHeader(
+                title = "SpineIQ",
+                trailing = {
+                    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
                         Icon(
-                            Icons.Filled.ChevronRight,
-                            contentDescription = "View report",
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                }
+                },
+            )
+
+            if (state.isLoading) {
+                HomeLoading()
+                return@Column
             }
 
-            // 7 ── Motivational insight
-            GlassCard(modifier = Modifier.entrance(6)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier
-                            .width(3.dp)
-                            .height(40.dp)
-                            .clip(CircleShape)
-                            .background(rewardGradient())
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Icon(
-                        Icons.Outlined.TipsAndUpdates,
-                        contentDescription = null,
-                        tint = SpineIQTheme.colors.rewardText,
-                        modifier = Modifier.size(22.dp),
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        tip,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-
-            // 8 ── Privacy assurance + footer
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .entrance(7)
-                    .clip(CardShape)
-                    .padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Icon(
-                    Icons.Filled.Lock,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(18.dp),
+                // 1 ── Living Spine hero
+                GlowCard(
+                    modifier = Modifier.entrance(0),
+                    shape = HeroShape,
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LivingSpine(
+                            vitality = state.vitality,
+                            modifier = Modifier.size(116.dp, 188.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(
+                            Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            MicroLabel(greeting)
+                            Text(
+                                state.userName.substringBefore(' ').ifBlank { "there" },
+                                style = MaterialTheme.typography.displaySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                AnimatedCountText(
+                                    target = state.vitality,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    " spine vitality",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 3.dp),
+                                )
+                            }
+                            StreakFlame(
+                                streakDays = state.streakDays,
+                                activeToday = state.checkedInToday || state.ritualsDoneToday > 0,
+                            )
+                        }
+                    }
+                }
+
+                // 2 ── Daily check-in
+                DailyCheckInCard(
+                    checkedInToday = state.checkedInToday,
+                    todayMood = state.todayMood,
+                    streakDays = state.streakDays,
+                    last7Days = state.last7Days,
+                    onCheckIn = viewModel::checkIn,
+                    modifier = Modifier.entrance(1),
                 )
+
+                // 3 ── Today's personalized rituals
+                if (state.rituals.isNotEmpty()) {
+                    GlowCard(modifier = Modifier.entrance(2)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                MicroLabel("Today's rituals")
+                                Text(
+                                    "Personalized for your spine",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                            Text(
+                                "${state.ritualsDoneToday}/${state.ritualsTotalToday}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = SpineIQTheme.colors.accentText,
+                            )
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            state.rituals.forEach { status ->
+                                RitualRow(
+                                    title = status.ritual.title,
+                                    subtitle = status.ritual.subtitle,
+                                    icon = ritualIcon(status.ritual.category),
+                                    done = status.done,
+                                    onToggle = { viewModel.completeRitual(status.ritual.id) },
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 4 ── Primary CTA
+                Column(Modifier.entrance(3), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PrimaryButton(
+                        onClick = { navController.navigate(Screen.AssessmentGraph.route) },
+                        label = "Start New Assessment",
+                        icon = Icons.Filled.Add,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .breathe(),
+                    )
+                    Text(
+                        "A few minutes · refreshes your Spine Vitality",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                }
+
+                // 5 ── Last assessment summary
+                if (state.lastAssessmentId != null && state.lastScores != null) {
+                    PressableCard(
+                        onClick = { navController.navigate(Screen.FullReport.route(state.lastAssessmentId!!)) },
+                        modifier = Modifier.entrance(4),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                MicroLabel("Last assessment")
+                                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    AnimatedCountText(
+                                        target = state.lastScores!!.totalSSSScore,
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                    Text(
+                                        "/ 11",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(bottom = 4.dp),
+                                    )
+                                }
+                                SssTierBadge(state.lastScores!!.sssSeverityTier)
+                                state.lastAssessmentDate?.let {
+                                    Text(
+                                        it.format(fmt),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                            Icon(
+                                Icons.Filled.ChevronRight,
+                                contentDescription = "View report",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+
+                // 6 ── Daily insight
+                GlassCard(modifier = Modifier.entrance(5)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier
+                                .width(3.dp)
+                                .height(40.dp)
+                                .clip(CircleShape)
+                                .background(brandGradient())
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Icon(
+                            Icons.Outlined.TipsAndUpdates,
+                            contentDescription = null,
+                            tint = SpineIQTheme.colors.accentText,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            tip,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+
+                // 7 ── Privacy assurance + footer
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .entrance(6)
+                        .clip(CardShape)
+                        .padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        "Private & encrypted — your health data never leaves this device.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
                 Text(
-                    "Private & encrypted — your health data never leaves this device.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    "SpineIQ · SSS v1.0",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
             }
-
-            Text(
-                "SpineIQ · SSS v1.0",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
         }
-    }
-    }
-}
-
-@Composable
-private fun DailyGoalsCard(
-    checkedIn: Boolean,
-    assessmentDone: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    GlassCard(modifier = modifier) {
-        MicroLabel("Daily Missions")
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Today's goals",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(Modifier.height(10.dp))
-        GoalRow(
-            label = "Daily check-in",
-            done = checkedIn,
-            coins = Economy.COINS_PER_CHECKIN,
-            xp = Economy.XP_PER_CHECKIN,
-        )
-        Spacer(Modifier.height(10.dp))
-        GoalRow(
-            label = "Complete an assessment",
-            done = assessmentDone,
-            coins = Economy.COINS_PER_FULL_ASSESSMENT,
-            xp = Economy.XP_PER_FULL_ASSESSMENT,
-        )
-    }
-}
-
-@Composable
-private fun GoalRow(
-    label: String,
-    done: Boolean,
-    coins: Int,
-    xp: Int,
-) {
-    val colors = SpineIQTheme.colors
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (done) {
-            Box(
-                Modifier
-                    .size(22.dp)
-                    .clip(CircleShape)
-                    .background(colors.reward),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = "Done",
-                    tint = colors.onReward,
-                    modifier = Modifier.size(14.dp),
-                )
-            }
-        } else {
-            Icon(
-                Icons.Outlined.Circle,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(22.dp),
-            )
-        }
-        Spacer(Modifier.width(10.dp))
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (done) FontWeight.SemiBold else FontWeight.Normal,
-            modifier = Modifier.weight(1f),
-        )
-        RewardChip(coins = coins, xp = xp)
     }
 }
 
